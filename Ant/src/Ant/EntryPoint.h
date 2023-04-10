@@ -12,7 +12,6 @@ int main(int argc, char** argv)
 	ANT_INFO("Hello! Var={0}", a);
 
 
-	printf("Ant Engine\n");
 	auto app = Ant::CreateApplication();
 	app->Run();
 	delete app;
