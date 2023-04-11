@@ -37,6 +37,12 @@
     <ClInclude Include="src\Ant\KeyCodes.h">
       <Filter>Ant</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Layer.h">
+      <Filter>Ant</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\LayerStack.h">
+      <Filter>Ant</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Log.h">
       <Filter>Ant</Filter>
     </ClInclude>
@@ -53,6 +59,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Application.cpp">
+      <Filter>Ant</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Layer.cpp">
+      <Filter>Ant</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\LayerStack.cpp">
       <Filter>Ant</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Log.cpp">

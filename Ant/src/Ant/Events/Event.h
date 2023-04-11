@@ -52,8 +52,6 @@ namespace Ant {
 			return GetCategoryFlags() & category;
 		}
 
-	private:
-		
 	};
 
 	class EventDispatcher

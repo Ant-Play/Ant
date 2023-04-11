@@ -67,14 +67,17 @@ project "Ant"
 
     filter "configurations:Debug"
         defines "ANT_DEBUG"
+        buildoptions = "/MDd"
         symbols "On"
 
     filter "configurations:Release"
         defines "ANT_RELEASE"
+        buildoptions = "/MD"
         optimize "On"
 
     filter "configurations:Dist"
         defines "ANT_DIST"
+        buildoptions = "/MD"
         optimize "On"
 
 project "Sandbox"

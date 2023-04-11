@@ -4,6 +4,11 @@
 #include "Platform/WindowsWindow.h"
 #include "Ant/Events/ApplicationEvent.h"
 #include "Window.h"
+#include "Ant/LayerStack.h"
+
+
+
+
 namespace Ant{
 	class ANT_API Application
 	{
@@ -15,12 +20,14 @@ namespace Ant{
 
 		void OnEvent(Event& e);
 
-		bool OnWindowClosed(WindowCloseEvent& e);
-
+		void PushLayer(Layer* layer);
+		void PushOverlay(Layer* layer);
 	private:
+		bool OnWindowClosed(WindowCloseEvent& e);
 
 		std::unique_ptr<Window> m_Window;
 		bool m_Running = true;
+		LayerStack m_LayerStack;
 	};
 
 	// To be defined in CLIENT

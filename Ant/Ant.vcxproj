@@ -158,6 +158,8 @@
     <ClInclude Include="src\Ant\Events\KeyEvent.h" />
     <ClInclude Include="src\Ant\Events\MouseEvent.h" />
     <ClInclude Include="src\Ant\KeyCodes.h" />
+    <ClInclude Include="src\Ant\Layer.h" />
+    <ClInclude Include="src\Ant\LayerStack.h" />
     <ClInclude Include="src\Ant\Log.h" />
     <ClInclude Include="src\Ant\MouseCodes.h" />
     <ClInclude Include="src\Ant\Window.h" />
@@ -166,6 +168,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Application.cpp" />
+    <ClCompile Include="src\Ant\Layer.cpp" />
+    <ClCompile Include="src\Ant\LayerStack.cpp" />
     <ClCompile Include="src\Ant\Log.cpp" />
     <ClCompile Include="src\Ant\Window.cpp" />
     <ClCompile Include="src\Platform\WindowsWindow.cpp" />

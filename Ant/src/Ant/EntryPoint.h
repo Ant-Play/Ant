@@ -8,8 +8,6 @@ int main(int argc, char** argv)
 {
 	Ant::Log::Init();
 	ANT_CORE_WARN("Initialized Log!");
-	int a = 5;
-	ANT_INFO("Hello! Var={0}", a);
 
 
 	auto app = Ant::CreateApplication();
