@@ -10,6 +10,11 @@ workspace "Ant"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+-- Include directories relative to root folder (solution directory)
+IncludeDir = {}
+IncludeDir["GLFW"] = "Ant/vendor/GLFW/include"
+
+include "Ant/vendor/GLFW"
 
 project "Ant"
     location "Ant"
@@ -31,7 +36,17 @@ project "Ant"
     includedirs
     {
         "%{prj.name}/src",
-        "%{prj.name}/vendor/spdlog/include"
+        "%{prj.name}/vendor/spdlog/include",
+        "%{IncludeDir.GLFW}"
+        --"Ant/src",
+        --"Ant/vendor/spdlog/include",
+        --"Ant/vendor/GLFW/include"
+    }
+
+    links
+    {
+        "GLFW",
+        "opengl32.lib"
     }
 
     filter "system:windows"
@@ -79,7 +94,8 @@ project "Sandbox"
     includedirs
     {
         "Ant/vendor/spdlog/include",
-        "Ant/src"
+        "Ant/src",
+        "%{IncludeDir.GLFW}"
     }
 
     links

@@ -1,3 +1,6 @@
 [submodule "Ant/vendor/spdlog"]
 	path = Ant/vendor/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "Ant/vendor/GLFW"]
+	path = Ant/vendor/GLFW
+	url = https://github.com/TheCherno/glfw

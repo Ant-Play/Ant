@@ -1,14 +1,15 @@
 #include "antpch.h"
 #include "Application.h"
 
-#include "Ant/Events/ApplicationEvent.h"
-#include "Ant/Log.h"
-
+#include <GLFW/glfw3.h>
 namespace Ant {
+
+#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
 	Application::Application()
 	{
-
+		m_Window = Window::Create();
+		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 	}
 
 	Application::~Application()
@@ -16,9 +17,17 @@ namespace Ant {
 
 	}
 
+	void Application::OnEvent(Event& e)
+	{
+		EventDispatcher dispathcher(e);
+		dispathcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClosed));
+
+		ANT_CORE_TRACE("{0}", e);
+	}
+
 	void Application::Run()
 	{
-		WindowsResizeEvent e(1280, 720);
+		WindowResizeEvent e(1280, 720);
 		if (e.IsInCategory(EventCategoryApplication))
 		{
 			ANT_TRACE(e);
@@ -27,6 +36,17 @@ namespace Ant {
 		{
 			ANT_ERROR(e);
 		}
-		while (true);
+		while (m_Running)
+		{
+			glClearColor(1, 0, 1, 1);
+			glClear(GL_COLOR_BUFFER_BIT);
+			m_Window->OnUpdate();
+		}
+	}
+
+	bool Application::OnWindowClosed(WindowCloseEvent& e)
+	{
+		m_Running = false;
+		return true;
 	}
 }

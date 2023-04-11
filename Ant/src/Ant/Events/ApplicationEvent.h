@@ -4,10 +4,10 @@
 
 namespace Ant {
 
-	class WindowsResizeEvent : public Event
+	class WindowResizeEvent : public Event
 	{
 	public:
-		WindowsResizeEvent(unsigned int width, unsigned int height)
+		WindowResizeEvent(unsigned int width, unsigned int height)
 			: m_Width(width), m_Height(height) { }
 
 		unsigned int GetWidth() const { return m_Width; }
@@ -21,7 +21,7 @@ namespace Ant {
 		}
 
 		EVENT_CLASS_TYPE(WindowResize)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	private:
 		unsigned int m_Width, m_Height;
 	};
@@ -32,7 +32,7 @@ namespace Ant {
 		WindowCloseEvent() = default;
 
 		EVENT_CLASS_TYPE(WindowClose)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
 	class AppTickEvent : public Event
@@ -41,7 +41,7 @@ namespace Ant {
 		AppTickEvent() = default;
 
 		EVENT_CLASS_TYPE(AppTick)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
 	class AppUpdataEvent : public Event
@@ -50,7 +50,7 @@ namespace Ant {
 		AppUpdataEvent() = default;
 
 		EVENT_CLASS_TYPE(AppUpdate)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
 	class AppRenderEvent : public Event
@@ -59,6 +59,6 @@ namespace Ant {
 		AppRenderEvent() = default;
 
 		EVENT_CLASS_TYPE(AppRender)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 }

@@ -4,6 +4,12 @@
     <Filter Include="Ant">
       <UniqueIdentifier>{08D6870B-74DF-877C-FD5A-9E7C6963937C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ant\Events">
+      <UniqueIdentifier>{EC681F23-D820-6170-4128-3ACC2DFFFB60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Ant.h" />
@@ -16,15 +22,33 @@
     <ClInclude Include="src\Ant\EntryPoint.h">
       <Filter>Ant</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Events\ApplicationEvent.h">
+      <Filter>Ant\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Events\Event.h">
+      <Filter>Ant\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Events\KeyEvent.h">
+      <Filter>Ant\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Events\MouseEvent.h">
+      <Filter>Ant\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\KeyCodes.h">
+      <Filter>Ant</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Log.h">
       <Filter>Ant</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Events\Event.h" />
-    <ClInclude Include="src\Ant\Events\KeyEvent.h" />
-    <ClInclude Include="src\Ant\Events\MouseEvent.h" />
-    <ClInclude Include="src\Ant\Events\ApplicationEvent.h" />
-    <ClInclude Include="src\Ant\KeyCodes.h" />
-    <ClInclude Include="src\Ant\MouseCodes.h" />
+    <ClInclude Include="src\Ant\MouseCodes.h">
+      <Filter>Ant</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Window.h">
+      <Filter>Ant</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\WindowsWindow.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
     <ClInclude Include="src\antpch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -33,6 +57,12 @@
     </ClCompile>
     <ClCompile Include="src\Ant\Log.cpp">
       <Filter>Ant</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Window.cpp">
+      <Filter>Ant</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\WindowsWindow.cpp">
+      <Filter>Platform</Filter>
     </ClCompile>
     <ClCompile Include="src\antpch.cpp" />
   </ItemGroup>

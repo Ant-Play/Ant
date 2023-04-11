@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Ant/Log.h"
 
 #ifdef ANT_PLATFORM_WINDOWS
 #include <Windows.h>
