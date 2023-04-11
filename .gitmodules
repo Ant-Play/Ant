@@ -4,3 +4,6 @@
 [submodule "Ant/vendor/GLFW"]
 	path = Ant/vendor/GLFW
 	url = https://github.com/TheCherno/glfw
+[submodule "Ant/vendor/imgui"]
+	path = Ant/vendor/imgui
+	url = https://github.com/TheCherno/imgui

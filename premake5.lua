@@ -13,8 +13,12 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"] = "Ant/vendor/GLFW/include"
+IncludeDir["Glad"] = "Ant/vendor/Glad/include"
+IncludeDir["ImGui"] = "Ant/vendor/imgui"
 
 include "Ant/vendor/GLFW"
+include "Ant/vendor/Glad"
+include "Ant/vendor/imgui"
 
 project "Ant"
     location "Ant"
@@ -37,7 +41,9 @@ project "Ant"
     {
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include",
-        "%{IncludeDir.GLFW}"
+        "%{IncludeDir.GLFW}",
+        "%{IncludeDir.Glad}",
+        "%{IncludeDir.ImGui}"
         --"Ant/src",
         --"Ant/vendor/spdlog/include",
         --"Ant/vendor/GLFW/include"
@@ -46,6 +52,8 @@ project "Ant"
     links
     {
         "GLFW",
+        "Glad",
+        "ImGui",
         "opengl32.lib"
     }
 
@@ -57,7 +65,8 @@ project "Ant"
         defines
         {
             "ANT_PLATFORM_WINDOWS",
-            "ANT_BUILD_DLL"
+            "ANT_BUILD_DLL",
+            "GLFW_INCLUDE_NONE"
         }
 
         postbuildcommands
@@ -98,7 +107,9 @@ project "Sandbox"
     {
         "Ant/vendor/spdlog/include",
         "Ant/src",
-        "%{IncludeDir.GLFW}"
+        "%{IncludeDir.GLFW}",
+        "%{IncludeDir.Glad}",
+        "%{IncludeDir.ImGui}"
     }
 
     links

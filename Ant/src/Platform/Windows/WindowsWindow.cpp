@@ -1,10 +1,11 @@
 #include "antpch.h"
-#include "Platform/WindowsWindow.h"
+#include "Platform/Windows/WindowsWindow.h"
 
 #include "Ant/Events/ApplicationEvent.h"
 #include "Ant/Events/KeyEvent.h"
 #include "Ant/Events/MouseEvent.h"
 
+#include <glad/glad.h>
 
 namespace Ant {
 
@@ -47,7 +48,8 @@ namespace Ant {
 		//这里将一个glfwWindow设置为当前上下文，一个thread同时只能拥有一个上下文，
 		//这省去了一些函数每次都指定window的麻烦，像glfwSwapInterval()这样的函数只操作当前Context
 		glfwMakeContextCurrent(m_Window);
-
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		ANT_CORE_ASSERT(status, "Failed to initialize Glad");
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
