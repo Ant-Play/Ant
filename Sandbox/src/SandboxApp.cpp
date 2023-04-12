@@ -1,5 +1,7 @@
 #include <Ant.h>
 #include <iostream>
+
+
 class ExampleLayer : public Ant::Layer
 {
 public:
@@ -11,13 +13,15 @@ public:
 
 	void OnUpdate()
 	{
-		ANT_INFO("ExampleLayer::Update");
+		//ANT_INFO("ExampleLayer::Update");
+		if (Ant::Input::IsKeyPressed(Ant::Key::Tab));
+			ANT_ASSERT("Tab is being pressed!");
 	}
 
 	void OnEvent(Ant::Event& event)
 	{
 		//ANT_TRACE("{0}", event);
-		ANT_TRACE("Event has running");
+		//ANT_TRACE("Event has running");
 	}
 };
 

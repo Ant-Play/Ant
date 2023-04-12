@@ -10,6 +10,11 @@
 	#error Ant only support Windows
 #endif // HZ_PLATFORM_WINDOWS
 
+#ifdef HZ_DEBUG
+	#define ANT_ENABLE_ASSERTS
+#endif // HZ_DEBUG
+
+
 #ifdef ANT_ENABLE_ASSERTS
 	#define ANT_ASSERT(x, ...) { if(!(x)) {ANT_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
 	#define ANT_CORE_ASSERT(x, ...) { if(!(x)) { ANT_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); }}
@@ -19,6 +24,9 @@
 #endif // ANT_ENABLE_ASSERTS
 
 #define BIT(x) (1 << x)
+
+#define ANT_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+
 #include <memory>
 
 namespace Ant {

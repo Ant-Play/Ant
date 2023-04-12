@@ -1,5 +1,6 @@
 workspace "Ant"
     architecture "x64"
+    startproject "Sandbox"
 
     configurations
     {
@@ -20,10 +21,13 @@ include "Ant/vendor/GLFW"
 include "Ant/vendor/Glad"
 include "Ant/vendor/imgui"
 
+--startproject "Sandbox"
+
 project "Ant"
     location "Ant"
     kind "SharedLib"
     language "C++"
+    staticruntime "off"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -59,7 +63,6 @@ project "Ant"
 
     filter "system:windows"
         cppdialect "C++17"
-        staticruntime "On"
         systemversion "latest"
 
         defines
@@ -71,28 +74,30 @@ project "Ant"
 
         postbuildcommands
         {
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
+            -- ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
+            ("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
         }
 
     filter "configurations:Debug"
         defines "ANT_DEBUG"
-        buildoptions = "/MDd"
+        runtime "Debug"
         symbols "On"
 
     filter "configurations:Release"
         defines "ANT_RELEASE"
-        buildoptions = "/MD"
+        runtime "Release"
         optimize "On"
 
     filter "configurations:Dist"
         defines "ANT_DIST"
-        buildoptions = "/MD"
+        runtime "Release"
         optimize "On"
 
 project "Sandbox"
     location "Sandbox"
     kind "ConsoleApp"
     language "C++"
+    staticruntime "off"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -119,7 +124,6 @@ project "Sandbox"
 
     filter "system:windows"
         cppdialect "C++17"
-        staticruntime "On"
         systemversion "latest"
 
         defines
@@ -129,14 +133,17 @@ project "Sandbox"
 
     filter "configurations:Debug"
         defines "ANT_DEBUG"
+        runtime "Debug"
         symbols "On"
 
     filter "configurations:Release"
         defines "ANT_RELEASE"
+        runtime "Release"
         optimize "On"
 
     filter "configurations:Dist"
         defines "ANT_DIST"
+        runtime "Release"
         optimize "On"
 
 

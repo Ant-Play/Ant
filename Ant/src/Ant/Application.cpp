@@ -1,10 +1,10 @@
 #include "antpch.h"
 #include "Application.h"
+#include "Ant/Inputs.h"
+#include "Ant/KeyCodes.h"
 
 #include <glad/glad.h>
 namespace Ant {
-
-#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
 	Application* Application::s_Instance = nullptr;
 
@@ -13,7 +13,7 @@ namespace Ant {
 		ANT_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 		m_Window = Window::Create();
-		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		m_Window->SetEventCallback(ANT_BIND_EVENT_FN(Application::OnEvent));
 	}
 
 	Application::~Application()
@@ -36,7 +36,7 @@ namespace Ant {
 	void Application::OnEvent(Event& e)
 	{
 		EventDispatcher dispathcher(e);
-		dispathcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClosed));
+		dispathcher.Dispatch<WindowCloseEvent>(ANT_BIND_EVENT_FN(Application::OnWindowClosed));
 
 		ANT_CORE_TRACE("{0}", e);
 
@@ -59,6 +59,9 @@ namespace Ant {
 			//绘制图层从前往后
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
+			auto [x, y] = Input::GetMousePosition();
+			ANT_CORE_TRACE("{0}, {1}", x, y);
+
 			m_Window->OnUpdate();
 		}
 	}
