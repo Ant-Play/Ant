@@ -14,8 +14,9 @@ public:
 	void OnUpdate()
 	{
 		//ANT_INFO("ExampleLayer::Update");
-		if (Ant::Input::IsKeyPressed(Ant::Key::Tab));
-			ANT_ASSERT("Tab is being pressed!");
+		auto status = Ant::Input::IsKeyPressed(Ant::Key::Tab);
+		if (status)
+			ANT_INFO("Tab is being pressed!");
 	}
 
 	void OnEvent(Ant::Event& event)
@@ -31,7 +32,6 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer);
-		PushOverlay(new Ant::ImGuiLayer());
 	}
 
 	~Sandbox()

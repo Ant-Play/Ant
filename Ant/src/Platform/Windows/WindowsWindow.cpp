@@ -4,8 +4,9 @@
 #include "Ant/Events/ApplicationEvent.h"
 #include "Ant/Events/KeyEvent.h"
 #include "Ant/Events/MouseEvent.h"
+#include "Platform/OpenGL/OpenGLContext.h"
 
-#include <glad/glad.h>
+
 
 namespace Ant {
 
@@ -44,12 +45,11 @@ namespace Ant {
 		}
 
 		m_Window = glfwCreateWindow((int)m_Data.Width, (int)m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		
+		m_Context = new OpenGLContext(m_Window);
+		m_Context->Init();
+		
 
-		//这里将一个glfwWindow设置为当前上下文，一个thread同时只能拥有一个上下文，
-		//这省去了一些函数每次都指定window的麻烦，像glfwSwapInterval()这样的函数只操作当前Context
-		glfwMakeContextCurrent(m_Window);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		ANT_CORE_ASSERT(status, "Failed to initialize Glad");
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
@@ -154,9 +154,7 @@ namespace Ant {
 		//每次update时，处理当前在队列中的事件
 		glfwPollEvents();
 
-		//刷新下一帧(严格来说是把Framebuffer后台帧换到前台，把Framebuffer当前帧换到后台，
-		//所以是Swap)
-		glfwSwapBuffers(m_Window);
+		m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)

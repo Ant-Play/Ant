@@ -1,7 +1,7 @@
 #pragma once
 #include "Ant/Window.h"
+#include "Ant/Renderer/GraphicContext.h"
 #include <GLFW/glfw3.h>
-
 namespace Ant {
 
 	class WindowsWindow : public Window
@@ -32,6 +32,7 @@ namespace Ant {
 	private:
 		GLFWwindow* m_Window;
 		//std::unique_ptr<GraphicsContext> m_Context;
+		GraphicsContext* m_Context;
 
 		struct WindowData
 		{

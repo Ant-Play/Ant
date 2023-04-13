@@ -16,6 +16,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "Ant/vendor/GLFW/include"
 IncludeDir["Glad"] = "Ant/vendor/Glad/include"
 IncludeDir["ImGui"] = "Ant/vendor/imgui"
+IncludeDir["glm"] = "Ant/vendor/glm"
 
 include "Ant/vendor/GLFW"
 include "Ant/vendor/Glad"
@@ -25,9 +26,10 @@ include "Ant/vendor/imgui"
 
 project "Ant"
     location "Ant"
-    kind "SharedLib"
+    kind "StaticLib"
     language "C++"
-    staticruntime "off"
+    cppdialect "C++17"
+    staticruntime "on"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -39,6 +41,8 @@ project "Ant"
     {
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
+        "%{prj.name}/vendor/glm/glm/**.hpp",
+        "%{prj.name}/vendor/glm/glm/**.inl"
     }
 
     includedirs
@@ -47,7 +51,8 @@ project "Ant"
         "%{prj.name}/vendor/spdlog/include",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
-        "%{IncludeDir.ImGui}"
+        "%{IncludeDir.ImGui}",
+        "%{IncludeDir.glm}"
         --"Ant/src",
         --"Ant/vendor/spdlog/include",
         --"Ant/vendor/GLFW/include"
@@ -62,7 +67,6 @@ project "Ant"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
         systemversion "latest"
 
         defines
@@ -72,32 +76,27 @@ project "Ant"
             "GLFW_INCLUDE_NONE"
         }
 
-        postbuildcommands
-        {
-            -- ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
-            ("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
-        }
-
     filter "configurations:Debug"
         defines "ANT_DEBUG"
         runtime "Debug"
-        symbols "On"
+        symbols "on"
 
     filter "configurations:Release"
         defines "ANT_RELEASE"
         runtime "Release"
-        optimize "On"
+        optimize "on"
 
     filter "configurations:Dist"
         defines "ANT_DIST"
         runtime "Release"
-        optimize "On"
+        optimize "on"
 
 project "Sandbox"
     location "Sandbox"
     kind "ConsoleApp"
     language "C++"
-    staticruntime "off"
+    cppdialect "C++17"
+    staticruntime "on"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -114,7 +113,8 @@ project "Sandbox"
         "Ant/src",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
-        "%{IncludeDir.ImGui}"
+        "%{IncludeDir.ImGui}",
+        "%{IncludeDir.glm}"
     }
 
     links
@@ -123,7 +123,6 @@ project "Sandbox"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
         systemversion "latest"
 
         defines
@@ -134,16 +133,16 @@ project "Sandbox"
     filter "configurations:Debug"
         defines "ANT_DEBUG"
         runtime "Debug"
-        symbols "On"
+        symbols "on"
 
     filter "configurations:Release"
         defines "ANT_RELEASE"
         runtime "Release"
-        optimize "On"
+        optimize "on"
 
     filter "configurations:Dist"
         defines "ANT_DIST"
         runtime "Release"
-        optimize "On"
+        optimize "on"
 
 

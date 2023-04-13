@@ -7,3 +7,6 @@
 [submodule "Ant/vendor/imgui"]
 	path = Ant/vendor/imgui
 	url = https://github.com/TheCherno/imgui
+[submodule "Ant/vendor/glm"]
+	path = Ant/vendor/glm
+	url = https://github.com/g-truc/glm
