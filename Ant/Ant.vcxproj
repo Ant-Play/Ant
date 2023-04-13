@@ -156,6 +156,7 @@
     <ClInclude Include="src\Ant\Log.h" />
     <ClInclude Include="src\Ant\MouseCodes.h" />
     <ClInclude Include="src\Ant\Renderer\GraphicContext.h" />
+    <ClInclude Include="src\Ant\Renderer\Shader.h" />
     <ClInclude Include="src\Ant\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
@@ -585,6 +586,7 @@
     <ClCompile Include="src\Ant\Layer.cpp" />
     <ClCompile Include="src\Ant\LayerStack.cpp" />
     <ClCompile Include="src\Ant\Log.cpp" />
+    <ClCompile Include="src\Ant\Renderer\Shader.cpp" />
     <ClCompile Include="src\Ant\Window.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
