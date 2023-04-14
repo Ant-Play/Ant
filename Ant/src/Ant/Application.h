@@ -7,6 +7,7 @@
 #include "Ant/LayerStack.h"
 #include "Ant/ImGui/ImGuiLayer.h"
 #include "Ant/Renderer/Shader.h"
+#include "Ant/Renderer/Buffer.h"
 
 
 namespace Ant{
@@ -33,8 +34,10 @@ namespace Ant{
 		bool m_Running = true;
 		LayerStack m_LayerStack;
 
-		unsigned int m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+		unsigned int m_VertexArray;
 		Scope<Shader> m_Shader;
+		Scope<VertexBuffer> m_VertexBuffer;
+		Scope<IndexBuffer> m_IndexBuffer;
 
 	private:
 		static Application* s_Instance;
