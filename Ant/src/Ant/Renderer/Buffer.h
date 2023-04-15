@@ -28,6 +28,7 @@ namespace Ant{
 		return 0;
 	}
 
+	//一个VBO所包含的内容
 	struct BufferElements
 	{
 		std::string Name;
@@ -66,6 +67,7 @@ namespace Ant{
 		}
 	};
 
+	//VBOlayout
 	class BufferLayout
 	{
 	public:
@@ -103,6 +105,7 @@ namespace Ant{
 		uint32_t m_Stride = 0;
 	};
 
+	//VBO的抽象类
 	class VertexBuffer
 	{
 	public:
@@ -117,6 +120,7 @@ namespace Ant{
 		static VertexBuffer* Create(float* vertices, uint32_t size);
 	};
 
+	//EBO的抽象类
 	class IndexBuffer
 	{
 	public:

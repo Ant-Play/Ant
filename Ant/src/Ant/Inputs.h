@@ -4,6 +4,7 @@
 
 namespace Ant {
 
+	//ÊäÈëIOµÄ³éÏó
 	class ANT_API Input
 	{
 	public:

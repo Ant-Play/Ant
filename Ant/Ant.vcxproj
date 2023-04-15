@@ -140,6 +140,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Ant\Renderer\OrthographicCamera.h" />
     <ClInclude Include="src\Ant.h" />
     <ClInclude Include="src\Ant\Application.h" />
     <ClInclude Include="src\Ant\Core.h" />
@@ -158,10 +159,15 @@
     <ClInclude Include="src\Ant\Renderer\Buffer.h" />
     <ClInclude Include="src\Ant\Renderer\GraphicContext.h" />
     <ClInclude Include="src\Ant\Renderer\Renderer.h" />
+    <ClInclude Include="src\Ant\Renderer\RendererAPI.h" />
+    <ClInclude Include="src\Ant\Renderer\RendererCommand.h" />
     <ClInclude Include="src\Ant\Renderer\Shader.h" />
+    <ClInclude Include="src\Ant\Renderer\VertexArray.h" />
     <ClInclude Include="src\Ant\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\antpch.h" />
@@ -583,6 +589,7 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\Ant\Application.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp" />
@@ -591,10 +598,15 @@
     <ClCompile Include="src\Ant\Log.cpp" />
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\Ant\Renderer\RendererAPI.cpp" />
+    <ClCompile Include="src\Ant\Renderer\RendererCommand.cpp" />
     <ClCompile Include="src\Ant\Renderer\Shader.cpp" />
+    <ClCompile Include="src\Ant\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Ant\Window.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\antpch.cpp">

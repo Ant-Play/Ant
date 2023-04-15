@@ -2,6 +2,7 @@
 
 namespace Ant
 {
+	//上下文抽象
 	class GraphicsContext
 	{
 	public:

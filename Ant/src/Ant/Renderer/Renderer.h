@@ -1,19 +1,28 @@
 #pragma once
-
+#include "Ant/Core.h"
+#include "Ant/Renderer/RendererCommand.h"
+#include "Ant/Renderer/VertexArray.h"
+#include "Ant/Renderer/OrthographicCamera.h"
+#include "Ant/Renderer/Shader.h"
 
 namespace Ant{
-
-	enum class RendererAPI
-	{
-		None = 0, OpenGL = 1
-	};
 
 	class Renderer
 	{
 	public:
-		inline static RendererAPI GetAPI() { return s_RendererAPI; }
+		static void BeginScene(OrthographicCamera& camera);
+		static void EndScene();
+
+		static void Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray);
+
+		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 
 	private:
-		static RendererAPI s_RendererAPI;
+		struct SceneData
+		{
+			glm::mat4 ViewProjectionMatrix;
+		};
+
+		static SceneData* m_SceneData;
 	};
 }

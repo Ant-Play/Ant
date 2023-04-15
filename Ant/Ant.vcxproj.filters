@@ -1369,6 +1369,12 @@
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Renderer.h" />
+    <ClInclude Include="src\Ant\Renderer\VertexArray.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="src\Ant\Renderer\RendererAPI.h" />
+    <ClInclude Include="src\Ant\Renderer\RendererCommand.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
+    <ClInclude Include="src\Ant\Renderer\OrthographicCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Application.cpp">
@@ -1414,5 +1420,11 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\Ant\Renderer\VertexArray.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
+    <ClCompile Include="src\Ant\Renderer\RendererAPI.cpp" />
+    <ClCompile Include="src\Ant\Renderer\RendererCommand.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
+    <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp" />
   </ItemGroup>
 </Project>

@@ -1,7 +1,6 @@
 #include "antpch.h"
-#include "Buffer.h"
-
-#include "Renderer.h"
+#include "Ant/Renderer/Buffer.h"
+#include "Ant/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
 namespace Ant {
@@ -11,12 +10,12 @@ namespace Ant {
 
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::None: 
+			case RendererAPI::API::None: 
 			{
 				ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
 				return nullptr;
 			}
-			case RendererAPI::OpenGL:
+			case RendererAPI::API::OpenGL:
 			{
 				return new OpenGLVertexBuffer(vertices, size);
 			}
@@ -31,12 +30,12 @@ namespace Ant {
 
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::None:
+			case RendererAPI::API::None:
 			{
 				ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
 				return nullptr;
 			}
-			case RendererAPI::OpenGL:
+			case RendererAPI::API::OpenGL:
 			{
 				return new OpenGLIndexBuffer(indices, size);
 			}
