@@ -1,12 +1,12 @@
 #include "antpch.h"
-#include "Ant/Renderer/Shader.h"
+#include "Ant/Renderer/Texture.h"
 #include "Ant/Renderer/Renderer.h"
-#include "Platform/OpenGL/OpenGLShader.h"
-
+#include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace Ant {
 
-	Shader* Shader::Create(const std::string& vertexSrc, const std::string& fragmentSrc)
+
+	Ref<Texture2D> Texture2D::Create(const std::string& path)
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -17,7 +17,7 @@ namespace Ant {
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLShader(vertexSrc, fragmentSrc);
+				return CreateRef<OpenGLTexture2D>(path);
 			}
 		}
 

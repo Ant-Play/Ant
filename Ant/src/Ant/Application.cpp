@@ -15,6 +15,9 @@ namespace Ant {
 		s_Instance = this;
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(ANT_BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetVSync(false);
+		
+		Renderer::Init();
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
@@ -55,9 +58,13 @@ namespace Ant {
 	{
 		while (m_Running)
 		{
+			float time = (float)glfwGetTime(); // Platform::GetTime();
+			Timestep timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
+
 			//绘制图层从前往后
 			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate();
+				layer->OnUpdate(timestep);
 			
 			m_ImGuiLayer->Begin();
 			for (Layer* layer : m_LayerStack)

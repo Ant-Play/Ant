@@ -77,7 +77,7 @@
       <PrecompiledHeaderFile>antpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>ANT_PLATFORM_WINDOWS;ANT_BUILD_DLL;GLFW_INCLUDE_NONE;ANT_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -97,7 +97,7 @@
       <PrecompiledHeaderFile>antpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>ANT_PLATFORM_WINDOWS;ANT_BUILD_DLL;GLFW_INCLUDE_NONE;ANT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -121,7 +121,7 @@
       <PrecompiledHeaderFile>antpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>ANT_PLATFORM_WINDOWS;ANT_BUILD_DLL;GLFW_INCLUDE_NONE;ANT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -140,10 +140,10 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\Ant\Renderer\OrthographicCamera.h" />
     <ClInclude Include="src\Ant.h" />
     <ClInclude Include="src\Ant\Application.h" />
     <ClInclude Include="src\Ant\Core.h" />
+    <ClInclude Include="src\Ant\Core\Timestep.h" />
     <ClInclude Include="src\Ant\EntryPoint.h" />
     <ClInclude Include="src\Ant\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Ant\Events\Event.h" />
@@ -158,15 +158,19 @@
     <ClInclude Include="src\Ant\MouseCodes.h" />
     <ClInclude Include="src\Ant\Renderer\Buffer.h" />
     <ClInclude Include="src\Ant\Renderer\GraphicContext.h" />
+    <ClInclude Include="src\Ant\Renderer\OrthographicCamera.h" />
     <ClInclude Include="src\Ant\Renderer\Renderer.h" />
     <ClInclude Include="src\Ant\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Ant\Renderer\RendererCommand.h" />
     <ClInclude Include="src\Ant\Renderer\Shader.h" />
+    <ClInclude Include="src\Ant\Renderer\Texture.h" />
     <ClInclude Include="src\Ant\Renderer\VertexArray.h" />
     <ClInclude Include="src\Ant\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
@@ -587,9 +591,9 @@
     <ClInclude Include="vendor\glm\glm\vec3.hpp" />
     <ClInclude Include="vendor\glm\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
+    <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\Ant\Application.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp" />
@@ -597,21 +601,26 @@
     <ClCompile Include="src\Ant\LayerStack.cpp" />
     <ClCompile Include="src\Ant\Log.cpp" />
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Ant\Renderer\RendererAPI.cpp" />
     <ClCompile Include="src\Ant\Renderer\RendererCommand.cpp" />
     <ClCompile Include="src\Ant\Renderer\Shader.cpp" />
+    <ClCompile Include="src\Ant\Renderer\Texture.cpp" />
     <ClCompile Include="src\Ant\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Ant\Window.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\antpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">

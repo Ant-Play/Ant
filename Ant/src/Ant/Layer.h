@@ -1,6 +1,7 @@
 #pragma once
 #include "Ant/Core.h"
 #include "Ant/Events/Event.h"
+#include "Ant/Core/Timestep.h"
 
 
 namespace Ant{
@@ -12,7 +13,7 @@ namespace Ant{
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
-		virtual void OnUpdate() {}
+		virtual void OnUpdate(Timestep ts) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
 

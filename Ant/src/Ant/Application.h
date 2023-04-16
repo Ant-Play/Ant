@@ -6,6 +6,7 @@
 #include "Ant/Window.h"
 #include "Ant/LayerStack.h"
 #include "Ant/ImGui/ImGuiLayer.h"
+#include "Ant/Core/Timestep.h"
 
 namespace Ant{
 	class Application
@@ -30,6 +31,7 @@ namespace Ant{
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
 		LayerStack m_LayerStack;
+		float m_LastFrameTime = 0.0f;
 
 	private:
 		static Application* s_Instance;

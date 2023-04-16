@@ -17,12 +17,12 @@ IncludeDir["GLFW"] = "Ant/vendor/GLFW/include"
 IncludeDir["Glad"] = "Ant/vendor/Glad/include"
 IncludeDir["ImGui"] = "Ant/vendor/imgui"
 IncludeDir["glm"] = "Ant/vendor/glm"
+IncludeDir["stb_image"] = "Ant/vendor/stb_image"
 
 include "Ant/vendor/GLFW"
 include "Ant/vendor/Glad"
 include "Ant/vendor/imgui"
 
---startproject "Sandbox"
 
 project "Ant"
     location "Ant"
@@ -41,6 +41,8 @@ project "Ant"
     {
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
+        "%{prj.name}/vendor/stb_image/**.h",
+        "%{prj.name}/vendor/stb_image/**.cpp",
         "%{prj.name}/vendor/glm/glm/**.hpp",
         "%{prj.name}/vendor/glm/glm/**.inl"
     }
@@ -52,10 +54,8 @@ project "Ant"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",
-        "%{IncludeDir.glm}"
-        --"Ant/src",
-        --"Ant/vendor/spdlog/include",
-        --"Ant/vendor/GLFW/include"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.stb_image}"
     }
 
     links
@@ -114,7 +114,8 @@ project "Sandbox"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.stb_image}"
     }
 
     links

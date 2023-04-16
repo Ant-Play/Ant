@@ -8,6 +8,7 @@
 #include "Ant/MouseCodes.h"
 #include "Ant/Layer.h"
 #include "Ant/Log.h"
+#include "Ant/Core/Timestep.h"
 
 #include "Ant/ImGui/ImGuiLayer.h"
 
@@ -18,6 +19,7 @@
 #include "Ant/Renderer/Buffer.h"
 #include "Ant/Renderer/VertexArray.h"
 #include "Ant/Renderer/Shader.h"
+#include "Ant/Renderer/Texture.h"
 
 #include "Ant/Renderer/OrthographicCamera.h"
 // ---------------------------------------------------
