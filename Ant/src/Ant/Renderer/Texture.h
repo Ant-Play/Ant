@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Ant/Core.h"
-#include <string>
-
 namespace Ant{
 
 	class Texture

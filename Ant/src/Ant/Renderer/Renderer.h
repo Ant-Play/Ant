@@ -1,7 +1,5 @@
 #pragma once
-#include "Ant/Core.h"
 #include "Ant/Renderer/RendererCommand.h"
-#include "Ant/Renderer/VertexArray.h"
 #include "Ant/Renderer/OrthographicCamera.h"
 #include "Ant/Renderer/Shader.h"
 
@@ -11,6 +9,7 @@ namespace Ant{
 	{
 	public:
 		static void Init();
+		static void OnWindowResize(uint32_t width, uint32_t height);
 
 		static void BeginScene(OrthographicCamera& camera);
 		static void EndScene();

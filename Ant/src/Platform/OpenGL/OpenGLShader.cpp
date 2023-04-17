@@ -1,116 +1,43 @@
 #include "antpch.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
+#include <fstream>
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Ant {
-
-	OpenGLShader::OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc)
+	static GLenum ShaderTypeFromeString(const std::string& type)
 	{
+		if (type == "vertex") return GL_VERTEX_SHADER;
+		if (type == "fragment" || type == "pixel") return GL_FRAGMENT_SHADER;
 
-		// Create an empty vertex shader handle
-		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-		// Send the vertex shader source code to GL
-		// Note that std::string's .c_str is NULL character terminated.
-		const GLchar* source = vertexSrc.c_str();
-		glShaderSource(vertexShader, 1, &source, 0);
-
-		// Compile the vertex shader
-		glCompileShader(vertexShader);
-
-		GLint isCompiled = 0;
-		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
-		if (isCompiled == GL_FALSE)
-		{
-			ANT_CORE_ERROR("VertexShader compiled error!");
-			GLint maxLength = 0;
-			glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-			// The maxLength includes the NULL character
-			std::vector<GLchar> infoLog(maxLength);
-			glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &infoLog[0]);
-
-			// We don't need the shader anymore.
-			glDeleteShader(vertexShader);
-
-			ANT_CORE_ERROR("{0}", infoLog.data());
-			ANT_CORE_ASSERT(false, "Vertex shader compilation failure!");
-			return;
-		}
-
-		// Create an empty fragment shader handle
-		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-		// Send the fragment shader source code to GL
-		// Note that std::string's .c_str is NULL character terminated.
-		source = (const GLchar*)fragmentSrc.c_str();
-		glShaderSource(fragmentShader, 1, &source, 0);
-
-		// Compile the fragment shader
-		glCompileShader(fragmentShader);
-
-		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
-		if (isCompiled == GL_FALSE)
-		{
-			ANT_CORE_ERROR("FragmentShader compiled error!");
-			GLint maxLength = 0;
-			glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-			// The maxLength includes the NULL character
-			std::vector<GLchar> infoLog(maxLength);
-			glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &infoLog[0]);
-
-			// We don't need the shader anymore.
-			glDeleteShader(fragmentShader);
-			// Either of them. Don't leak shaders.
-			glDeleteShader(vertexShader);
-
-			ANT_CORE_ERROR("{0}", infoLog.data());
-			ANT_CORE_ASSERT(false, "fragment shader compilation failure!");
-			return;
-		}
-
-		// Vertex and fragment shaders are successfully compiled.
-		// Now time to link them together into a program.
-		// Get a program object.
-		m_RendererID = glCreateProgram();
-
-		// Attach our shaders to our program
-		glAttachShader(m_RendererID, vertexShader);
-		glAttachShader(m_RendererID, fragmentShader);
-
-		// Link our program
-		glLinkProgram(m_RendererID);
-
-		// Note the different functions here: glGetProgram* instead of glGetShader*.
-		GLint isLinked = 0;
-		glGetProgramiv(m_RendererID, GL_LINK_STATUS, (int*)&isLinked);
-		if (isLinked == GL_FALSE)
-		{
-			ANT_CORE_ERROR("Shader linked error!");
-			GLint maxLength = 0;
-			glGetProgramiv(m_RendererID, GL_INFO_LOG_LENGTH, &maxLength);
-
-			// The maxLength includes the NULL character
-			std::vector<GLchar> infoLog(maxLength);
-			glGetProgramInfoLog(m_RendererID, maxLength, &maxLength, &infoLog[0]);
-
-			// We don't need the program anymore.
-			glDeleteProgram(m_RendererID);
-			// Don't leak shaders either.
-			glDeleteShader(vertexShader);
-			glDeleteShader(fragmentShader);
-
-			ANT_CORE_ERROR("{0}", infoLog.data());
-			ANT_CORE_ASSERT(false, "Shader link failure!");
-			return;
-		}
-
-		// Always detach shaders after a successful link.
-		glDetachShader(m_RendererID, vertexShader);
-		glDetachShader(m_RendererID, fragmentShader);
+		ANT_CORE_ASSERT(false, "Unkown shader type '{0}'", type);
+		return 0;
 	}
+
+	OpenGLShader::OpenGLShader(const std::string& filepath)
+	{
+		std::string source = ReadFile(filepath);
+		auto shaderSources = PreProcess(source);
+		Compile(shaderSources);
+
+		// Extract name from filepath
+		auto lastSlash = filepath.find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		auto lastDot = filepath.rfind('.');
+		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
+		m_Name = filepath.substr(lastSlash, count);
+	}
+
+	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
+		: m_Name(name)
+	{
+		std::unordered_map<GLenum, std::string> sources;
+		sources[GL_VERTEX_SHADER] = vertexSrc;
+		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
+		Compile(sources);
+	}
+
 
 	OpenGLShader::~OpenGLShader()
 	{
@@ -148,8 +75,7 @@ namespace Ant {
 	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& value)
 	{
 		auto location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform3f(location, value.x, value.y, value.z);
-		//glUniform3fv(location, 1, glm::value_ptr(value));
+		glUniform3fv(location, 1, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& value)
@@ -162,6 +88,138 @@ namespace Ant {
 	{
 		auto location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+	std::string OpenGLShader::ReadFile(const std::string& filepath)
+	{
+		std::string result;
+		std::ifstream in(filepath, std::ios::in | std::ios::binary);
+		if (in)
+		{
+			in.seekg(0, std::ios::end);
+			result.resize(in.tellg());
+			in.seekg(0, std::ios::beg);
+			in.read(&result[0], result.size());
+			in.close();
+		}
+		else
+		{
+			ANT_CORE_ERROR("Coule not open file '{0}'", filepath);
+		}
+
+		return result;
+	}
+
+	// 对输入的源代码进行预处理，将每个 shader 的代码保存在一个对应的 unordered_map 中
+	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
+	{
+		std::unordered_map<GLenum, std::string> shaderSources;
+
+		const char* typeToken = "#type";
+		size_t typeTokenLength = strlen(typeToken);
+		size_t pos = source.find(typeToken, 0);												// 在源代码中寻找第一个 shader 类型关键字的位置
+		while (pos != std::string::npos)
+		{
+			size_t eol = source.find_first_of("\r\n", pos);									// 在 shader 类型关键字后面寻找第一个回车或换行符的位置
+			ANT_CORE_ASSERT(eol != std::string::npos, "Syntax error");
+			size_t begin = pos + typeTokenLength + 1;
+			std::string type = source.substr(begin, eol - begin);
+			ANT_CORE_ASSERT(ShaderTypeFromeString(type), "Invalid shader type specified!");
+
+			size_t nextLinePos = source.find_first_not_of("\r\n", eol);						// 在回车或换行符后面寻找下一个非回车或换行符的位置
+			pos = source.find(typeToken, nextLinePos);										// 在下一个非回车或换行符后面寻找下一个 shader 类型关键字的位置
+			shaderSources[ShaderTypeFromeString(type)] = source.substr(nextLinePos, pos -   // 将该 shader 类型的代码保存在 unordered_map 中
+				(nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+		}
+
+		return shaderSources;
+	}
+
+	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
+	{
+		GLuint program = glCreateProgram();
+		ANT_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
+		std::array<GLenum, 2> glShaderIDs;
+		int glShaderIDIndex = 0;
+
+		for (auto& kv : shaderSources)
+		{
+			GLenum type = kv.first;
+			std::string typeStr;
+			if (type == GL_VERTEX_SHADER)
+				typeStr = "VertexShader";
+			else
+				typeStr = "FragmentShader";
+			const std::string& source = kv.second;
+			// Create an empty vertex shader handle
+			GLuint shader = glCreateShader(type);
+
+			// Send the vertex shader source code to GL
+			// Note that std::string's .c_str is NULL character terminated.
+			const GLchar* sourceCStr = source.c_str();
+			glShaderSource(shader, 1, &sourceCStr, 0);
+
+			// Compile the vertex shader
+			glCompileShader(shader);
+
+			GLint isCompiled = 0;
+			glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+			if (isCompiled == GL_FALSE)
+			{
+				GLint maxLength = 0;
+				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+				// The maxLength includes the NULL character
+				std::vector<GLchar> infoLog(maxLength);
+				glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+
+				// We don't need the shader anymore.
+				glDeleteShader(shader);
+
+				ANT_CORE_ERROR("Shader compiled error!");
+				ANT_CORE_ERROR("Type is '{0}' : {1}",typeStr, infoLog.data());
+				return;
+			}
+
+			// Attach our shaders to our program
+			glAttachShader(program, shader);
+
+			glShaderIDs[glShaderIDIndex++] = shader;
+		}
+
+		m_RendererID = program;
+
+
+		// Link our program
+		glLinkProgram(m_RendererID);
+
+		// Note the different functions here: glGetProgram* instead of glGetShader*.
+		GLint isLinked = 0;
+		glGetProgramiv(m_RendererID, GL_LINK_STATUS, (int*)&isLinked);
+		if (isLinked == GL_FALSE)
+		{
+			GLint maxLength = 0;
+			glGetProgramiv(m_RendererID, GL_INFO_LOG_LENGTH, &maxLength);
+
+			// The maxLength includes the NULL character
+			std::vector<GLchar> infoLog(maxLength);
+			glGetProgramInfoLog(m_RendererID, maxLength, &maxLength, &infoLog[0]);
+
+			// We don't need the program anymore.
+			glDeleteProgram(m_RendererID);
+
+			// Don't leak shaders either.
+			for(auto ids : glShaderIDs)
+				glDeleteShader(ids);
+
+			ANT_CORE_ERROR("Shader link failure!");
+			ANT_CORE_ERROR("{0}", infoLog.data());
+			return;
+		}
+
+		// Always detach shaders after a successful link.
+		for (auto ids : glShaderIDs)
+			glDetachShader(m_RendererID, ids);
 	}
 
 }

@@ -1,17 +1,19 @@
 #include <Ant.h>
-#include <iostream>
+#include "Ant/Core/EntryPoint.h"
+#include "Sandbox2D.h"
 
 #include <imgui.h>
 #include "Platform/OpenGL/OpenGLShader.h"
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 class ExampleLayer : public Ant::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f)
+		: Layer("Example"), m_CameraController(1600.0f / 900.0f)
 	{
-		m_VertexArray.reset(Ant::VertexArray::Create());
+		m_VertexArray = Ant::VertexArray::Create();
 
 		float vertices[3 * 7] = {
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -68,10 +70,10 @@ public:
 				}
 		)";
 
-		m_Shader.reset(Ant::Shader::Create(vertexSrc, fragmentSrc));
+		m_Shader = Ant::Shader::Create("Triangle Shader", vertexSrc, fragmentSrc);
 
 
-		tmpVA.reset(Ant::VertexArray::Create());
+		tmpVA = Ant::VertexArray::Create();
 
 		float verticesTmp[5 * 4] = {
 			 -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -122,75 +124,27 @@ public:
 				}
 		)";
 
-		tmpShader.reset(Ant::Shader::Create(tmpVertexSrc, tmpFragmentSrc));
-
-
-		std::string texVertexSrc = R"(
-				#version 330 core
-
-				layout(location = 0) in vec3 a_Position;
-				layout(location = 1) in vec2 a_TexCoord;
-				
-				out vec3 v_Position;
-				out vec2 v_TexCoord;
-
-				uniform mat4 u_ViewProjection;
-				uniform mat4 u_Transform;
-				
-				void main()
-				{
-					v_TexCoord = a_TexCoord;
-					gl_Position = u_ViewProjection * u_Transform *  vec4(a_Position, 1.0);
-				}
-		)";
-
-		std::string texFragmentSrc = R"(
-				#version 330 core
-
-				layout(location = 0) out vec4 color;
-	
-				in vec2 v_TexCoord;
-
-				uniform sampler2D u_Texture;
-
-				void main()
-				{
-					//color = vec4(0.8, 0.3, 0.2,1.0);
-					color = texture(u_Texture, v_TexCoord);
-				}
-		)";
-		texShader.reset(Ant::Shader::Create(texVertexSrc, texFragmentSrc));
+		tmpShader = Ant::Shader::Create("Mesh Shader", tmpVertexSrc, tmpFragmentSrc);
+		
+		auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
 		m_Texture = Ant::Texture2D::Create("assets/textures/Checkerboard.png");
 		m_AnotherTexture = Ant::Texture2D::Create("assets/textures/ChernoLogo.png");
 
-		std::dynamic_pointer_cast<Ant::OpenGLShader>(texShader)->Bind();
-		std::dynamic_pointer_cast<Ant::OpenGLShader>(texShader)->UploadUniformInt("u_Texture", 0);
+		std::dynamic_pointer_cast<Ant::OpenGLShader>(textureShader)->Bind();
+		std::dynamic_pointer_cast<Ant::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Ant::Timestep ts)
 	{
-		if (Ant::Input::IsKeyPressed(Ant::Key::Left))
-			m_CameraPosition.x -= m_CameraTranslateSpeed * ts;
-		if (Ant::Input::IsKeyPressed(Ant::Key::Right))
-			m_CameraPosition.x += m_CameraTranslateSpeed * ts;
-		if (Ant::Input::IsKeyPressed(Ant::Key::Up))
-			m_CameraPosition.y += m_CameraTranslateSpeed * ts;
-		if (Ant::Input::IsKeyPressed(Ant::Key::Down))
-			m_CameraPosition.y -= m_CameraTranslateSpeed * ts;
-		if (Ant::Input::IsKeyPressed(Ant::Key::A))
-			m_CameraRotation -= m_CameraRotationSpeed * ts;
-		if (Ant::Input::IsKeyPressed(Ant::Key::D))
-			m_CameraRotation += m_CameraRotationSpeed * ts;
+		// Updata
+		m_CameraController.OnUpdata(ts);
 
-
+		// Render
 		Ant::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		Ant::RendererCommand::Clear();
 
-		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.SetRotation(m_CameraRotation);
-
-		Ant::Renderer::BeginScene(m_Camera);
+		Ant::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -205,12 +159,13 @@ public:
 				Ant::Renderer::Submit(tmpShader, tmpVA, transform);
 			}
 		}
+		auto textureShader = m_ShaderLibrary.Get("Texture");
 		//Ant::Renderer::Submit(tmpShader, tmpVA);
 		//Ant::Renderer::Submit(m_Shader, m_VertexArray);
 		m_Texture->Bind();
-		Ant::Renderer::Submit(texShader, tmpVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)));
+		Ant::Renderer::Submit(textureShader, tmpVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)));
 		m_AnotherTexture->Bind();
-		Ant::Renderer::Submit(texShader, tmpVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)));
+		Ant::Renderer::Submit(textureShader, tmpVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)));
 
 		Ant::Renderer::EndScene();
 	}
@@ -224,22 +179,27 @@ public:
 
 	void OnEvent(Ant::Event& event)
 	{
+		m_CameraController.OnEvent(event);
+
+		if (event.GetEventType() == Ant::EventType::WindowResize)
+		{
+			auto& re = (Ant::WindowResizeEvent&)event;
+
+			/*float zoom = (float)re.GetWidth() / 1600.0f;
+			m_CameraController.SetZoomLevel(zoom);*/
+		}
 	}
 
 
 private:
+	Ant::ShaderLibrary m_ShaderLibrary;
 	Ant::Ref<Ant::Texture2D> m_Texture, m_AnotherTexture;
-	Ant::Ref<Ant::Shader> m_Shader, tmpShader, texShader;
+	Ant::Ref<Ant::Shader> m_Shader, tmpShader;
 	Ant::Ref<Ant::VertexArray> m_VertexArray, tmpVA;
 	Ant::Ref<Ant::VertexBuffer> m_VertexBuffer;
 	Ant::Ref<Ant::IndexBuffer> m_IndexBuffer;
 
-	Ant::OrthographicCamera m_Camera;
-
-	glm::vec3 m_CameraPosition;
-	float m_CameraRotation = 0.0f;
-	float m_CameraRotationSpeed = 180.0f;
-	float m_CameraTranslateSpeed = 10.0f;
+	Ant::OrthographicCameraController m_CameraController;
 
 	glm::vec3 m_TmpColor = { 0.8, 0.3, 0.2 };
 };
@@ -249,7 +209,8 @@ class Sandbox : public Ant::Application
 public:
 	Sandbox()
 	{
-		PushLayer(new ExampleLayer);
+		//PushLayer(new ExampleLayer);
+		PushLayer(new Sandbox2D());
 	}
 
 	~Sandbox()

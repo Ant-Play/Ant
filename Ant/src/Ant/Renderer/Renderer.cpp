@@ -1,5 +1,6 @@
 #include "antpch.h"
 #include "Ant/Renderer/Renderer.h"
+#include "Ant/Renderer/Renderer2D.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Ant {
@@ -10,6 +11,13 @@ namespace Ant {
 	void Renderer::Init()
 	{
 		RendererCommand::Init();
+		Renderer2D::Init();
+	}
+
+
+	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
+	{
+		RendererCommand::SetViewport(0, 0, width, height);
 	}
 
 	// TODO

@@ -1,12 +1,9 @@
 #pragma once
-#include "Ant/Core.h"
-#include "Ant/Events/Event.h"
-#include "Platform/Windows/WindowsWindow.h"
+#include "Ant/Core/Core.h"
 #include "Ant/Events/ApplicationEvent.h"
-#include "Ant/Window.h"
-#include "Ant/LayerStack.h"
+#include "Platform/Windows/WindowsWindow.h"
+#include "Ant/Core/LayerStack.h"
 #include "Ant/ImGui/ImGuiLayer.h"
-#include "Ant/Core/Timestep.h"
 
 namespace Ant{
 	class Application
@@ -26,10 +23,12 @@ namespace Ant{
 		inline static Application& Get() { return *s_Instance; }
 	private:
 		bool OnWindowClosed(WindowCloseEvent& e);
+		bool OnWindowResized(WindowResizeEvent& e);
 
 		Scope<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
+		bool m_Minimized = false;
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0.0f;
 

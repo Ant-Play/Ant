@@ -1,10 +1,7 @@
 #pragma once
-
-#include "Ant/Core.h"
-#include "Ant/Layer.h"
+#include "Ant/Core/Layer.h"
 
 #include <vector>
-
 namespace Ant {
 
 	class ANT_API LayerStack

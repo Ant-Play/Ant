@@ -57,17 +57,38 @@
     <ClInclude Include="src\Ant.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Application.h">
-      <Filter>src\Ant</Filter>
+    <ClInclude Include="src\Ant\Core\Application.h">
+      <Filter>src\Ant\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Core.h">
-      <Filter>src\Ant</Filter>
+    <ClInclude Include="src\Ant\Core\Core.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\EntryPoint.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\Inputs.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\KeyCodes.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\Layer.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\LayerStack.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\Log.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\MouseCodes.h">
+      <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\Timestep.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\EntryPoint.h">
-      <Filter>src\Ant</Filter>
+    <ClInclude Include="src\Ant\Core\Window.h">
+      <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Events\ApplicationEvent.h">
       <Filter>src\Ant\Events</Filter>
@@ -84,24 +105,6 @@
     <ClInclude Include="src\Ant\ImGui\ImGuiLayer.h">
       <Filter>src\Ant\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Inputs.h">
-      <Filter>src\Ant</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\KeyCodes.h">
-      <Filter>src\Ant</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Layer.h">
-      <Filter>src\Ant</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\LayerStack.h">
-      <Filter>src\Ant</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Log.h">
-      <Filter>src\Ant</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\MouseCodes.h">
-      <Filter>src\Ant</Filter>
-    </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Buffer.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
@@ -109,6 +112,9 @@
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\OrthographicCamera.h">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\OrthographicCameraController.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Renderer.h">
@@ -128,9 +134,6 @@
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\VertexArray.h">
       <Filter>src\Ant\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Window.h">
-      <Filter>src\Ant</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
@@ -1410,10 +1413,23 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\Renderer2D.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Ant\Application.cpp">
-      <Filter>src\Ant</Filter>
+    <ClCompile Include="src\Ant\Core\Application.cpp">
+      <Filter>src\Ant\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Core\Layer.cpp">
+      <Filter>src\Ant\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Core\LayerStack.cpp">
+      <Filter>src\Ant\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Core\Log.cpp">
+      <Filter>src\Ant\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Core\Window.cpp">
+      <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\ImGui\ImGuiBuild.cpp">
       <Filter>src\Ant\ImGui</Filter>
@@ -1421,19 +1437,13 @@
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp">
       <Filter>src\Ant\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Layer.cpp">
-      <Filter>src\Ant</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Ant\LayerStack.cpp">
-      <Filter>src\Ant</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Ant\Log.cpp">
-      <Filter>src\Ant</Filter>
-    </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\OrthographicCameraController.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp">
@@ -1453,9 +1463,6 @@
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\VertexArray.cpp">
       <Filter>src\Ant\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Ant\Window.cpp">
-      <Filter>src\Ant</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
       <Filter>src\Platform\OpenGL</Filter>
@@ -1487,5 +1494,6 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\Renderer2D.cpp" />
   </ItemGroup>
 </Project>

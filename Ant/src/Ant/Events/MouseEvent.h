@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Ant/Events/Event.h"
-#include "Ant/MouseCodes.h"
+#include "Ant/Core/MouseCodes.h"
 
 namespace Ant {
 

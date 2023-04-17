@@ -1,7 +1,5 @@
 #include "antpch.h"
-#include "Ant/Application.h"
-#include "Ant/Inputs.h"
-#include "Ant/KeyCodes.h"
+#include "Ant/Core/Application.h"
 #include "Ant/Renderer/Renderer.h"
 
 
@@ -44,6 +42,7 @@ namespace Ant {
 	{
 		EventDispatcher dispathcher(e);
 		dispathcher.Dispatch<WindowCloseEvent>(ANT_BIND_EVENT_FN(Application::OnWindowClosed));
+		dispathcher.Dispatch<WindowResizeEvent>(ANT_BIND_EVENT_FN(Application::OnWindowResized));
 
 		//事务响应从后往前
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
@@ -62,10 +61,14 @@ namespace Ant {
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			//绘制图层从前往后
-			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate(timestep);
-			
+			if (!m_Minimized)
+			{
+				//绘制图层从前往后
+				for (Layer* layer : m_LayerStack)
+					layer->OnUpdate(timestep);
+
+			}
+
 			m_ImGuiLayer->Begin();
 			for (Layer* layer : m_LayerStack)
 				layer->OnImGuiRender();
@@ -80,4 +83,17 @@ namespace Ant {
 		m_Running = false;
 		return true;
 	}
+
+	bool Application::OnWindowResized(WindowResizeEvent& e)
+	{
+		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+		m_Minimized = false;
+		return false;
+	}
+
 }

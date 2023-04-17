@@ -1,8 +1,7 @@
 #pragma once
-
+#include "Ant/Core/Core.h"
 #include "antpch.h"
-#include "Ant/Core.h"
-#include "Ant/Events/Event.h"
+
 
 namespace Ant {
 

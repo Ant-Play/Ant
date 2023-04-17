@@ -1,9 +1,8 @@
 #pragma once
-#include "Ant/Core.h"
-#include "Ant/Events/Event.h"
 #include "Ant/Core/Timestep.h"
+#include "Ant/Events/Event.h"
 
-
+#include <string>
 namespace Ant{
 	class ANT_API Layer
 	{

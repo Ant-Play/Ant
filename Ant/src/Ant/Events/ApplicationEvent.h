@@ -2,6 +2,7 @@
 
 #include "Ant/Events/Event.h"
 
+#include <string>
 namespace Ant {
 
 	class WindowResizeEvent : public Event

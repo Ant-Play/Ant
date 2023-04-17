@@ -1,5 +1,5 @@
 #pragma once
-#include "Ant/Inputs.h"
+#include "Ant/Core/Inputs.h"
 
 namespace Ant {
 
