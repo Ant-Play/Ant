@@ -1,47 +1,59 @@
+
 #include "Sandbox2D.h"
 
 #include <imgui.h>
 #include "Platform/OpenGL/OpenGLShader.h"
 #include <glm/gtc/type_ptr.hpp>
+#include "Ant/Debug/Instrumentor.h"
 
 Sandbox2D::Sandbox2D()
 	: Layer("Sandbox2D"), m_CameraController(1600.0f / 900.0f)
 {
-
+	
 }
 
 void Sandbox2D::OnAttach()
 {
+	ANT_PROFILE_FUNCTION();
 
+	m_Texture = Ant::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
 void Sandbox2D::OnDetach()
 {
-
+	ANT_PROFILE_FUNCTION();
 }
 
 void Sandbox2D::OnUpdate(Ant::Timestep ts)
 {
+	ANT_PROFILE_FUNCTION();
 	// Updata
 	m_CameraController.OnUpdata(ts);
 
 	// Render
-	Ant::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-	Ant::RendererCommand::Clear();
+	{
+		ANT_PROFILE_SCOPE("Renderer Prep");
+		Ant::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		Ant::RendererCommand::Clear();
 
-	Ant::Renderer2D::BeginScene(m_CameraController.GetCamera());
+	}
 
-	Ant::Renderer2D::DrawQuad({ 0.0f,0.0f }, { 1.0f,1.0f }, { 0.8f, 0.3f, 0.2f, 1.0f });
+	{
+		ANT_PROFILE_SCOPE("Renderer Draw");
 
-	Ant::Renderer2D::EndScene();
+		Ant::Renderer2D::BeginScene(m_CameraController.GetCamera());
+		Ant::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.3f, 0.2f, 1.0f });
+		Ant::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
+		Ant::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_Texture);
 
-
-	/*std::dynamic_pointer_cast<Ant::OpenGLShader>(m_Shader)->Bind();
-	std::dynamic_pointer_cast<Ant::OpenGLShader>(m_Shader)->UploadUniformFloat4("u_Color", m_Color);*/
+		Ant::Renderer2D::EndScene();
+	}
 }
 
 void Sandbox2D::OnImGuiRender()
 {
+	ANT_PROFILE_FUNCTION();
+
 	ImGui::Begin("Settings");
 	ImGui::ColorEdit4("Square Color", glm::value_ptr(m_Color));
 	ImGui::End();

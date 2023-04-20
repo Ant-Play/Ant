@@ -1,3 +1,4 @@
+
 #include <Ant.h>
 #include "Ant/Core/EntryPoint.h"
 #include "Sandbox2D.h"
@@ -22,7 +23,7 @@ public:
 		};
 
 
-		m_VertexBuffer.reset(Ant::VertexBuffer::Create(vertices, sizeof(vertices)));
+		m_VertexBuffer = Ant::VertexBuffer::Create(vertices, sizeof(vertices));
 
 		Ant::BufferLayout layout = {
 						{ Ant::ShaderDataType::Float3, "a_Position" },
@@ -33,7 +34,7 @@ public:
 		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 
 		unsigned int indices[3] = { 0, 1, 2 };
-		m_IndexBuffer.reset(Ant::IndexBuffer::Create(indices, std::size(indices)));
+		m_IndexBuffer = Ant::IndexBuffer::Create(indices, std::size(indices));
 		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
 		std::string vertexSrc = R"(
@@ -83,15 +84,15 @@ public:
 		};
 
 		Ant::Ref<Ant::VertexBuffer> tmpVB;
-		tmpVB.reset(Ant::VertexBuffer::Create(verticesTmp, sizeof(verticesTmp)));
-		tmpVB->SetLayout({ 
+		tmpVB = Ant::VertexBuffer::Create(verticesTmp, sizeof(verticesTmp));
+		tmpVB->SetLayout({
 			{ Ant::ShaderDataType::Float3, "a_Position" },
 			{ Ant::ShaderDataType::Float2, "a_Texcoord" }
 			});
 		tmpVA->AddVertexBuffer(tmpVB);
 		unsigned int indicesTmp[6] = { 0, 1, 2, 0, 2, 3 };
 		Ant::Ref<Ant::IndexBuffer> tmpIB;
-		tmpIB.reset(Ant::IndexBuffer::Create(indicesTmp, std::size(indicesTmp)));
+		tmpIB = Ant::IndexBuffer::Create(indicesTmp, std::size(indicesTmp));
 		tmpVA->SetIndexBuffer(tmpIB);
 
 		std::string tmpVertexSrc = R"(
@@ -125,7 +126,7 @@ public:
 		)";
 
 		tmpShader = Ant::Shader::Create("Mesh Shader", tmpVertexSrc, tmpFragmentSrc);
-		
+
 		auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
 		m_Texture = Ant::Texture2D::Create("assets/textures/Checkerboard.png");

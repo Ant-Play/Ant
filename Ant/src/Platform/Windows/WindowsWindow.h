@@ -23,8 +23,6 @@ namespace Ant {
 
 		virtual void* GetNativeWindow() const { return m_Window; }
 
-
-
 	private:
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
@@ -33,7 +31,7 @@ namespace Ant {
 	private:
 		GLFWwindow* m_Window;
 		//std::unique_ptr<GraphicsContext> m_Context;
-		GraphicsContext* m_Context;
+		Scope<GraphicsContext> m_Context;
 
 		struct WindowData
 		{

@@ -9,6 +9,7 @@
 #include "Ant/Core/Layer.h"
 #include "Ant/Core/Log.h"
 #include "Ant/Renderer/OrthographicCameraController.h"
+#include "Ant/Core/Timer.h"
 #include "Ant/Core/Timestep.h"
 
 #include "Ant/ImGui/ImGuiLayer.h"

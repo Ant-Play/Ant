@@ -15,6 +15,8 @@ namespace Ant{
 
 	void OpenGLContext::Init()
 	{
+		ANT_PROFILE_FUNCTION();
+
 		//这里将一个glfwWindow设置为当前上下文，一个thread同时只能拥有一个上下文，
 		//这省去了一些函数每次都指定window的麻烦，像glfwSwapInterval()这样的函数只操作当前Context
 		glfwMakeContextCurrent(m_WindowHandle);
@@ -32,6 +34,8 @@ namespace Ant{
 
 	void OpenGLContext::SwapBuffers()
 	{
+		ANT_PROFILE_FUNCTION();
+
 		//刷新下一帧(严格来说是把Framebuffer后台帧换到前台，把Framebuffer当前帧换到后台，
 		//所以是Swap)
 		glfwSwapBuffers(m_WindowHandle);

@@ -10,6 +10,9 @@
     <Filter Include="src\Ant\Core">
       <UniqueIdentifier>{57027ACE-4365-0973-ECEA-4129D82CD5F5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Ant\Debug">
+      <UniqueIdentifier>{55A8C69D-C168-42D4-8AA3-8B51F62287B0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Ant\Events">
       <UniqueIdentifier>{A305265A-8FD3-1960-7867-8A8664D4F5C4}</UniqueIdentifier>
     </Filter>
@@ -84,11 +87,17 @@
     <ClInclude Include="src\Ant\Core\MouseCodes.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Core\Timer.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Core\Timestep.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\Window.h">
       <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Debug\Instrumentor.h">
+      <Filter>src\Ant\Debug</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Events\ApplicationEvent.h">
       <Filter>src\Ant\Events</Filter>
@@ -118,6 +127,9 @@
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Renderer.h">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\Renderer2D.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\RendererAPI.h">
@@ -1413,7 +1425,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Renderer\Renderer2D.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
@@ -1447,6 +1458,9 @@
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\Renderer2D.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\RendererAPI.cpp">
@@ -1494,6 +1508,6 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\Renderer2D.cpp" />
+    <ClCompile Include="src\Ant\Renderer\GraphicContext.cpp" />
   </ItemGroup>
 </Project>

@@ -1,10 +1,11 @@
 #pragma once
 #include "Ant/Core/Core.h"
-#include "antpch.h"
+#include "Ant/Events/Event.h"
 
-
+#include <sstream>
 namespace Ant {
 
+	//¥∞ø⁄ Ù–‘
 	struct WindowProps
 	{
 		std::string Title;
@@ -24,7 +25,6 @@ namespace Ant {
 	class Window
 	{
 	public:
-		//using EventCallbackFn = std::function<void(Event&)>;
 		using EventCallbackFn = std::function<void(Event&)>;
 
 		virtual ~Window() = default;

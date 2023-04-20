@@ -150,8 +150,10 @@
     <ClInclude Include="src\Ant\Core\LayerStack.h" />
     <ClInclude Include="src\Ant\Core\Log.h" />
     <ClInclude Include="src\Ant\Core\MouseCodes.h" />
+    <ClInclude Include="src\Ant\Core\Timer.h" />
     <ClInclude Include="src\Ant\Core\Timestep.h" />
     <ClInclude Include="src\Ant\Core\Window.h" />
+    <ClInclude Include="src\Ant\Debug\Instrumentor.h" />
     <ClInclude Include="src\Ant\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Ant\Events\Event.h" />
     <ClInclude Include="src\Ant\Events\KeyEvent.h" />
@@ -604,6 +606,7 @@
     <ClCompile Include="src\Ant\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Ant\Renderer\GraphicContext.cpp" />
     <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\Ant\Renderer\OrthographicCameraController.cpp" />
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp" />

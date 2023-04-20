@@ -19,7 +19,22 @@ private:
 
 	// Temp
 	Ant::Ref<Ant::Shader> m_Shader;
+	Ant::Ref<Ant::Texture2D> m_Texture;
 	Ant::Ref<Ant::VertexArray> m_SquareVA;
+
+	struct ProfileResult
+	{
+		ProfileResult(const char* name, float time)
+			: Name(name), Time(time)
+		{
+
+		}
+		const char* Name;
+		float Time;
+	};
+
+	std::vector<ProfileResult> m_ProfileResult;
+
 	glm::vec4 m_Color = { 0.8f, 0.3f, 0.2f, 1.0f };
 };
 

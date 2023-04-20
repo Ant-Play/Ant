@@ -1,10 +1,13 @@
 #pragma once
 #include "Ant/Core/Timestep.h"
-#include "Ant/Events/Event.h"
+#include "Ant/Events/ApplicationEvent.h"
+#include "Ant/Events/KeyEvent.h"
+#include "Ant/Events/MouseEvent.h"
 
-#include <string>
 namespace Ant{
-	class ANT_API Layer
+
+	//显示图层的基类抽象
+	class Layer
 	{
 	public:
 		Layer(const std::string& name = "Layer");

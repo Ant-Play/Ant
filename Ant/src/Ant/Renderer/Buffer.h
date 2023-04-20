@@ -31,7 +31,7 @@ namespace Ant{
 		return 0;
 	}
 
-	//一个VBO所包含的内容
+	// 缓冲区元素结构体
 	struct BufferElements
 	{
 		std::string Name;
@@ -70,7 +70,6 @@ namespace Ant{
 		}
 	};
 
-	//VBOlayout
 	class BufferLayout
 	{
 	public:
@@ -86,12 +85,14 @@ namespace Ant{
 		inline const uint32_t GetStride() const { return m_Stride; }
 		inline const std::vector<BufferElements>& GetElements() const { return m_Elements; }
 
+		// 为了使用迭代器遍历元素列表而添加的方法
 		std::vector<BufferElements>::iterator begin() { return m_Elements.begin(); }
 		std::vector<BufferElements>::iterator end() { return m_Elements.end(); }
 		std::vector<BufferElements>::const_iterator begin() const { return m_Elements.begin(); }
 		std::vector<BufferElements>::const_iterator end() const { return m_Elements.end(); }
 
 	private:
+		// 计算元素的偏移量和Layout的步长
 		void CalculateOffsetAndStride()
 		{
 			uint32_t offset = 0;
@@ -108,32 +109,41 @@ namespace Ant{
 		uint32_t m_Stride = 0;
 	};
 
-	//VBO的抽象类
 	class VertexBuffer
 	{
 	public:
 		virtual ~VertexBuffer() = default;
 
+		// 绑定/解绑顶点缓冲区
 		virtual void Bind() const = 0;
 		virtual void UnBind() const = 0;
 
+		// 设置顶点数据
+		virtual void SetData(const void* data, uint32_t size) = 0;
+
+		// 获取/设置顶点缓冲区布局
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 
-		static VertexBuffer* Create(float* vertices, uint32_t size);
+		// 创建并初始化顶点缓冲区
+		static Ref<VertexBuffer> Create(uint32_t size);
+		static Ref<VertexBuffer> Create(float* vertices, uint32_t size);
 	};
 
-	//EBO的抽象类
+	// Currently Ant only supports 32-bit index buffers
 	class IndexBuffer
 	{
 	public:
 		virtual ~IndexBuffer() = default;
 
+		// 绑定/解绑索引缓冲区
 		virtual void Bind() const = 0;
 		virtual void UnBind() const = 0;
 
+		// 获取索引数量
 		virtual uint32_t GetCount() const = 0;
 
-		static IndexBuffer* Create(uint32_t* indices, uint32_t size);
+		// 创建索引缓冲区
+		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t size);
 	};
 }

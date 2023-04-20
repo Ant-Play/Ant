@@ -17,6 +17,8 @@ namespace Ant {
 
 	OpenGLShader::OpenGLShader(const std::string& filepath)
 	{
+		ANT_PROFILE_FUNCTION();
+
 		std::string source = ReadFile(filepath);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
@@ -32,6 +34,8 @@ namespace Ant {
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
 		: m_Name(name)
 	{
+		ANT_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
 		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
@@ -41,57 +45,29 @@ namespace Ant {
 
 	OpenGLShader::~OpenGLShader()
 	{
+		ANT_PROFILE_FUNCTION();
+
 		glDeleteProgram(m_RendererID);
 	}
 
 	void OpenGLShader::Bind() const
 	{
+		ANT_PROFILE_FUNCTION();
+
 		glUseProgram(m_RendererID);
 	}
 
 	void OpenGLShader::UnBind() const
 	{
+		ANT_PROFILE_FUNCTION();
+
 		glUseProgram(0);
-	}
-
-	void OpenGLShader::UploadUniformInt(const std::string& name, const int value)
-	{
-		auto location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform1i(location,value);
-	}
-
-	void OpenGLShader::UploadUniformFloat(const std::string& name, const float value)
-	{
-		auto location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform1f(location, value);
-	}
-
-	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& value)
-	{
-		auto location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform2fv(location, 1, glm::value_ptr(value));
-	}
-
-	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& value)
-	{
-		auto location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform3fv(location, 1, glm::value_ptr(value));
-	}
-
-	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& value)
-	{
-		auto location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform4fv(location, 1, glm::value_ptr(value));
-	}
-
-	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
-	{
-		auto location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
+		ANT_PROFILE_FUNCTION();
+
 		std::string result;
 		std::ifstream in(filepath, std::ios::in | std::ios::binary);
 		if (in)
@@ -113,6 +89,8 @@ namespace Ant {
 	// 对输入的源代码进行预处理，将每个 shader 的代码保存在一个对应的 unordered_map 中
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
 	{
+		ANT_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> shaderSources;
 
 		const char* typeToken = "#type";
@@ -137,6 +115,8 @@ namespace Ant {
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
+		ANT_PROFILE_FUNCTION();
+
 		GLuint program = glCreateProgram();
 		ANT_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
 		std::array<GLenum, 2> glShaderIDs;
@@ -221,5 +201,101 @@ namespace Ant {
 		for (auto ids : glShaderIDs)
 			glDetachShader(m_RendererID, ids);
 	}
+
+	void OpenGLShader::SetInt(const std::string& name, const int slot)
+	{
+		ANT_PROFILE_FUNCTION();
+
+		UploadUniformInt(name, slot);
+	}
+
+	void OpenGLShader::SetIntArray(const std::string& name, int* values, uint32_t count)
+	{
+		UploadUniformIntArray(name, values, count);
+	}
+
+	void OpenGLShader::SetFloat(const std::string& name, float value)
+	{
+		ANT_PROFILE_FUNCTION();
+
+		UploadUniformFloat(name, value);
+	}
+
+	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
+	{
+		ANT_PROFILE_FUNCTION();
+
+		UploadUniformFloat2(name, value);
+	}
+
+	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
+	{
+		ANT_PROFILE_FUNCTION();
+
+		UploadUniformFloat3(name, value);
+	}
+
+	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
+	{
+		ANT_PROFILE_FUNCTION();
+
+		UploadUniformFloat4(name, value);
+	}
+
+	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
+	{
+		ANT_PROFILE_FUNCTION();
+
+		UploadUniformMat4(name, value);
+	}
+
+	void OpenGLShader::UploadUniformInt(const std::string& name, const int value)
+	{
+		auto location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform1i(location,value);
+	}
+
+	void OpenGLShader::UploadUniformIntArray(const std::string& name, int* values, uint32_t count)
+	{
+		auto location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform1iv(location, count, values);
+	}
+
+	void OpenGLShader::UploadUniformFloat(const std::string& name, const float value)
+	{
+		auto location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform1f(location, value);
+	}
+
+	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& value)
+	{
+		auto location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform2fv(location, 1, glm::value_ptr(value));
+	}
+
+	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& value)
+	{
+		auto location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform3fv(location, 1, glm::value_ptr(value));
+	}
+
+	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& value)
+	{
+		auto location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform4fv(location, 1, glm::value_ptr(value));
+	}
+
+	void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
+	{
+		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
+	{
+		auto location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
 
 }
