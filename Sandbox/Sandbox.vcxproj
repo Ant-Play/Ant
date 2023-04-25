@@ -131,9 +131,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\FlappyBirdTest\Color.h" />
+    <ClInclude Include="src\FlappyBirdTest\GameLayer.h" />
+    <ClInclude Include="src\FlappyBirdTest\Level.h" />
+    <ClInclude Include="src\FlappyBirdTest\ParticleSystem.h" />
+    <ClInclude Include="src\FlappyBirdTest\Player.h" />
+    <ClInclude Include="src\FlappyBirdTest\Random.h" />
     <ClInclude Include="src\Sandbox2D.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\FlappyBirdTest\GameLayer.cpp" />
+    <ClCompile Include="src\FlappyBirdTest\Level.cpp" />
+    <ClCompile Include="src\FlappyBirdTest\ParticleSystem.cpp" />
+    <ClCompile Include="src\FlappyBirdTest\Player.cpp" />
+    <ClCompile Include="src\FlappyBirdTest\Random.cpp" />
     <ClCompile Include="src\Sandbox2D.cpp" />
     <ClCompile Include="src\SandboxApp.cpp" />
   </ItemGroup>

@@ -126,6 +126,9 @@
     <ClInclude Include="src\Ant\Renderer\OrthographicCameraController.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\RenderCommand.h">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Renderer.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
@@ -1451,10 +1454,16 @@
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\GraphicContext.cpp">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\OrthographicCameraController.cpp">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\RenderCommand.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp">
@@ -1508,6 +1517,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\GraphicContext.cpp" />
   </ItemGroup>
 </Project>

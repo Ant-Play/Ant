@@ -17,6 +17,7 @@ void Sandbox2D::OnAttach()
 	ANT_PROFILE_FUNCTION();
 
 	m_Texture = Ant::Texture2D::Create("assets/textures/Checkerboard.png");
+	m_ShipTexture = Ant::Texture2D::Create("assets/textures/Ship.png");
 }
 
 void Sandbox2D::OnDetach()
@@ -33,8 +34,8 @@ void Sandbox2D::OnUpdate(Ant::Timestep ts)
 	// Render
 	{
 		ANT_PROFILE_SCOPE("Renderer Prep");
-		Ant::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-		Ant::RendererCommand::Clear();
+		Ant::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		Ant::RenderCommand::Clear();
 
 	}
 
@@ -45,9 +46,9 @@ void Sandbox2D::OnUpdate(Ant::Timestep ts)
 		Ant::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.3f, 0.2f, 1.0f });
 		Ant::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
 		Ant::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_Texture);
-
-		Ant::Renderer2D::EndScene();
+		Ant::Renderer2D::DrawQuad({ m_Position.x, m_Position.y, 0.5f }, { 1.0f, 1.3f }, /*glm::radians(GetRotation()),*/ m_ShipTexture);
 	}
+		Ant::Renderer2D::EndScene();
 }
 
 void Sandbox2D::OnImGuiRender()

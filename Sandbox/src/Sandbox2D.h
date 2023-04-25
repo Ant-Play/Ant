@@ -36,5 +36,8 @@ private:
 	std::vector<ProfileResult> m_ProfileResult;
 
 	glm::vec4 m_Color = { 0.8f, 0.3f, 0.2f, 1.0f };
+
+	glm::vec2 m_Position = { -10.0f, 0.0f };
+	Ant::Ref<Ant::Texture2D> m_ShipTexture;
 };
 

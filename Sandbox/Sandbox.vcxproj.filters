@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="FlappyBirdTest">
+      <UniqueIdentifier>{52980D01-3E66-0107-27FA-712D1367DD6B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\FlappyBirdTest\Color.h">
+      <Filter>FlappyBirdTest</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FlappyBirdTest\GameLayer.h">
+      <Filter>FlappyBirdTest</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FlappyBirdTest\Level.h">
+      <Filter>FlappyBirdTest</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FlappyBirdTest\ParticleSystem.h">
+      <Filter>FlappyBirdTest</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FlappyBirdTest\Player.h">
+      <Filter>FlappyBirdTest</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FlappyBirdTest\Random.h">
+      <Filter>FlappyBirdTest</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sandbox2D.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\FlappyBirdTest\GameLayer.cpp">
+      <Filter>FlappyBirdTest</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FlappyBirdTest\Level.cpp">
+      <Filter>FlappyBirdTest</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FlappyBirdTest\ParticleSystem.cpp">
+      <Filter>FlappyBirdTest</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FlappyBirdTest\Player.cpp">
+      <Filter>FlappyBirdTest</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FlappyBirdTest\Random.cpp">
+      <Filter>FlappyBirdTest</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Sandbox2D.cpp" />
+    <ClCompile Include="src\SandboxApp.cpp" />
+  </ItemGroup>
+</Project>

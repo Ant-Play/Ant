@@ -2,11 +2,13 @@
 #include <Ant.h>
 #include "Ant/Core/EntryPoint.h"
 #include "Sandbox2D.h"
+#include "FlappyBirdTest/GameLayer.h"
 
 #include <imgui.h>
 #include "Platform/OpenGL/OpenGLShader.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+
 
 class ExampleLayer : public Ant::Layer
 {
@@ -142,8 +144,8 @@ public:
 		m_CameraController.OnUpdata(ts);
 
 		// Render
-		Ant::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-		Ant::RendererCommand::Clear();
+		Ant::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		Ant::RenderCommand::Clear();
 
 		Ant::Renderer::BeginScene(m_CameraController.GetCamera());
 
@@ -211,7 +213,8 @@ public:
 	Sandbox()
 	{
 		//PushLayer(new ExampleLayer);
-		PushLayer(new Sandbox2D());
+		//PushLayer(new Sandbox2D());
+		PushLayer(new GameLayer());
 	}
 
 	~Sandbox()

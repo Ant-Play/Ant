@@ -163,6 +163,7 @@
     <ClInclude Include="src\Ant\Renderer\GraphicContext.h" />
     <ClInclude Include="src\Ant\Renderer\OrthographicCamera.h" />
     <ClInclude Include="src\Ant\Renderer\OrthographicCameraController.h" />
+    <ClInclude Include="src\Ant\Renderer\RenderCommand.h" />
     <ClInclude Include="src\Ant\Renderer\Renderer.h" />
     <ClInclude Include="src\Ant\Renderer\Renderer2D.h" />
     <ClInclude Include="src\Ant\Renderer\RendererAPI.h" />
@@ -609,6 +610,7 @@
     <ClCompile Include="src\Ant\Renderer\GraphicContext.cpp" />
     <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\Ant\Renderer\OrthographicCameraController.cpp" />
+    <ClCompile Include="src\Ant\Renderer\RenderCommand.cpp" />
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Ant\Renderer\Renderer2D.cpp" />
     <ClCompile Include="src\Ant\Renderer\RendererAPI.cpp" />
