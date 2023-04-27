@@ -25,6 +25,7 @@
       <Filter>FlappyBirdTest</Filter>
     </ClInclude>
     <ClInclude Include="src\Sandbox2D.h" />
+    <ClInclude Include="src\ExampleLayer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FlappyBirdTest\GameLayer.cpp">
@@ -44,5 +45,6 @@
     </ClCompile>
     <ClCompile Include="src\Sandbox2D.cpp" />
     <ClCompile Include="src\SandboxApp.cpp" />
+    <ClCompile Include="src\ExampleLayer.cpp" />
   </ItemGroup>
 </Project>
