@@ -15,7 +15,7 @@
 
 //--------------хуж╬©Б---------------------
 namespace Ant{
-	class ANT_API Log
+	class Log
 	{
 	public:
 		static void Init();

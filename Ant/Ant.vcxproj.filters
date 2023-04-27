@@ -63,10 +63,16 @@
     <ClInclude Include="src\Ant\Core\Application.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Core\Buffer.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Core\Core.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\EntryPoint.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\FileSystem.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\Inputs.h">
@@ -87,10 +93,16 @@
     <ClInclude Include="src\Ant\Core\MouseCodes.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Core\PlatformDetection.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Core\Timer.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\Timestep.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\UUID.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\Window.h">
@@ -136,9 +148,6 @@
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\RendererAPI.h">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Renderer\RendererCommand.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Shader.h">
@@ -1433,6 +1442,9 @@
     <ClCompile Include="src\Ant\Core\Application.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Core\FileSystem.cpp">
+      <Filter>src\Ant\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ant\Core\Layer.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
@@ -1440,6 +1452,9 @@
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\Log.cpp">
+      <Filter>src\Ant\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Core\UUID.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\Window.cpp">
@@ -1473,9 +1488,6 @@
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\RendererAPI.cpp">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\RendererCommand.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Shader.cpp">

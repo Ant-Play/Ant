@@ -95,7 +95,6 @@ namespace Ant {
 				}
 
 			}
-
 			m_ImGuiLayer->Begin();
 			{
 				ANT_PROFILE_SCOPE("LayerStack OnImGuiRender");

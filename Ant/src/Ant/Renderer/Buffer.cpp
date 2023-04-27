@@ -45,7 +45,7 @@ namespace Ant {
 	}
 
 
-	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t size)
+	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t count)
 	{
 
 		switch (Renderer::GetAPI())
@@ -57,7 +57,7 @@ namespace Ant {
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return CreateRef<OpenGLIndexBuffer>(indices, size);
+				return CreateRef<OpenGLIndexBuffer>(indices, count);
 			}
 		}
 

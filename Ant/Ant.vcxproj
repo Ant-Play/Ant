@@ -142,16 +142,20 @@
   <ItemGroup>
     <ClInclude Include="src\Ant.h" />
     <ClInclude Include="src\Ant\Core\Application.h" />
+    <ClInclude Include="src\Ant\Core\Buffer.h" />
     <ClInclude Include="src\Ant\Core\Core.h" />
     <ClInclude Include="src\Ant\Core\EntryPoint.h" />
+    <ClInclude Include="src\Ant\Core\FileSystem.h" />
     <ClInclude Include="src\Ant\Core\Inputs.h" />
     <ClInclude Include="src\Ant\Core\KeyCodes.h" />
     <ClInclude Include="src\Ant\Core\Layer.h" />
     <ClInclude Include="src\Ant\Core\LayerStack.h" />
     <ClInclude Include="src\Ant\Core\Log.h" />
     <ClInclude Include="src\Ant\Core\MouseCodes.h" />
+    <ClInclude Include="src\Ant\Core\PlatformDetection.h" />
     <ClInclude Include="src\Ant\Core\Timer.h" />
     <ClInclude Include="src\Ant\Core\Timestep.h" />
+    <ClInclude Include="src\Ant\Core\UUID.h" />
     <ClInclude Include="src\Ant\Core\Window.h" />
     <ClInclude Include="src\Ant\Debug\Instrumentor.h" />
     <ClInclude Include="src\Ant\Events\ApplicationEvent.h" />
@@ -167,7 +171,6 @@
     <ClInclude Include="src\Ant\Renderer\Renderer.h" />
     <ClInclude Include="src\Ant\Renderer\Renderer2D.h" />
     <ClInclude Include="src\Ant\Renderer\RendererAPI.h" />
-    <ClInclude Include="src\Ant\Renderer\RendererCommand.h" />
     <ClInclude Include="src\Ant\Renderer\Shader.h" />
     <ClInclude Include="src\Ant\Renderer\Texture.h" />
     <ClInclude Include="src\Ant\Renderer\VertexArray.h" />
@@ -600,9 +603,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp" />
+    <ClCompile Include="src\Ant\Core\FileSystem.cpp" />
     <ClCompile Include="src\Ant\Core\Layer.cpp" />
     <ClCompile Include="src\Ant\Core\LayerStack.cpp" />
     <ClCompile Include="src\Ant\Core\Log.cpp" />
+    <ClCompile Include="src\Ant\Core\UUID.cpp" />
     <ClCompile Include="src\Ant\Core\Window.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp" />
@@ -614,7 +619,6 @@
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Ant\Renderer\Renderer2D.cpp" />
     <ClCompile Include="src\Ant\Renderer\RendererAPI.cpp" />
-    <ClCompile Include="src\Ant\Renderer\RendererCommand.cpp" />
     <ClCompile Include="src\Ant\Renderer\Shader.cpp" />
     <ClCompile Include="src\Ant\Renderer\Texture.cpp" />
     <ClCompile Include="src\Ant\Renderer\VertexArray.cpp" />

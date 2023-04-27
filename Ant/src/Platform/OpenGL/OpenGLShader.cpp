@@ -11,7 +11,7 @@ namespace Ant {
 		if (type == "vertex") return GL_VERTEX_SHADER;
 		if (type == "fragment" || type == "pixel") return GL_FRAGMENT_SHADER;
 
-		ANT_CORE_ASSERT(false, "Unkown shader type '{0}'", type);
+		ANT_CORE_ASSERT(false, "Unkown shader type");
 		return 0;
 	}
 

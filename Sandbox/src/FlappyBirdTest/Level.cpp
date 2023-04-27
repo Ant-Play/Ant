@@ -110,8 +110,8 @@ void Level::OnRender()
 
 	for (auto& pillar : m_Pillars)
 	{
-		Renderer2D::DrawRotatedQuad(pillar.TopPosition, pillar.TopScale, glm::radians(180.0f), m_TriangleTexture, color);
-		Renderer2D::DrawRotatedQuad(pillar.BottomPosition, pillar.BottomScale, 0.0f, m_TriangleTexture, color);
+		Renderer2D::DrawRotatedQuad(pillar.TopPosition, pillar.TopScale, glm::radians(180.0f), m_TriangleTexture, 1.0f, color);
+		Renderer2D::DrawRotatedQuad(pillar.BottomPosition, pillar.BottomScale, 0.0f, m_TriangleTexture, 1.0f, color);
 	}
 
 	m_Player.OnRender();

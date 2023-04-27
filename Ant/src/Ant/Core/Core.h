@@ -1,22 +1,33 @@
 #pragma once
+#include "Ant/Core/PlatformDetection.h"
 
-#ifdef ANT_PLATFORM_WINDOWS
-#if ANT_DYNAMIC_LINK
-	#ifdef ANT_BUILD_DLL
-		#define ANT_API _declspec(dllexport)
+//#ifdef ANT_PLATFORM_WINDOWS
+//#if ANT_DYNAMIC_LINK
+//	#ifdef ANT_BUILD_DLL
+//		#define ANT_API _declspec(dllexport)
+//	#else
+//		#define ANT_API _declspec(dllimport)
+//	#endif // DEBUG
+//#else
+//	#define ANT_API
+//#endif
+//#else
+//	#error Ant only support Windows
+//#endif // ANT_PLATFORM_WINDOWS
+
+#ifdef ANT_DEBUG
+	#if defined(ANT_PLATFORM_WINDOWS)
+		#define ANT_DEBUGBREAK() __debugbreak();
+	#elif defined(ANT_PLATFORM_LINUX)
+		#include <signal.h>
+		#define ANT_DEBUGBREAK() __debugbreak();
 	#else
-		#define ANT_API _declspec(dllimport)
-	#endif // DEBUG
-#else
-	#define ANT_API
-#endif
-#else
-	#error Ant only support Windows
-#endif // HZ_PLATFORM_WINDOWS
-
-#ifdef HZ_DEBUG
+		#error "Platform doesn't support debugbreak yet!"
+	#endif
 	#define ANT_ENABLE_ASSERTS
-#endif // HZ_DEBUG
+#else
+	#define ANT_DEBUGBREAK()
+#endif // ANT_DEBUG
 
 #define ANT_EXPAND_MACRO(x) x
 #define ANT_STRINGIFY_MACRO(x) #x
