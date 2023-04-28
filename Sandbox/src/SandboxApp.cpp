@@ -2,7 +2,6 @@
 #include <Ant.h>
 #include "Ant/Core/EntryPoint.h"
 #include "Sandbox2D.h"
-#include "FlappyBirdTest/GameLayer.h"
 
 class Sandbox : public Ant::Application
 {

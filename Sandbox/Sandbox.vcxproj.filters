@@ -6,45 +6,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\FlappyBirdTest\Color.h">
-      <Filter>FlappyBirdTest</Filter>
-    </ClInclude>
-    <ClInclude Include="src\FlappyBirdTest\GameLayer.h">
-      <Filter>FlappyBirdTest</Filter>
-    </ClInclude>
-    <ClInclude Include="src\FlappyBirdTest\Level.h">
-      <Filter>FlappyBirdTest</Filter>
-    </ClInclude>
-    <ClInclude Include="src\FlappyBirdTest\ParticleSystem.h">
-      <Filter>FlappyBirdTest</Filter>
-    </ClInclude>
-    <ClInclude Include="src\FlappyBirdTest\Player.h">
-      <Filter>FlappyBirdTest</Filter>
-    </ClInclude>
-    <ClInclude Include="src\FlappyBirdTest\Random.h">
-      <Filter>FlappyBirdTest</Filter>
-    </ClInclude>
     <ClInclude Include="src\Sandbox2D.h" />
     <ClInclude Include="src\ExampleLayer.h" />
+    <ClInclude Include="src\ParticleSystem.h" />
+    <ClInclude Include="src\Random.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\FlappyBirdTest\GameLayer.cpp">
-      <Filter>FlappyBirdTest</Filter>
-    </ClCompile>
-    <ClCompile Include="src\FlappyBirdTest\Level.cpp">
-      <Filter>FlappyBirdTest</Filter>
-    </ClCompile>
-    <ClCompile Include="src\FlappyBirdTest\ParticleSystem.cpp">
-      <Filter>FlappyBirdTest</Filter>
-    </ClCompile>
-    <ClCompile Include="src\FlappyBirdTest\Player.cpp">
-      <Filter>FlappyBirdTest</Filter>
-    </ClCompile>
-    <ClCompile Include="src\FlappyBirdTest\Random.cpp">
-      <Filter>FlappyBirdTest</Filter>
-    </ClCompile>
     <ClCompile Include="src\Sandbox2D.cpp" />
     <ClCompile Include="src\SandboxApp.cpp" />
     <ClCompile Include="src\ExampleLayer.cpp" />
+    <ClCompile Include="src\ParticleSystem.cpp" />
+    <ClCompile Include="src\Random.cpp" />
   </ItemGroup>
 </Project>

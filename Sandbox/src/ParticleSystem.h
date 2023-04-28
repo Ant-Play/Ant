@@ -1,7 +1,6 @@
 #pragma once
 #include "Ant.h"
 
-
 struct ParticleProps
 {
 	glm::vec2 Position;
@@ -14,12 +13,12 @@ struct ParticleProps
 class ParticleSystem
 {
 public:
-	ParticleSystem();
-
-	void Emit(const ParticleProps& particleProps);
+	ParticleSystem(uint32_t maxParticles = 100000);
 
 	void OnUpdate(Ant::Timestep ts);
-	void OnRender();
+	void OnRender(Ant::OrthographicCamera& camera);
+
+	void Emit(const ParticleProps& particleProps);
 private:
 	struct Particle
 	{
@@ -35,5 +34,5 @@ private:
 		bool Active = false;
 	};
 	std::vector<Particle> m_ParticlePool;
-	uint32_t m_PoolIndex = 999;
+	uint32_t m_PoolIndex;
 };
