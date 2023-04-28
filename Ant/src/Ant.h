@@ -1,7 +1,7 @@
 #pragma once
 
 // For use by Ant application
-#include "Ant/Core/Core.h"
+#include "Ant/Core/Base.h"
 
 #include "Ant/Core/Application.h"
 #include "Ant/Core/Layer.h"

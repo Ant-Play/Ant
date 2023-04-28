@@ -8,9 +8,4 @@ namespace Ant {
 	{
 
 	}
-
-	Layer::~Layer()
-	{
-
-	}
 }

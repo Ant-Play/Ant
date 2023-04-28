@@ -1,8 +1,14 @@
 #pragma once
-#include "Ant/Core/Core.h"
-#include "Ant/Events/ApplicationEvent.h"
-#include "Platform/Windows/WindowsWindow.h"
+
+#include "Ant/Core/Base.h"
+
+#include "Ant/Core/Window.h"
 #include "Ant/Core/LayerStack.h"
+#include "Ant/Events/Event.h"
+#include "Ant/Events/ApplicationEvent.h"
+
+#include "Ant/Core/Timestep.h"
+
 #include "Ant/ImGui/ImGuiLayer.h"
 
 int main(int argc, char** argv);

@@ -1,7 +1,8 @@
 #include "antpch.h"
-#include "OrthographicCameraController.h"
-#include "Ant/Core/KeyCodes.h"
+#include "Ant/Renderer/OrthographicCameraController.h"
+
 #include "Ant/Core/Inputs.h"
+#include "Ant/Core/KeyCodes.h"
 
 namespace Ant {
 
@@ -19,23 +20,23 @@ namespace Ant {
 		//newPosition.x = currentPosition.x + distance * cos(theta)
 		//newPosition.y = currentPosition.y + distance * sin(theta)
 		//currentPosition是相机的当前位置，distance是相机需要移动的距离，theta是相机移动的角度。
-		if (Input::IsKeyPressed(Key::A))
+		if (Input::IsKeyPressed(ANT_KEY_A))
 		{
 			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
-		else if (Input::IsKeyPressed(Key::D))
+		else if (Input::IsKeyPressed(ANT_KEY_D))
 		{
 			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
 
-		if (Input::IsKeyPressed(Key::W))
+		if (Input::IsKeyPressed(ANT_KEY_W))
 		{
 			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
-		else if (Input::IsKeyPressed(Key::S))
+		else if (Input::IsKeyPressed(ANT_KEY_S))
 		{
 			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
@@ -43,9 +44,9 @@ namespace Ant {
 
 		if (m_Rotation)
 		{
-			if (Input::IsKeyPressed(Key::Q))
+			if (Input::IsKeyPressed(ANT_KEY_Q))
 				m_CameraRotation += m_CameraRotationSpeed * ts;
-			if (Input::IsKeyPressed(Key::E))
+			if (Input::IsKeyPressed(ANT_KEY_E))
 				m_CameraRotation -= m_CameraRotationSpeed * ts;
 
 			if (m_CameraRotation > 180.0f)

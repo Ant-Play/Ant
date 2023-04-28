@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ant/Core/Core.h"
+#include "Ant/Core/Base.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>

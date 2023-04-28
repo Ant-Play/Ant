@@ -142,8 +142,9 @@
   <ItemGroup>
     <ClInclude Include="src\Ant.h" />
     <ClInclude Include="src\Ant\Core\Application.h" />
+    <ClInclude Include="src\Ant\Core\Assert.h" />
     <ClInclude Include="src\Ant\Core\Buffer.h" />
-    <ClInclude Include="src\Ant\Core\Core.h" />
+    <ClInclude Include="src\Ant\Core\Base.h" />
     <ClInclude Include="src\Ant\Core\EntryPoint.h" />
     <ClInclude Include="src\Ant\Core\FileSystem.h" />
     <ClInclude Include="src\Ant\Core\Inputs.h" />
@@ -605,6 +606,7 @@
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp" />
     <ClCompile Include="src\Ant\Core\FileSystem.cpp" />
+    <ClCompile Include="src\Ant\Core\Input.cpp" />
     <ClCompile Include="src\Ant\Core\Layer.cpp" />
     <ClCompile Include="src\Ant\Core\LayerStack.cpp" />
     <ClCompile Include="src\Ant\Core\Log.cpp" />
