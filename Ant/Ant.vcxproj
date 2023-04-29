@@ -143,8 +143,8 @@
     <ClInclude Include="src\Ant.h" />
     <ClInclude Include="src\Ant\Core\Application.h" />
     <ClInclude Include="src\Ant\Core\Assert.h" />
-    <ClInclude Include="src\Ant\Core\Buffer.h" />
     <ClInclude Include="src\Ant\Core\Base.h" />
+    <ClInclude Include="src\Ant\Core\Buffer.h" />
     <ClInclude Include="src\Ant\Core\EntryPoint.h" />
     <ClInclude Include="src\Ant\Core\FileSystem.h" />
     <ClInclude Include="src\Ant\Core\Inputs.h" />
@@ -165,6 +165,7 @@
     <ClInclude Include="src\Ant\Events\MouseEvent.h" />
     <ClInclude Include="src\Ant\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Ant\Renderer\Buffer.h" />
+    <ClInclude Include="src\Ant\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Ant\Renderer\GraphicContext.h" />
     <ClInclude Include="src\Ant\Renderer\OrthographicCamera.h" />
     <ClInclude Include="src\Ant\Renderer\OrthographicCameraController.h" />
@@ -173,10 +174,12 @@
     <ClInclude Include="src\Ant\Renderer\Renderer2D.h" />
     <ClInclude Include="src\Ant\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Ant\Renderer\Shader.h" />
+    <ClInclude Include="src\Ant\Renderer\SubTexture.h" />
     <ClInclude Include="src\Ant\Renderer\Texture.h" />
     <ClInclude Include="src\Ant\Renderer\VertexArray.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
@@ -184,7 +187,6 @@
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\antpch.h" />
-    <ClInclude Include="src\Ant\Renderer\SubTexture.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_features.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_fixes.hpp" />
@@ -615,6 +617,7 @@
     <ClCompile Include="src\Ant\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Ant\Renderer\Framebuffer.cpp" />
     <ClCompile Include="src\Ant\Renderer\GraphicContext.cpp" />
     <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\Ant\Renderer\OrthographicCameraController.cpp" />
@@ -623,10 +626,12 @@
     <ClCompile Include="src\Ant\Renderer\Renderer2D.cpp" />
     <ClCompile Include="src\Ant\Renderer\RendererAPI.cpp" />
     <ClCompile Include="src\Ant\Renderer\Shader.cpp" />
+    <ClCompile Include="src\Ant\Renderer\SubTexture.cpp" />
     <ClCompile Include="src\Ant\Renderer\Texture.cpp" />
     <ClCompile Include="src\Ant\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />
@@ -636,7 +641,6 @@
     <ClCompile Include="src\antpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\SubTexture.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>

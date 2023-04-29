@@ -1,6 +1,6 @@
 #include "ExampleLayer.h"
 
-#include <imgui.h>
+#include <imgui/imgui.h>
 #include "Platform/OpenGL/OpenGLShader.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>

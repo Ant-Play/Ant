@@ -76,12 +76,12 @@ namespace Ant{
 	// 处理事件，如果当前阻塞事件，则会根据 ImGuiIO 中的 WantCaptureMouse 和 WantCaptureKeyboard 标志来决定是否将事件标记为已处理。
 	void ImGuiLayer::OnEvent(Event& event)
 	{
-		if (m_BlockEvents)
+		/*if (m_BlockEvents)
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			event.Handled |= event.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
 			event.Handled |= event.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
-		}
+		}*/
 	}
 
 	// 用于开始一个新的 ImGui 帧，它需要在渲染 ImGui 内容之前调用。

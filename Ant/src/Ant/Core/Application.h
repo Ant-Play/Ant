@@ -19,7 +19,7 @@ namespace Ant{
 	class Application
 	{
 	public:
-		Application();
+		Application(const std::string& name = "Ant Engine");
 		virtual ~Application();
 
 		// 事件处理函数

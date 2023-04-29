@@ -23,6 +23,7 @@
 
 #include "Ant/Renderer/Buffer.h"
 #include "Ant/Renderer/Shader.h"
+#include "Ant/Renderer/FrameBuffer.h"
 #include "Ant/Renderer/Texture.h"
 #include "Ant/Renderer/SubTexture.h"
 #include "Ant/Renderer/VertexArray.h"

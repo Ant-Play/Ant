@@ -109,6 +109,8 @@ namespace Ant{
 	void Renderer2D::Shutdown()
 	{
 		ANT_PROFILE_FUNCTION();
+
+		delete[] s_Data.QuadVertexBufferBase;
 	}
 
 

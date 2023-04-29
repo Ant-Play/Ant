@@ -13,8 +13,8 @@ namespace Ant {
 
 		virtual void OnUpdate() override;
 
-		inline virtual unsigned int GetWidth() const override { return m_Data.Width; }
-		inline virtual unsigned int GetHeight() const override { return m_Data.Height; }
+		inline virtual uint32_t GetWidth() const override { return m_Data.Width; }
+		inline virtual uint32_t GetHeight() const override { return m_Data.Height; }
 
 		//Window attributes
 		inline virtual void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }

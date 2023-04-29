@@ -14,13 +14,13 @@ namespace Ant {
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application()
+	Application::Application(const std::string& name)
 	{
 		ANT_PROFILE_FUNCTION(); // 性能分析
 
 		ANT_CORE_ASSERT(!s_Instance, "Application already exists!"); // 断言，确保实例不存在
 		s_Instance = this;
-		m_Window = Window::Create(); // 创建窗口
+		m_Window = Window::Create(WindowProps(name)); // 创建窗口
 		m_Window->SetEventCallback(ANT_BIND_EVENT_FN(Application::OnEvent)); // 设置事件回调函数
 		m_Window->SetVSync(false); // 关闭垂直同步
 

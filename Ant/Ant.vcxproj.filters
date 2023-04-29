@@ -63,10 +63,13 @@
     <ClInclude Include="src\Ant\Core\Application.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Core\Buffer.h">
+    <ClInclude Include="src\Ant\Core\Assert.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\Base.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\Buffer.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\EntryPoint.h">
@@ -129,6 +132,9 @@
     <ClInclude Include="src\Ant\Renderer\Buffer.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\Framebuffer.h">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Renderer\GraphicContext.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
@@ -153,6 +159,9 @@
     <ClInclude Include="src\Ant\Renderer\Shader.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\SubTexture.h">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Texture.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
@@ -163,6 +172,9 @@
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h">
@@ -1437,16 +1449,15 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Renderer\SubTexture.h">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Core\Assert.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\FileSystem.cpp">
+      <Filter>src\Ant\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Core\Input.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\Layer.cpp">
@@ -1473,6 +1484,9 @@
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\Framebuffer.cpp">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ant\Renderer\GraphicContext.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
@@ -1497,6 +1511,9 @@
     <ClCompile Include="src\Ant\Renderer\Shader.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\SubTexture.cpp">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Texture.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
@@ -1507,6 +1524,9 @@
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp">
@@ -1533,9 +1553,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\SubTexture.cpp">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Ant\Core\Input.cpp" />
   </ItemGroup>
 </Project>
