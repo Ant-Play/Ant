@@ -1,12 +1,12 @@
 #include "antpch.h"
-#include "Platform/Windows/WindowsInput.h"
+#include "Ant/Core/Inputs.h"
 #include "Ant/Core/Application.h"
 
 #include <GLFW/glfw3.h>
 
 namespace Ant {
 
-	bool Ant::WindowsInputs::IsKeyPressedImpl(KeyCode key)
+	bool Input::IsKeyPressed(KeyCode key)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 
@@ -15,7 +15,7 @@ namespace Ant {
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 
-	bool WindowsInputs::IsMouseButtonPressedImpl(MouseCode button)
+	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));
@@ -23,7 +23,7 @@ namespace Ant {
 		return state == GLFW_PRESS;
 	}
 
-	std::pair<float, float> WindowsInputs::GetMousePositionImpl()
+	std::pair<float, float> Input::GetMousePosition()
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		double xpos, ypos;
@@ -31,15 +31,15 @@ namespace Ant {
 		return {(float)xpos, (float)ypos};
 	}
 
-	float WindowsInputs::GetMouseXImpl()
+	float Input::GetMouseX()
 	{
-		auto [x, y] = GetMousePositionImpl();
+		auto [x, y] = GetMousePosition();
 		return x;
 	}
 
-	float WindowsInputs::GetMouseYImpl()
+	float Input::GetMouseY()
 	{
-		auto [x, y] = GetMousePositionImpl();
+		auto [x, y] = GetMousePosition();
 		return y;
 	}
 }

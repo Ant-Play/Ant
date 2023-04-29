@@ -13,15 +13,15 @@ int main(int argc, char** argv)
 	Ant::Log::Init();
 
 	//ÐÔÄÜ·ÖÎö
-	ANT_PROFILE_BEGIN_SESSION("Startup", "HazelProfile-Startup.json");
+	ANT_PROFILE_BEGIN_SESSION("Startup", "AntProfile-Startup.json");
 	auto app = Ant::CreateApplication();
 	ANT_PROFILE_END_SESSION();
 
-	ANT_PROFILE_BEGIN_SESSION("Runtime", "HazelProfile-Runtime.json");
+	ANT_PROFILE_BEGIN_SESSION("Runtime", "AntProfile-Runtime.json");
 	app->Run();
 	ANT_PROFILE_END_SESSION();
 
-	ANT_PROFILE_BEGIN_SESSION("Shutdown", "HazelProfile-Shutdown.json");
+	ANT_PROFILE_BEGIN_SESSION("Shutdown", "AntProfile-Shutdown.json");
 	delete app;
 	ANT_PROFILE_END_SESSION();
 

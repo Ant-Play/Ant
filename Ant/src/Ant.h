@@ -8,13 +8,15 @@
 #include "Ant/Core/Log.h"
 
 #include "Ant/Core/Timestep.h"
-
 #include "Ant/Core/Inputs.h"
 #include "Ant/Core/KeyCodes.h"
 #include "Ant/Core/MouseCodes.h"
-#include "Ant/Renderer/OrthographicCameraController.h"
 
 #include "Ant/ImGui/ImGuiLayer.h"
+
+#include "Ant/Scene/Scene.h"
+#include "Ant/Scene/Entity.h"
+#include "Ant/Scene/Components.h"
 
 // ----Renderer-----------------------------------
 #include "Ant/Renderer/Renderer.h"
@@ -29,4 +31,5 @@
 #include "Ant/Renderer/VertexArray.h"
 
 #include "Ant/Renderer/OrthographicCamera.h"
+#include "Ant/Renderer/OrthographicCameraController.h"
 // ---------------------------------------------------

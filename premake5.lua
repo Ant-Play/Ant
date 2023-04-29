@@ -18,6 +18,8 @@ IncludeDir["Glad"] = "Ant/vendor/Glad/include"
 IncludeDir["ImGui"] = "Ant/vendor/imgui"
 IncludeDir["glm"] = "Ant/vendor/glm"
 IncludeDir["stb_image"] = "Ant/vendor/stb_image"
+IncludeDir["entt"] = "Ant/vendor/entt/include"
+
 
 group "Dependencies"
     include "Ant/vendor/GLFW"
@@ -57,7 +59,9 @@ project "Ant"
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.glm}",
-        "%{IncludeDir.stb_image}"
+        "%{IncludeDir.stb_image}",
+        "%{IncludeDir.entt}"
+
     }
 
     links
@@ -114,7 +118,8 @@ project "Sandbox"
         "Ant/vendor/spdlog/include",
         "Ant/src",
         "Ant/vendor",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.entt}"
     }
 
     links
@@ -162,7 +167,8 @@ project "AntPlay"
         "Ant/vendor/spdlog/include",
         "Ant/src",
         "Ant/vendor",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.entt}"
     }
     
     links

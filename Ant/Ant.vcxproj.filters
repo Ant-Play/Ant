@@ -189,9 +189,6 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Windows\WindowsInput.h">
-      <Filter>src\Platform\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
       <Filter>src\Platform\Windows</Filter>
     </ClInclude>
@@ -1449,15 +1446,15 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Scene\Scene.h" />
+    <ClInclude Include="src\Ant\Scene\Components.h" />
+    <ClInclude Include="src\Ant\Scene\Entity.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\FileSystem.cpp">
-      <Filter>src\Ant\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Ant\Core\Input.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\Layer.cpp">
@@ -1553,5 +1550,7 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Scene\Scene.cpp" />
+    <ClCompile Include="src\Ant\Scene\Entity.cpp" />
   </ItemGroup>
 </Project>
