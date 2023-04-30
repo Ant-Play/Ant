@@ -1449,6 +1449,8 @@
     <ClInclude Include="src\Ant\Scene\Scene.h" />
     <ClInclude Include="src\Ant\Scene\Components.h" />
     <ClInclude Include="src\Ant\Scene\Entity.h" />
+    <ClInclude Include="src\Ant\Renderer\Camera.h" />
+    <ClInclude Include="src\Ant\Scene\SceneCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
@@ -1552,5 +1554,6 @@
     </ClCompile>
     <ClCompile Include="src\Ant\Scene\Scene.cpp" />
     <ClCompile Include="src\Ant\Scene\Entity.cpp" />
+    <ClCompile Include="src\Ant\Scene\SceneCamera.cpp" />
   </ItemGroup>
 </Project>

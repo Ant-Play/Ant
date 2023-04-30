@@ -1,4 +1,5 @@
 #pragma once
+#include "Ant/Renderer/Camera.h"
 #include "Ant/Renderer/OrthographicCamera.h"
 #include "Ant/Renderer/Texture.h"
 #include "Ant/Renderer/SubTexture.h"
@@ -12,7 +13,8 @@ namespace Ant{
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const OrthographicCamera& camera);
+		static void BeginScene(const Camera& camera, const glm::mat4& transform);
+		static void BeginScene(const OrthographicCamera& camera); // TODO: Remove
 		static void EndScene();
 		static void Flush();
 

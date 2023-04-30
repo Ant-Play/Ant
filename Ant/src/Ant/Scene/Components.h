@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Ant/Scene/SceneCamera.h"
 
 #include <glm/glm.hpp>
 
@@ -36,5 +37,15 @@ namespace Ant{
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 		SpriteRendererComponent(const glm::vec4& color)
 			: Color(color) {}
+	};
+
+	struct CameraComponent
+	{
+		SceneCamera Camera;
+		bool Primary = true; // Think about moving to scene
+		bool FixedAspectRatio = false;
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
 	};
 }

@@ -165,6 +165,7 @@
     <ClInclude Include="src\Ant\Events\MouseEvent.h" />
     <ClInclude Include="src\Ant\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Ant\Renderer\Buffer.h" />
+    <ClInclude Include="src\Ant\Renderer\Camera.h" />
     <ClInclude Include="src\Ant\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Ant\Renderer\GraphicContext.h" />
     <ClInclude Include="src\Ant\Renderer\OrthographicCamera.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="src\Ant\Scene\Components.h" />
     <ClInclude Include="src\Ant\Scene\Entity.h" />
     <ClInclude Include="src\Ant\Scene\Scene.h" />
+    <ClInclude Include="src\Ant\Scene\SceneCamera.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h" />
@@ -632,6 +634,7 @@
     <ClCompile Include="src\Ant\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Ant\Scene\Entity.cpp" />
     <ClCompile Include="src\Ant\Scene\Scene.cpp" />
+    <ClCompile Include="src\Ant\Scene\SceneCamera.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp" />
