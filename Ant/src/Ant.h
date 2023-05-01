@@ -17,6 +17,7 @@
 #include "Ant/Scene/Scene.h"
 #include "Ant/Scene/Entity.h"
 #include "Ant/Scene/Components.h"
+#include "Ant/Scene/ScriptableEntity.h"
 
 // ----Renderer-----------------------------------
 #include "Ant/Renderer/Renderer.h"

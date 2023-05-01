@@ -38,6 +38,49 @@ namespace Ant {
 		auto& cc = m_SecondCamera.AddComponent<CameraComponent>();
 		cc.Primary = false;
 
+
+		class CameraController : public ScriptableEntity
+		{
+		public:
+			void OnCreate()
+			{
+				std::cerr << "CameraController::OnCreate!" << std::endl;
+			}
+
+			void OnDestroy()
+			{
+
+			}
+
+			void OnUpdate(Timestep ts)
+			{
+				auto& transform = GetComponent<TransformComponent>().Transform;
+				float speed = 5.0f;
+
+				if (Input::IsKeyPressed(ANT_KEY_A))
+				{
+					transform[3][0] -= speed * ts;
+				}
+				else if (Input::IsKeyPressed(ANT_KEY_D))
+				{
+					transform[3][0] += speed * ts;
+				}
+
+				if (Input::IsKeyPressed(ANT_KEY_W))
+				{
+					transform[3][1] += speed * ts;
+				}
+				else if (Input::IsKeyPressed(ANT_KEY_S))
+				{
+					transform[3][1] -= speed * ts;
+				}
+			}
+		};
+
+		m_MainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -150,6 +193,7 @@ namespace Ant {
 				ImGui::EndMenuBar();
 			}
 
+			m_SceneHierarchyPanel.OnImGuiRender();
 
 			ImGui::Begin("Settings");
 

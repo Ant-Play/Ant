@@ -1451,6 +1451,7 @@
     <ClInclude Include="src\Ant\Scene\Entity.h" />
     <ClInclude Include="src\Ant\Renderer\Camera.h" />
     <ClInclude Include="src\Ant\Scene\SceneCamera.h" />
+    <ClInclude Include="src\Ant\Scene\ScriptableEntity.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
