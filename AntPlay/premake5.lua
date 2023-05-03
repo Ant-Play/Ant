@@ -19,7 +19,7 @@ project "AntPlay"
 		"%{wks.location}/Ant/src",
 		"%{wks.location}/Ant/vendor",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.filewatch}",
+		--"%{IncludeDir.filewatch}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGuizmo}"
 	}

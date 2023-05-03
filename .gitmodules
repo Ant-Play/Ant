@@ -13,3 +13,6 @@
 [submodule "Ant/vendor/yaml-cpp"]
 	path = Ant/vendor/yaml-cpp
 	url = https://github.com/TheCherno/yaml-cpp
+[submodule "Ant/vendor/ImGuizmo"]
+	path = Ant/vendor/ImGuizmo
+	url = https://github.com/TheCherno/ImGuizmo

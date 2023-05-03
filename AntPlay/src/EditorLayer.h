@@ -15,7 +15,12 @@ namespace Ant {
 		void OnUpdate(Timestep ts);
 		virtual void OnImGuiRender() override;
 		void OnEvent(Event& event);
+	private:
+		bool OnKeyPressed(KeyPressedEvent& e);
 
+		void NewScene();
+		void OpenScene();
+		void SaveSceneAs();
 	private:
 		Ant::OrthographicCameraController m_CameraController;
 
@@ -37,6 +42,8 @@ namespace Ant {
 		glm::vec2 m_ViewportSize = {0.0f, 0.0f};
 
 		glm::vec4 m_Color = { 0.8f, 0.3f, 0.2f, 1.0f };
+
+		int m_GizmoType = -1;
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;

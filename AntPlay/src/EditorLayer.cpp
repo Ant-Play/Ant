@@ -3,9 +3,12 @@
 #include "Ant/Scene/SceneSerializer.h"
 #include "Ant/Debug/Instrumentor.h"
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Ant/Utils/PlatformUtils.h"
+#include "Ant/Math/Math.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <ImGuizmo.h>
 
 namespace Ant {
 	EditorLayer::EditorLayer()
@@ -196,17 +199,19 @@ namespace Ant {
 				{
 					// Disabling fullscreen would allow the window to be moved to the front of other windows,
 					// which we can't undo at the moment without finer window depth/z control.
-
-					if (ImGui::MenuItem("Serialize"))
+					if (ImGui::MenuItem("New", "Ctrl+N"))
 					{
-						SceneSerializer serializer(m_ActiveScene);
-						serializer.Serialize("assets/scenes/Example.ant");
+						NewScene();
 					}
 
-					if (ImGui::MenuItem("Deserialize"))
+					if (ImGui::MenuItem("Open...", "Ctrl+O"))
 					{
-						SceneSerializer serializer(m_ActiveScene);
-						serializer.Deserialize("assets/scenes/Example.ant");
+						OpenScene();
+					}
+
+					if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+					{
+						SaveSceneAs();
 					}
 
 					if (ImGui::MenuItem("Exit")) Application::Get().Close();
@@ -235,7 +240,7 @@ namespace Ant {
 			// 判断当前悬停窗口，以处理事件
 			m_ViewportFocused = ImGui::IsWindowFocused();
 			m_ViewportHovered = ImGui::IsWindowHovered();
-			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
+			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
 
 			// 获取控件视口
 			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
@@ -244,6 +249,53 @@ namespace Ant {
 
 			uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 			ImGui::Image((void*)textureID, ImVec2(m_ViewportSize.x, m_ViewportSize.y), ImVec2(0, 1), ImVec2(1, 0));
+
+			// Gizmos
+			Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+			if (selectedEntity && m_GizmoType != -1)
+			{
+				ImGuizmo::SetOrthographic(false);
+				ImGuizmo::SetDrawlist();
+
+				float windowWidth = (float)ImGui::GetWindowWidth();
+				float windowHeight = (float)ImGui::GetWindowHeight();
+				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+				// Camera
+				auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+				const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+				const glm::mat4& cameraProjection = camera.GetProjection();
+				glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+
+				// Entity transform
+				auto& tc = selectedEntity.GetComponent<TransformComponent>();
+				glm::mat4 transform = tc.GetTransform();
+
+				// Snapping
+				bool snap = Input::IsKeyPressed(KeyCode::LeftControl);
+				float snapValue = 0.5f;  // Snap to 0.5m for translation/scale
+				// Snap to 45 degrees for rotation
+				if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+					snapValue = 45.0f;
+
+				float snapValues[3] = { snapValue, snapValue, snapValue };
+
+				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+
+				if (ImGuizmo::IsUsing())
+				{
+					glm::vec3 translation, rotation, scale;
+					Math::DecomposeTransform(transform, translation, rotation, scale);
+
+					glm::vec3 deltaRotation = rotation - tc.Rotation;
+					tc.Translation = translation;
+					tc.Rotation += deltaRotation;
+					tc.Scale = scale;
+				}
+			}
+
+
+
 			ImGui::End();
 			ImGui::PopStyleVar();
 
@@ -270,5 +322,91 @@ namespace Ant {
 	void EditorLayer::OnEvent(Event& event)
 	{
 		m_CameraController.OnEvent(event);
+
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressedEvent>(ANT_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+
+	}
+
+
+	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
+	{
+		// Shortcuts
+		if (e.IsRepeat())
+			return false;
+		bool control = (Input::IsKeyPressed(KeyCode::LeftControl) || Input::IsKeyPressed(KeyCode::RightControl));
+		bool shift = (Input::IsKeyPressed(KeyCode::LeftShift) || Input::IsKeyPressed(KeyCode::RightShift));
+		switch (e.GetKeyCode())
+		{
+		case KeyCode::N:
+		{
+			if (control)
+			{
+				NewScene();
+			}
+			break;
+		}
+		case KeyCode::O:
+		{
+			if (control)
+			{
+				OpenScene();
+			}
+			break;
+		}
+		case KeyCode::S:
+		{
+			if (control && shift)
+			{
+				SaveSceneAs();
+			}
+			break;
+		}
+
+		// Gizmos
+		case KeyCode::Q:
+			m_GizmoType = -1;
+			break;
+		case KeyCode::W:
+			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			break;
+		case KeyCode::E:
+			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			break;
+		case KeyCode::R:
+			m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			break;
+		}
+	}
+
+	void EditorLayer::NewScene()
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		std::string filepath = FileDialogs::OpenFile("Ant Scene (*.ant)\0*.ant\0");
+		if (!filepath.empty())
+		{
+			m_ActiveScene = CreateRef<Scene>();
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Deserialize(filepath);
+		}
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		std::string filepath = FileDialogs::SaveFile("Ant Scene (*.ant)\0*.ant\0");
+		if (!filepath.empty())
+		{
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Serialize(filepath);
+		}
 	}
 }

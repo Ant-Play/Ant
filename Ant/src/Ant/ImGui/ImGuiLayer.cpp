@@ -16,6 +16,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
+#include <ImGuizmo.h>
+
 namespace Ant{
 	ImGuiLayer::ImGuiLayer()
 		: Layer("ImGuiLayer")
@@ -92,6 +94,7 @@ namespace Ant{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 
 	// ImGuiLayer‰÷»æΩ· ¯

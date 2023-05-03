@@ -25,6 +25,9 @@
     <Filter Include="src\Ant\Scene">
       <UniqueIdentifier>{FC0AD59E-68CB-50D5-3106-9A529D8595B1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Ant\Utils">
+      <UniqueIdentifier>{3F9F029F-AB5F-7ED5-749A-C752E019C3B1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
@@ -36,6 +39,9 @@
     </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\ImGuizmo">
+      <UniqueIdentifier>{73BF7F4C-DF4A-ED10-E85B-700554664911}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor\glm">
       <UniqueIdentifier>{829FC5A8-6E57-07F6-D75E-E051C335A2E6}</UniqueIdentifier>
@@ -186,8 +192,14 @@
     <ClInclude Include="src\Ant\Scene\SceneCamera.h">
       <Filter>src\Ant\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Scene\SceneSerializer.h">
+      <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Scene\ScriptableEntity.h">
       <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Utils\PlatformUtils.h">
+      <Filter>src\Ant\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
@@ -215,6 +227,9 @@
     </ClInclude>
     <ClInclude Include="src\antpch.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h">
+      <Filter>vendor\ImGuizmo</Filter>
     </ClInclude>
     <ClInclude Include="vendor\glm\glm\common.hpp">
       <Filter>vendor\glm\glm</Filter>
@@ -1467,7 +1482,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Scene\SceneSerializer.h" />
+    <ClInclude Include="src\Ant\Math\Math.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
@@ -1545,6 +1560,9 @@
     <ClCompile Include="src\Ant\Scene\SceneCamera.cpp">
       <Filter>src\Ant\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Scene\SceneSerializer.cpp">
+      <Filter>src\Ant\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
@@ -1569,15 +1587,21 @@
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsPlatformUtils.cpp">
+      <Filter>src\Platform\Windows</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\antpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
+      <Filter>vendor\ImGuizmo</Filter>
+    </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Scene\SceneSerializer.cpp" />
+    <ClCompile Include="src\Ant\Math\Math.cpp" />
   </ItemGroup>
 </Project>
