@@ -17,8 +17,8 @@ namespace Ant {
 
 		void SetViewportSize(uint32_t width, uint32_t height);
 
-		float GetPerspectiveVerticalFov() const { return glm::degrees(m_PerspectiveFOV); }
-		void SetPerspectiveVerticalFov(float verticalFOV) { m_PerspectiveFOV = glm::radians(verticalFOV); RecalculateProjection(); }
+		float GetPerspectiveVerticalFOV() const { return glm::degrees(m_PerspectiveFOV); }
+		void SetPerspectiveVerticalFOV(float verticalFOV) { m_PerspectiveFOV = glm::radians(verticalFOV); RecalculateProjection(); }
 		float GetPerspectiveNearClip() const { return m_PerspectiveNear;}
 		void SetPerspectiveNearClip(float nearClip) { m_PerspectiveNear = nearClip; RecalculateProjection(); }
 		float GetPerspectiveFarClip() const { return m_PerspectiveFar; }

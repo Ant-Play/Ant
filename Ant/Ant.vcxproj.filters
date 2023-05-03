@@ -22,6 +22,9 @@
     <Filter Include="src\Ant\Renderer">
       <UniqueIdentifier>{2509B972-1102-D8C4-3A34-BD49268CB7D0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Ant\Scene">
+      <UniqueIdentifier>{FC0AD59E-68CB-50D5-3106-9A529D8595B1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
@@ -132,6 +135,9 @@
     <ClInclude Include="src\Ant\Renderer\Buffer.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\Camera.h">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Framebuffer.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
@@ -167,6 +173,21 @@
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\VertexArray.h">
       <Filter>src\Ant\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Scene\Components.h">
+      <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Scene\Entity.h">
+      <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Scene\Scene.h">
+      <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Scene\SceneCamera.h">
+      <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Scene\ScriptableEntity.h">
+      <Filter>src\Ant\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
@@ -1446,12 +1467,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Scene\Scene.h" />
-    <ClInclude Include="src\Ant\Scene\Components.h" />
-    <ClInclude Include="src\Ant\Scene\Entity.h" />
-    <ClInclude Include="src\Ant\Renderer\Camera.h" />
-    <ClInclude Include="src\Ant\Scene\SceneCamera.h" />
-    <ClInclude Include="src\Ant\Scene\ScriptableEntity.h" />
+    <ClInclude Include="src\Ant\Scene\SceneSerializer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
@@ -1520,6 +1536,15 @@
     <ClCompile Include="src\Ant\Renderer\VertexArray.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Scene\Entity.cpp">
+      <Filter>src\Ant\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Scene\Scene.cpp">
+      <Filter>src\Ant\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Scene\SceneCamera.cpp">
+      <Filter>src\Ant\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
@@ -1553,8 +1578,6 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Scene\Scene.cpp" />
-    <ClCompile Include="src\Ant\Scene\Entity.cpp" />
-    <ClCompile Include="src\Ant\Scene\SceneCamera.cpp" />
+    <ClCompile Include="src\Ant\Scene\SceneSerializer.cpp" />
   </ItemGroup>
 </Project>

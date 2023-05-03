@@ -10,3 +10,6 @@
 [submodule "Ant/vendor/glm"]
 	path = Ant/vendor/glm
 	url = https://github.com/g-truc/glm
+[submodule "Ant/vendor/yaml-cpp"]
+	path = Ant/vendor/yaml-cpp
+	url = https://github.com/TheCherno/yaml-cpp

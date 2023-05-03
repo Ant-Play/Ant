@@ -199,7 +199,10 @@ namespace Ant {
 
 		// Always detach shaders after a successful link.
 		for (auto ids : glShaderIDs)
+		{
 			glDetachShader(m_RendererID, ids);
+			glDeleteShader(ids);
+		}
 	}
 
 	void OpenGLShader::SetInt(const std::string& name, const int slot)
