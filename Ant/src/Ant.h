@@ -33,4 +33,5 @@
 
 #include "Ant/Renderer/OrthographicCamera.h"
 #include "Ant/Renderer/OrthographicCameraController.h"
+#include "Ant/Renderer/EditorCamera.h"
 // ---------------------------------------------------

@@ -144,6 +144,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Ant\Renderer\EditorCamera.h" />
     <ClInclude Include="src\Ant.h" />
     <ClInclude Include="src\Ant\Core\Application.h" />
     <ClInclude Include="src\Ant\Core\Assert.h" />
@@ -619,6 +620,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Ant\Renderer\EditorCamera.cpp" />
     <ClCompile Include="src\Ant\Core\Application.cpp" />
     <ClCompile Include="src\Ant\Core\FileSystem.cpp" />
     <ClCompile Include="src\Ant\Core\Layer.cpp" />

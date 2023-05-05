@@ -1483,6 +1483,7 @@
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Math\Math.h" />
+    <ClInclude Include="src\Ant\Renderer\EditorCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
@@ -1603,5 +1604,6 @@
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Math\Math.cpp" />
+    <ClCompile Include="src\Ant\Renderer\EditorCamera.cpp" />
   </ItemGroup>
 </Project>

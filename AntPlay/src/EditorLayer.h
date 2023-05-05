@@ -36,6 +36,8 @@ namespace Ant {
 
 		bool m_PrimaryCamera = true;
 
+		EditorCamera m_EditorCamera;
+
 		Ref<Texture2D> m_Texture;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
