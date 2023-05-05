@@ -1,10 +1,10 @@
-[21:03:09] [info] Ant: Creating window AntPlay (1600, 900)
-[21:03:10] [info] Ant: OpenGL Info:
-[21:03:10] [info] Ant:   Vendor: NVIDIA Corporation
-[21:03:10] [info] Ant:   Renderer: NVIDIA GeForce RTX 3070 Laptop GPU/PCIe/SSE2
-[21:03:10] [info] Ant:   Version: 4.6.0 NVIDIA 516.91
-[21:03:14] [trace] Ant: Deserializing scene 'Untitled'
-[21:03:14] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Top
-[21:03:14] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera
-[21:03:14] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Right
-[21:03:14] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Left
+[17:12:39] [info] Ant: Creating window AntPlay (1600, 900)
+[17:12:40] [info] Ant: OpenGL Info:
+[17:12:40] [info] Ant:   Vendor: NVIDIA Corporation
+[17:12:40] [info] Ant:   Renderer: NVIDIA GeForce RTX 3070 Laptop GPU/PCIe/SSE2
+[17:12:40] [info] Ant:   Version: 4.6.0 NVIDIA 516.91
+[17:12:44] [trace] Ant: Deserializing scene 'Untitled'
+[17:12:44] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Top
+[17:12:44] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera
+[17:12:44] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Right
+[17:12:44] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Left

@@ -39,7 +39,7 @@ namespace Ant{
 		//io.ConfigViewportsNoAutoMerge = true;					   // 禁用视图自动合并
 		//io.ConfigViewportsNoTaskBarIcon = true;				   // 禁用任务栏图标
 
-		float fontSize = 18.0f;
+		float fontSize = 38.0f;
 		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", fontSize);
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", fontSize);
 
