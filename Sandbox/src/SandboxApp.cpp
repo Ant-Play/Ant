@@ -8,7 +8,8 @@ namespace Ant {
 	class Sandbox : public Application
 	{
 	public:
-		Sandbox()
+		Sandbox(Ant::ApplicationCommandLineArgs args)
+			: Application("Sandbox", args)
 		{
 			//PushLayer(new ExampleLayer);
 			PushLayer(new Sandbox2D());
@@ -23,8 +24,8 @@ namespace Ant {
 
 	};
 
-	Application* CreateApplication()
+	Application* CreateApplication(Ant::ApplicationCommandLineArgs args)
 	{
-		return new Sandbox();
+		return new Sandbox(args);
 	}
 }

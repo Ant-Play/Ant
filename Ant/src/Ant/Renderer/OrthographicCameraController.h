@@ -21,7 +21,7 @@ namespace Ant {
 	public:
 		OrthographicCameraController(float aspectRatio, bool rotation = false);
 
-		void OnUpdata(Timestep ts);
+		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 
 		void ResizeBounds(float width, float height);

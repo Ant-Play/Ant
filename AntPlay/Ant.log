@@ -1,23 +1,58 @@
-[15:43:59] [info] Ant: Creating window AntPlay (1600, 900)
-[15:43:59] [info] Ant: OpenGL Info:
-[15:43:59] [info] Ant:   Vendor: NVIDIA Corporation
-[15:43:59] [info] Ant:   Renderer: NVIDIA GeForce RTX 3070 Laptop GPU/PCIe/SSE2
-[15:43:59] [info] Ant:   Version: 4.6.0 NVIDIA 516.91
-[15:43:59] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Texture.glsl
-[15:43:59] [trace] Ant:     1 uniform buffers
-[15:43:59] [trace] Ant:     0 resources
-[15:43:59] [trace] Ant: Uniform buffers:
-[15:43:59] [trace] Ant:   _47_49
-[15:43:59] [trace] Ant:     Size = 64
-[15:43:59] [trace] Ant:     Binding = 0
-[15:43:59] [trace] Ant:     Members = 1
-[15:43:59] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Texture.glsl
-[15:43:59] [trace] Ant:     0 uniform buffers
-[15:43:59] [trace] Ant:     1 resources
-[15:43:59] [trace] Ant: Uniform buffers:
-[15:43:59] [warning] Ant: Shader creation took 11.792202ms
-[15:44:36] [trace] Ant: Deserializing scene 'Untitled'
-[15:44:36] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Top
-[15:44:36] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera
-[15:44:36] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Right
-[15:44:36] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Left
+[22:52:55] [info] Ant: Creating window AntPlay (1600, 900)
+[22:52:56] [info] Ant: OpenGL Info:
+[22:52:56] [info] Ant:   Vendor: NVIDIA Corporation
+[22:52:56] [info] Ant:   Renderer: NVIDIA GeForce RTX 3070 Laptop GPU/PCIe/SSE2
+[22:52:56] [info] Ant:   Version: 4.6.0 NVIDIA 516.91
+[22:52:56] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Texture.glsl
+[22:52:56] [trace] Ant:     1 uniform buffers
+[22:52:56] [trace] Ant:     0 resources
+[22:52:56] [trace] Ant: Uniform buffers:
+[22:52:56] [trace] Ant:   _46_48
+[22:52:56] [trace] Ant:     Size = 64
+[22:52:56] [trace] Ant:     Binding = 0
+[22:52:56] [trace] Ant:     Members = 1
+[22:52:56] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Texture.glsl
+[22:52:56] [trace] Ant:     0 uniform buffers
+[22:52:56] [trace] Ant:     1 resources
+[22:52:56] [trace] Ant: Uniform buffers:
+[22:52:56] [warning] Ant: Shader creation took 24.001003ms
+[22:53:00] [trace] Ant: Deserializing scene 'Untitled'
+[22:53:00] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Top
+[22:53:00] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera
+[22:53:00] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Right
+[22:53:00] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Left
+[22:53:01] [trace] Ant: Deserializing scene 'Untitled'
+[22:53:01] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera B
+[22:53:01] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera A
+[22:53:01] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Red Square
+[22:53:01] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Green Square
+[22:53:06] [trace] Ant: Deserializing scene 'Untitled'
+[22:53:06] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Top
+[22:53:06] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera
+[22:53:06] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Right
+[22:53:06] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Left
+[22:53:07] [trace] Ant: Deserializing scene 'Untitled'
+[22:53:07] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera B
+[22:53:07] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera A
+[22:53:07] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Red Square
+[22:53:07] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Green Square
+[22:53:08] [trace] Ant: Deserializing scene 'Untitled'
+[22:53:08] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Top
+[22:53:08] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera
+[22:53:08] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Right
+[22:53:08] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Left
+[22:53:10] [trace] Ant: Deserializing scene 'Untitled'
+[22:53:10] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera B
+[22:53:10] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera A
+[22:53:10] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Red Square
+[22:53:10] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Green Square
+[22:53:12] [trace] Ant: Deserializing scene 'Untitled'
+[22:53:12] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Top
+[22:53:12] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera
+[22:53:12] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Right
+[22:53:12] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Left
+[22:53:24] [trace] Ant: Deserializing scene 'Untitled'
+[22:53:24] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera B
+[22:53:24] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Camera A
+[22:53:24] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Red Square
+[22:53:24] [trace] Ant: Deserialized entity with ID = 12837192831273, name = Green Square

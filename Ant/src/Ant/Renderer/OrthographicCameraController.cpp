@@ -13,7 +13,7 @@ namespace Ant {
 
 	}
 
-	void OrthographicCameraController::OnUpdata(Timestep ts)
+	void OrthographicCameraController::OnUpdate(Timestep ts)
 	{
 		ANT_PROFILE_FUNCTION();
 

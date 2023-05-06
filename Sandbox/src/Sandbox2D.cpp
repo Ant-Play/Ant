@@ -1,10 +1,10 @@
 
 #include "Sandbox2D.h"
+#include "Ant/Debug/Instrumentor.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 
 #include <imgui/imgui.h>
-#include "Platform/OpenGL/OpenGLShader.h"
 #include <glm/gtc/type_ptr.hpp>
-#include "Ant/Debug/Instrumentor.h"
 
 static const uint32_t s_MapWidth = 24;
 static const char* s_MapTiles =
