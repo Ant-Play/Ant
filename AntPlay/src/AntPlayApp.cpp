@@ -8,8 +8,8 @@ namespace Ant {
 	class AnePlay : public Ant::Application
 	{
 	public:
-		AnePlay()
-			: Application("AntPlay")
+		AnePlay(ApplicationCommandLineArgs args)
+			: Application("AntPlay", args)
 		{
 			//PushLayer(new ExampleLayer);
 			PushLayer(new EditorLayer());
@@ -24,8 +24,8 @@ namespace Ant {
 
 	};
 
-	Ant::Application* Ant::CreateApplication()
+	Ant::Application* Ant::CreateApplication(ApplicationCommandLineArgs args)
 	{
-		return new AnePlay();
+		return new AnePlay(args);
 	}
 }

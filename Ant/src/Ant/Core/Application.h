@@ -15,11 +15,24 @@ int main(int argc, char** argv);
 
 namespace Ant{
 
+	struct ApplicationCommandLineArgs
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int index) const
+		{
+			ANT_CORE_ASSERT(index < Count);
+			return Args[index];
+		}
+	};
+
 	// 应用程序类，作为所有应用程序的基类
 	class Application
 	{
 	public:
-		Application(const std::string& name = "Ant Engine");
+		Application(const std::string& name = "Ant Engine", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
+		
 		virtual ~Application();
 
 		// 事件处理函数
@@ -36,18 +49,20 @@ namespace Ant{
 		void Close();
 
 		inline static Application& Get() { return *s_Instance; }
+
+		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 	private:
 		void Run();
 		bool OnWindowClosed(WindowCloseEvent& e);
 		bool OnWindowResized(WindowResizeEvent& e);
-
+	private:
+		ApplicationCommandLineArgs m_CommandLineArgs;
 		Scope<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
 		bool m_Minimized = false;
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0.0f;
-
 	private:
 		static Application* s_Instance;
 		friend int ::main(int argc, char** argv);
@@ -55,5 +70,6 @@ namespace Ant{
 
 	// To be defined in CLIENT
 	Application* CreateApplication();
+	Application* CreateApplication(ApplicationCommandLineArgs args);
 }
 

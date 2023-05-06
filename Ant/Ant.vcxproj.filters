@@ -19,6 +19,9 @@
     <Filter Include="src\Ant\ImGui">
       <UniqueIdentifier>{0913259E-75D3-A0D4-3E0E-EA51AA8DE5B0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Ant\Math">
+      <UniqueIdentifier>{D8427FCE-C4A5-0E73-6D2B-4729596DDAF5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Ant\Renderer">
       <UniqueIdentifier>{2509B972-1102-D8C4-3A34-BD49268CB7D0}</UniqueIdentifier>
     </Filter>
@@ -138,10 +141,16 @@
     <ClInclude Include="src\Ant\ImGui\ImGuiLayer.h">
       <Filter>src\Ant\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Math\Math.h">
+      <Filter>src\Ant\Math</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Buffer.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Camera.h">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\EditorCamera.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Framebuffer.h">
@@ -175,6 +184,9 @@
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Texture.h">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\UniformBuffer.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\VertexArray.h">
@@ -217,6 +229,9 @@
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLUniformBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
@@ -1482,8 +1497,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Math\Math.h" />
-    <ClInclude Include="src\Ant\Renderer\EditorCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
@@ -1513,7 +1526,13 @@
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp">
       <Filter>src\Ant\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Math\Math.cpp">
+      <Filter>src\Ant\Math</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\EditorCamera.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Framebuffer.cpp">
@@ -1549,6 +1568,9 @@
     <ClCompile Include="src\Ant\Renderer\Texture.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\UniformBuffer.cpp">
+      <Filter>src\Ant\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ant\Renderer\VertexArray.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
@@ -1582,6 +1604,9 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLUniformBuffer.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
@@ -1603,7 +1628,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Math\Math.cpp" />
-    <ClCompile Include="src\Ant\Renderer\EditorCamera.cpp" />
   </ItemGroup>
 </Project>

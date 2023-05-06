@@ -40,7 +40,10 @@ namespace Ant {
 	private:
 		std::string ReadFile(const std::string& filepath);
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);
-		void Compile(const std::unordered_map<GLenum, std::string>& shaderSources);
+		void ComplieOrGetVulkanBinaries(const std::unordered_map<GLenum, std::string>& shaderSources);
+		void ComplieOrGetOpenGLBinaries();
+		void CreateProgram();
+		void Reflect(GLenum stage, const std::vector<uint32_t>& spirv);
 	private:
 		uint32_t m_RendererID;
 		std::string m_FilePath;
