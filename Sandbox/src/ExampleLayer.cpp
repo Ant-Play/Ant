@@ -133,7 +133,7 @@ ExampleLayer::ExampleLayer()
 void ExampleLayer::OnUpdate(Ant::Timestep ts)
 {
 	// Updata
-	m_CameraController.OnUpdata(ts);
+	m_CameraController.OnUpdate(ts);
 
 	// Render
 	Ant::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });

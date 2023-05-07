@@ -1,0 +1,79 @@
+Scene: Untitled
+Entities:
+  - Entity: 8039817404705721525
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [-1.78812671, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CircleRendererComponent:
+      Color: [1, 0.0125260949, 0.0125260949, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+    CircleCollider2DComponent:
+      Offset: [0, 0]
+      Radius: 0.5
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 7719088023965498189
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 0, 2000]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 10000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 9811137023733061944
+    TagComponent:
+      Tag: Floor
+    TransformComponent:
+      Translation: [0, -6.16128063, 0]
+      Rotation: [0, 0, 0]
+      Scale: [24.9736061, 1, 1]
+    SpriteRendererComponent:
+      Color: [0.839248419, 0.208498046, 0.208498046, 1]
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.289999992
+      RestitutionThreshold: 0.829999983
+  - Entity: 4798822540820896989
+    TagComponent:
+      Tag: Sprite
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, -1.91551447]
+      Scale: [0.99999249, 0.999991298, 0.999999762]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\Checkerboard.png
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.550000012
+      RestitutionThreshold: 0.5

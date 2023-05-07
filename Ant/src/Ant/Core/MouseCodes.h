@@ -25,6 +25,13 @@ namespace Ant {
 			os << static_cast<int32_t>(mouseCode);
 			return os;
 		}
+
+		enum class CursorMode
+		{
+			Normal = 0,
+			Hidden = 1,
+			Locked = 2
+		};
 }
 
 #define ANT_MOUSE_BUTTON_0      ::Ant::Mouse::Button0
@@ -39,3 +46,6 @@ namespace Ant {
 #define ANT_MOUSE_BUTTON_LEFT   ::Ant::Mouse::ButtonLeft
 #define ANT_MOUSE_BUTTON_RIGHT  ::Ant::Mouse::ButtonRight
 #define ANT_MOUSE_BUTTON_MIDDLE ::Ant::Mouse::ButtonMiddle
+#define ANT_MOUSE_CURSOR_NORMAL ::Ant::CursorMode::Normal
+#define ANT_MOUSE_CURSOR_HIDDEN ::Ant::CursorMode::Hidden
+#define ANT_MOUSE_CURSOR_LOCKED ::Ant::CursorMode::Locked

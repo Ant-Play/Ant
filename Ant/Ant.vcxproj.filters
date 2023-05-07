@@ -28,6 +28,9 @@
     <Filter Include="src\Ant\Scene">
       <UniqueIdentifier>{FC0AD59E-68CB-50D5-3106-9A529D8595B1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Ant\Scripts">
+      <UniqueIdentifier>{D6782CA9-4204-9A6D-4B15-1D62B71FF66D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Ant\Utils">
       <UniqueIdentifier>{3F9F029F-AB5F-7ED5-749A-C752E019C3B1}</UniqueIdentifier>
     </Filter>
@@ -209,6 +212,9 @@
     </ClInclude>
     <ClInclude Include="src\Ant\Scene\ScriptableEntity.h">
       <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Scripts\ScriptsEngine.h">
+      <Filter>src\Ant\Scripts</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Utils\PlatformUtils.h">
       <Filter>src\Ant\Utils</Filter>
@@ -1585,6 +1591,9 @@
     </ClCompile>
     <ClCompile Include="src\Ant\Scene\SceneSerializer.cpp">
       <Filter>src\Ant\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Scripts\ScriptsEngine.cpp">
+      <Filter>src\Ant\Scripts</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
       <Filter>src\Platform\OpenGL</Filter>

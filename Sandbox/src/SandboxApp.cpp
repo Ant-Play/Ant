@@ -8,8 +8,8 @@ namespace Ant {
 	class Sandbox : public Application
 	{
 	public:
-		Sandbox(Ant::ApplicationCommandLineArgs args)
-			: Application("Sandbox", args)
+		Sandbox(const Ant::ApplicationSpecification& specification)
+			: Application(specification)
 		{
 			//PushLayer(new ExampleLayer);
 			PushLayer(new Sandbox2D());
@@ -26,6 +26,11 @@ namespace Ant {
 
 	Application* CreateApplication(Ant::ApplicationCommandLineArgs args)
 	{
-		return new Sandbox(args);
+		ApplicationSpecification spec;
+		spec.Name = "Sandbox";
+		spec.WorkingDirectory = "../Hazelnut";
+		spec.CommandLineArgs = args;
+
+		return new Sandbox(spec);
 	}
 }

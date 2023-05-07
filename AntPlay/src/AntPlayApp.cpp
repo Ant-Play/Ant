@@ -5,27 +5,25 @@
 #include "EditorLayer.h"
 
 namespace Ant {
-	class AnePlay : public Ant::Application
+	class AntPlay : public Ant::Application
 	{
 	public:
-		AnePlay(ApplicationCommandLineArgs args)
-			: Application("AntPlay", args)
+		AntPlay(const ApplicationSpecification& specification)
+			: Application(specification)
 		{
 			//PushLayer(new ExampleLayer);
 			PushLayer(new EditorLayer());
 			//PushLayer(new GameLayer());
 		}
 
-		~AnePlay()
-		{
-
-		}
-
-
 	};
 
 	Ant::Application* Ant::CreateApplication(ApplicationCommandLineArgs args)
 	{
-		return new AnePlay(args);
+		ApplicationSpecification spec;
+		spec.Name = "AntPlay";
+		spec.CommandLineArgs = args;
+
+		return new AntPlay(spec);
 	}
 }

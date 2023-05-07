@@ -59,6 +59,22 @@ namespace Ant{
 
 	void EditorCamera::OnUpdate(Timestep ts)
 	{
+		//glm::vec2 mousePos = {Input::GetMouseX(), Input::GetMouseY()};
+		//glm::vec2 delta = (mousePos - m_LastMousePosition) * 0.002f;
+		//m_LastMousePosition = mousePos;
+
+		//if (!Input::IsMouseButtonPressed(MouseCode::ButtonRight))
+		//{
+		//	//Input::SetCursorMode(ANT_MOUSE_CURSOR_NORMAL);
+		//	return;
+		//}
+
+		////Input::SetCursorMode(ANT_MOUSE_CURSOR_LOCKED);
+
+		//bool moved = false;
+
+		//float speed = 5.0f;
+
 		if (Input::IsKeyPressed(KeyCode::LeftAlt))
 		{
 			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
@@ -66,13 +82,68 @@ namespace Ant{
 			m_InitialMousePosition = mouse;
 
 			if (Input::IsMouseButtonPressed(MouseCode::ButtonMiddle))
+			{
 				MousePan(delta);
+				//moved = true;
+			}
 			else if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
+			{
 				MouseRotate(delta);
+				//moved = true;
+			}
 			else if (Input::IsMouseButtonPressed(MouseCode::ButtonRight))
+			{
 				MouseZoom(delta.y);
+				//moved = true;
+			}
 		}
 
+		//// Movement
+		//if (Input::IsKeyPressed(KeyCode::W))
+		//{
+		//	m_Position += GetForwardDirection() * speed * ts.GetMilliseconds();
+		//	moved = true;
+		//}
+		//else if (Input::IsKeyPressed(KeyCode::S))
+		//{
+		//	m_Position -= GetForwardDirection() * speed * ts.GetMilliseconds();
+		//	moved = true;
+		//}
+		//else if (Input::IsKeyPressed(KeyCode::A))
+		//{
+		//	m_Position -= GetRightDirection() * speed * ts.GetMilliseconds();
+		//	moved = true;
+		//}
+		//else if (Input::IsKeyPressed(KeyCode::D))
+		//{
+		//	m_Position += GetRightDirection() * speed * ts.GetMilliseconds();
+		//	moved = true;
+		//}
+		//else if (Input::IsKeyPressed(KeyCode::Q))
+		//{
+		//	m_Position -= GetUpDirection() * speed * ts.GetMilliseconds();
+		//	moved = true;
+		//}
+		//else if (Input::IsKeyPressed(KeyCode::E))
+		//{
+		//	m_Position += GetUpDirection() * speed * ts.GetMilliseconds();
+		//	moved = true;
+		//}
+
+		//// Rotation
+		//if (delta.x != 0.0f || delta.y != 0.0f)
+		//{
+		//	float pitchDelta = delta.y * 0.3f;
+		//	float yawDelta = delta.x * 0.3f;
+
+		//	glm::quat q = glm::normalize(glm::cross(glm::angleAxis(-pitchDelta, GetRightDirection()),
+		//		glm::angleAxis(-yawDelta, glm::vec3(0.f, 1.0f, 0.0f))));
+		//	GetForwardDirection() = glm::rotate(q, GetForwardDirection());
+
+		//	moved = true;
+		//}
+
+		//if (moved)
 		UpdateView();
 	}
 

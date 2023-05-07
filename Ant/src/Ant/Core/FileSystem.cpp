@@ -1,8 +1,7 @@
 #include "antpch.h"
 #include "Ant/Core/FileSystem.h"
 
-namespace Ant{ 
-
+namespace Ant {
 	Buffer FileSystem::ReadFileBinary(const std::filesystem::path& filepath)
 	{
 		std::ifstream stream(filepath, std::ios::binary | std::ios::ate);
@@ -30,4 +29,3 @@ namespace Ant{
 		return buffer;
 	}
 }
-

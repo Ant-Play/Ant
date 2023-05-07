@@ -12,7 +12,7 @@ namespace Ant {
 
 		auto state = glfwGetKey(window, static_cast<int32_t>(key));
 
-		return state == GLFW_PRESS || state == GLFW_REPEAT;
+		return state == GLFW_PRESS;
 	}
 
 	bool Input::IsMouseButtonPressed(MouseCode button)
@@ -41,5 +41,11 @@ namespace Ant {
 	{
 		auto [x, y] = GetMousePosition();
 		return y;
+	}
+
+	static void SetCursorMode(CursorMode mode)
+	{
+		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
 	}
 }

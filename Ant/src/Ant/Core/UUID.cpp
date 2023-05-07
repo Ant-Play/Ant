@@ -1,7 +1,6 @@
 #include "antpch.h"
 #include "Ant/Core/UUID.h"
 
-
 #include <random>
 
 #include <unordered_map>
@@ -13,13 +12,10 @@ namespace Ant {
 	UUID::UUID()
 		: m_UUID(s_UniformDistribution(s_Engine))
 	{
-
 	}
 
 	UUID::UUID(uint64_t uuid)
 		: m_UUID(uuid)
 	{
-
 	}
-
 }

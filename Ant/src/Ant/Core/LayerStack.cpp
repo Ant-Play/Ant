@@ -2,7 +2,6 @@
 #include "Ant/Core/LayerStack.h"
 
 namespace Ant {
-
 	LayerStack::~LayerStack()
 	{
 		for (Layer* layer : m_Layers)

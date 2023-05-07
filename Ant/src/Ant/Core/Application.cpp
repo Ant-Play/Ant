@@ -1,31 +1,37 @@
 #include "antpch.h"
 #include "Ant/Core/Application.h"
-
 #include "Ant/Core/Log.h"
+#include "Ant/Core/Inputs.h"
 
 #include "Ant/Renderer/Renderer.h"
 
-#include "Ant/Core/Inputs.h"
+#include "Ant/Utils/PlatformUtils.h"
 
+#include "Ant/Scripts/ScriptsEngine.h"
 
 #include <GLFW/glfw3.h>
 
 namespace Ant {
-
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const std::string& name, ApplicationCommandLineArgs args)
-		: m_CommandLineArgs(args)
+	Application::Application(const ApplicationSpecification& specification)
+		: m_Specification(specification)
 	{
 		ANT_PROFILE_FUNCTION(); // 性能分析
 
 		ANT_CORE_ASSERT(!s_Instance, "Application already exists!"); // 断言，确保实例不存在
 		s_Instance = this;
-		m_Window = Window::Create(WindowProps(name)); // 创建窗口
+		// Set working directory here
+		if (!m_Specification.WorkingDirectory.empty())
+			std::filesystem::current_path(m_Specification.WorkingDirectory);
+
+		m_Window = Window::Create(WindowProps(m_Specification.Name)); // 创建窗口
+
 		m_Window->SetEventCallback(ANT_BIND_EVENT_FN(Application::OnEvent)); // 设置事件回调函数
 		m_Window->SetVSync(false); // 关闭垂直同步
 
 		Renderer::Init(); // 初始化渲染器
+		ScriptsEngine::Init();
 
 		m_ImGuiLayer = new ImGuiLayer(); // 创建ImGui层
 		PushOverlay(m_ImGuiLayer); // 将ImGui层推入图层栈
@@ -35,6 +41,7 @@ namespace Ant {
 	{
 		ANT_PROFILE_FUNCTION(); // 性能分析
 
+		ScriptsEngine::Shutdown();
 		Renderer::Shutdown(); // 关闭渲染器
 	}
 
@@ -72,7 +79,7 @@ namespace Ant {
 		//事务响应从后往前
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
-			if(e.Handled)
+			if (e.Handled)
 				break;
 			(*it)->OnEvent(e);
 		}
@@ -87,7 +94,7 @@ namespace Ant {
 		{
 			ANT_PROFILE_SCOPE("RunLoop");
 
-			float time = (float)glfwGetTime(); // Platform::GetTime();
+			float time = Time::GetTime(); // Platform::GetTime();
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
@@ -100,7 +107,6 @@ namespace Ant {
 					for (Layer* layer : m_LayerStack)
 						layer->OnUpdate(timestep);
 				}
-
 			}
 			m_ImGuiLayer->Begin();
 			{
@@ -134,5 +140,4 @@ namespace Ant {
 		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
 		return false;
 	}
-
 }

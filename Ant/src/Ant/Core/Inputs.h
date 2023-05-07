@@ -5,7 +5,6 @@
 #include "Ant/Core/MouseCodes.h"
 
 namespace Ant {
-
 	//ÊäÈëIOµÄ³éÏó
 	class Input
 	{
@@ -17,5 +16,7 @@ namespace Ant {
 		static std::pair<float, float> GetMousePosition();
 		static float GetMouseX();
 		static float GetMouseY();
+
+		static void SetCursorMode(CursorMode mode);
 	};
 }

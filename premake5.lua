@@ -35,6 +35,7 @@ group ""
 
 group "Core"
     include "Ant"
+    include "Ant-ScriptCore"
 group ""
 
 group "Tools"

@@ -2,12 +2,10 @@
 
 #include "Ant/Core/Buffer.h"
 
-
 #include <filesystem>
 
 namespace Ant {
-
-	class FileSystem 
+	class FileSystem
 	{
 	public:
 		// TODO: move to FileSystem class

@@ -67,7 +67,7 @@ void Sandbox2D::OnUpdate(Ant::Timestep ts)
 {
 	ANT_PROFILE_FUNCTION();
 	// Updata
-	m_CameraController.OnUpdata(ts);
+	m_CameraController.OnUpdate(ts);
 
 	// Render
 	// Reset stats here

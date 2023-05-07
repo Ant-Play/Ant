@@ -4,7 +4,6 @@
 #include <cstring>
 
 namespace Ant {
-
 	// Non-owning raw buffer class
 	struct Buffer
 	{

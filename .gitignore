@@ -1,9 +1,20 @@
-# Directories
-.vs/
-bin/
+# Binaries
+**/bin/
 bin-int/
-Ant/vendor/VulkanSDK/
+Intermediates/
 
-# Files
-*.user
+# Ant files
+*.log
+
+# Visual Studio files and directories
+.vs/
+**.sin
+**.vcxproj.filters
+**.vcxproj.user
+**.csproj
+
+# Directories
 *.json
+Ant/vendor/VulkanSDK/
+AntPlay/assets/cache
+scripts/__pycache__

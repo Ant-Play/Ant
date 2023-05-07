@@ -4,17 +4,17 @@
 #include <memory>
 
 #ifdef ANT_DEBUG
-	#if defined(ANT_PLATFORM_WINDOWS)
-		#define ANT_DEBUGBREAK() __debugbreak();
-	#elif defined(ANT_PLATFORM_LINUX)
-		#include <signal.h>
-		#define ANT_DEBUGBREAK() __debugbreak();
-	#else
-		#error "Platform doesn't support debugbreak yet!"
-	#endif
-	#define ANT_ENABLE_ASSERTS
+#if defined(ANT_PLATFORM_WINDOWS)
+#define ANT_DEBUGBREAK() __debugbreak();
+#elif defined(ANT_PLATFORM_LINUX)
+#include <signal.h>
+#define ANT_DEBUGBREAK() __debugbreak();
 #else
-	#define ANT_DEBUGBREAK()
+#error "Platform doesn't support debugbreak yet!"
+#endif
+#define ANT_ENABLE_ASSERTS
+#else
+#define ANT_DEBUGBREAK()
 #endif // ANT_DEBUG
 
 #define ANT_EXPAND_MACRO(x) x
@@ -27,7 +27,6 @@
 #include <memory>
 
 namespace Ant {
-
 	template<typename T>
 	using Scope = std::unique_ptr<T>;
 	template<typename T, typename ... Args>

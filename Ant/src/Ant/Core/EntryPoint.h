@@ -7,7 +7,6 @@
 // 创建应用程序实例
 extern Ant::Application* Ant::CreateApplication(ApplicationCommandLineArgs args);
 
-
 //程序运行进入点
 int main(int argc, char** argv)
 {
@@ -25,7 +24,6 @@ int main(int argc, char** argv)
 	ANT_PROFILE_BEGIN_SESSION("Shutdown", "AntProfile-Shutdown.json");
 	delete app;
 	ANT_PROFILE_END_SESSION();
-
 
 	return 0;
 }

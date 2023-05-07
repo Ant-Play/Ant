@@ -10,6 +10,11 @@
 
 namespace Ant{
 
+	float Time::GetTime()
+	{
+		return glfwGetTime();
+	}
+
 	std::string FileDialogs::OpenFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;				// common dialog box structure
