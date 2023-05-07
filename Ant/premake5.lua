@@ -33,6 +33,7 @@ project "Ant"
     {
         "src",
         "vendor/spdlog/include",
+        "%{IncludeDir.Box2D}",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",
@@ -46,6 +47,7 @@ project "Ant"
 
     links
     {
+        "Box2D",
         "GLFW",
         "Glad",
         "ImGui",
