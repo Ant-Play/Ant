@@ -23,10 +23,15 @@ namespace Ant {
 		void NewScene();
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path);
+		void SaveScene();
 		void SaveSceneAs();
+
+		void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
 
 		void OnScenePlay();
 		void OnSceneStop();
+
+		void OnDuplicateEntity();
 
 		// UI Panels
 		void UI_Toolbar();
@@ -39,6 +44,8 @@ namespace Ant {
 		Ref<Framebuffer> m_Framebuffer;
 
 		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_EditorScene;
+		std::filesystem::path m_EditorScenePath;
 		Entity m_SquareEntity;
 		Entity m_MainCamera;
 		Entity m_SecondCamera;
@@ -48,13 +55,13 @@ namespace Ant {
 
 		EditorCamera m_EditorCamera;
 
-		Ref<Texture2D> m_Texture;
+		Ref<Texture2D> m_CheckerboardTexture;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = {0.0f, 0.0f};
 		glm::vec2 m_ViewportBounds[2];
 
-		glm::vec4 m_Color = { 0.8f, 0.3f, 0.2f, 1.0f };
+		glm::vec4 m_SquareColor = { 0.8f, 0.3f, 0.2f, 1.0f };
 
 		int m_GizmoType = -1;
 

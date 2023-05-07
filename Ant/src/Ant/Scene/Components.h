@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Ant/Core/UUID.h"
 #include "Ant/Renderer/Texture.h"
 #include "Ant/Scene/SceneCamera.h"
-#include "Ant/Scene/ScriptableEntity.h"
 
 #include <functional>
 
@@ -12,6 +12,14 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace Ant{
+
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+	};
 
 	struct TagComponent
 	{
@@ -60,6 +68,16 @@ namespace Ant{
 			: Color(color) {}
 	};
 
+	struct CircleRendererComponent
+	{
+		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		float Thickness = 0.1f;
+		float Fade = 0.005f;
+
+		CircleRendererComponent() = default;
+		CircleRendererComponent(const CircleRendererComponent&) = default;
+	};
+
 	struct CameraComponent
 	{
 		SceneCamera Camera;
@@ -69,6 +87,9 @@ namespace Ant{
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 	};
+
+	// Forward declaration
+	class ScriptableEntity;
 
 	struct NativeScriptComponent
 	{

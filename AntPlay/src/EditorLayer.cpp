@@ -1,43 +1,41 @@
-
 #include "EditorLayer.h"
-#include "Ant/Scene/SceneSerializer.h"
-#include "Ant/Debug/Instrumentor.h"
-#include "Platform/OpenGL/OpenGLShader.h"
-#include "Ant/Utils/PlatformUtils.h"
-#include "Ant/Math/Math.h"
 
 #include <imgui/imgui.h>
+#include "ImGuizmo.h"
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <ImGuizmo.h>
+
+#include "Ant/Scene/SceneSerializer.h"
+#include "Ant/Utils/PlatformUtils.h"
+#include "Ant/Math/Math.h"
 
 namespace Ant {
 
 	extern const std::filesystem::path g_AssetPath;
 
 	EditorLayer::EditorLayer()
-		: Layer("Sandbox2D"), m_CameraController(1600.0f / 900.0f)
+		: Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f), m_SquareColor({ 0.2f, 0.3f, 0.8f, 1.0f })
 	{
-
 	}
 
 	void EditorLayer::OnAttach()
 	{
 		ANT_PROFILE_FUNCTION();
 
-		m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
+		m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
 		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
 		m_IconStop = Texture2D::Create("Resources/Icons/StopButton.png");
 
 		FramebufferSpecification fbSpec;
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
-		fbSpec.Height = 780;
+		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_ActiveScene = CreateRef<Scene>();
 
 		auto commandLineArgs = Application::Get().GetCommandLineArgs();
-		if(commandLineArgs.Count > 1)
+		if (commandLineArgs.Count > 1)
 		{
 			auto sceneFilePath = commandLineArgs[1];
 			SceneSerializer serializer(m_ActiveScene);
@@ -48,65 +46,54 @@ namespace Ant {
 
 #if 0
 		// Entity
-		auto greenSquare = m_ActiveScene->CreateEntity("Green Square");
-		greenSquare.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
+		auto square = m_ActiveScene->CreateEntity("Green Square");
+		square.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
 
 		auto redSquare = m_ActiveScene->CreateEntity("Red Square");
 		redSquare.AddComponent<SpriteRendererComponent>(glm::vec4{ 1.0f, 0.0f, 0.0f, 1.0f });
 
-		m_SquareEntity = greenSquare;
+		m_SquareEntity = square;
 
-		m_MainCamera = m_ActiveScene->CreateEntity("Camera A");
-		m_MainCamera.AddComponent<CameraComponent>();
+		m_CameraEntity = m_ActiveScene->CreateEntity("Camera A");
+		m_CameraEntity.AddComponent<CameraComponent>();
 
 		m_SecondCamera = m_ActiveScene->CreateEntity("Camera B");
 		auto& cc = m_SecondCamera.AddComponent<CameraComponent>();
 		cc.Primary = false;
 
-
 		class CameraController : public ScriptableEntity
 		{
 		public:
-			void OnCreate()
+			virtual void OnCreate() override
 			{
-				std::cerr << "CameraController::OnCreate!" << std::endl;
+				auto& translation = GetComponent<TransformComponent>().Translation;
+				translation.x = rand() % 10 - 5.0f;
 			}
 
-			void OnDestroy()
+			virtual void OnDestroy() override
 			{
-
 			}
 
-			void OnUpdate(Timestep ts)
+			virtual void OnUpdate(Timestep ts) override
 			{
-				auto& tc = GetComponent<TransformComponent>();
+				auto& translation = GetComponent<TransformComponent>().Translation;
+
 				float speed = 5.0f;
 
-				if (Input::IsKeyPressed(ANT_KEY_A))
-				{
-					tc.Translation.x -= speed * ts;
-				}
-				else if (Input::IsKeyPressed(ANT_KEY_D))
-				{
-					tc.Translation.x += speed * ts;
-				}
-
-				if (Input::IsKeyPressed(ANT_KEY_W))
-				{
-					tc.Translation.y += speed * ts;
-				}
-				else if (Input::IsKeyPressed(ANT_KEY_S))
-				{
-					tc.Translation.y -= speed * ts;
-				}
+				if (Input::IsKeyPressed(Key::A))
+					translation.x -= speed * ts;
+				if (Input::IsKeyPressed(Key::D))
+					translation.x += speed * ts;
+				if (Input::IsKeyPressed(Key::W))
+					translation.y += speed * ts;
+				if (Input::IsKeyPressed(Key::S))
+					translation.y -= speed * ts;
 			}
 		};
 
-		m_MainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 #endif
-
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -120,20 +107,19 @@ namespace Ant {
 
 		// Resize
 		if (FramebufferSpecification spec = m_Framebuffer->GetSpecification();
-			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f &&  // zero sized framebuffer is invalid
+			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_CameraController.ResizeBounds(m_ViewportSize.x, m_ViewportSize.y);
+			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
 		// Render
-		// Reset stats here
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
-		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		RenderCommand::Clear();
 
 		// Clear our entity ID attachment to -1
@@ -141,24 +127,24 @@ namespace Ant {
 
 		switch (m_SceneState)
 		{
-			case SceneState::Edit:
-			{
-				if (m_ViewportFocused)
-					m_CameraController.OnUpdate(ts);
+		case SceneState::Edit:
+		{
+			if (m_ViewportFocused)
+				m_CameraController.OnUpdate(ts);
 
-				m_EditorCamera.OnUpdate(ts);
+			m_EditorCamera.OnUpdate(ts);
 
-				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
-				break;
-			}
-			case SceneState::Play:
-			{
-				m_ActiveScene->OnUpdateRuntime(ts);
-				break;
-			}
+			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+			break;
+		}
+		case SceneState::Play:
+		{
+			m_ActiveScene->OnUpdateRuntime(ts);
+			break;
+		}
 		}
 
-		auto[mx, my] = ImGui::GetMousePos();
+		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
 		my -= m_ViewportBounds[0].y;
 		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
@@ -172,14 +158,13 @@ namespace Ant {
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 
-
-
 		m_Framebuffer->Unbind();
 	}
 
 	void EditorLayer::OnImGuiRender()
 	{
 		ANT_PROFILE_FUNCTION();
+
 		// Note: Switch this to true to enable dockspace
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -371,6 +356,7 @@ namespace Ant {
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
 
 		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
 		float size = ImGui::GetWindowHeight() - 4.0f;
 		Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
 		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
@@ -381,32 +367,19 @@ namespace Ant {
 			else if (m_SceneState == SceneState::Play)
 				OnSceneStop();
 		}
-
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor(3);
 		ImGui::End();
 	}
 
-	void EditorLayer::OnEvent(Event& event)
+	void EditorLayer::OnEvent(Event& e)
 	{
-		m_CameraController.OnEvent(event);
-		m_EditorCamera.OnEvent(event);
+		m_CameraController.OnEvent(e);
+		m_EditorCamera.OnEvent(e);
 
-		EventDispatcher dispatcher(event);
+		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(ANT_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(ANT_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
-
-	}
-
-	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
-	{
-		if (e.GetMouseButton() == MouseCode::ButtonLeft)
-		{
-			if(m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(KeyCode::LeftAlt) && !Input::IsKeyPressed(KeyCode::RightAlt))
-				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
-		}
-
-		return false;
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -414,51 +387,83 @@ namespace Ant {
 		// Shortcuts
 		if (e.IsRepeat())
 			return false;
-		bool control = (Input::IsKeyPressed(KeyCode::LeftControl) || Input::IsKeyPressed(KeyCode::RightControl));
-		bool shift = (Input::IsKeyPressed(KeyCode::LeftShift) || Input::IsKeyPressed(KeyCode::RightShift));
+
+		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+
 		switch (e.GetKeyCode())
 		{
-		case KeyCode::N:
+		case Key::N:
 		{
 			if (control)
-			{
 				NewScene();
-			}
+
 			break;
 		}
-		case KeyCode::O:
+		case Key::O:
+		{
+			if (control)
+				OpenScene();
+
+			break;
+		}
+		case Key::S:
 		{
 			if (control)
 			{
-				OpenScene();
+				if (shift)
+					SaveSceneAs();
+				else
+					SaveScene();
 			}
+
 			break;
 		}
-		case KeyCode::S:
+
+		// Scene Commands
+		case Key::D:
 		{
-			if (control && shift)
-			{
-				SaveSceneAs();
-			}
+			if (control)
+				OnDuplicateEntity();
+
 			break;
 		}
 
 		// Gizmos
-		case KeyCode::Q:
-			m_GizmoType = -1;
-			break;
-		case KeyCode::W:
-			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-			break;
-		case KeyCode::E:
-			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-			break;
-		case KeyCode::R:
-			m_GizmoType = ImGuizmo::OPERATION::SCALE;
+		case Key::Q:
+		{
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = -1;
 			break;
 		}
+		case Key::W:
+		{
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			break;
+		}
+		case Key::E:
+		{
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			break;
+		}
+		case Key::R:
+		{
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			break;
+		}
+		}
+	}
 
-
+	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	{
+		if (e.GetMouseButton() == Mouse::ButtonLeft)
+		{
+			if (m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+		}
 		return false;
 	}
 
@@ -467,20 +472,22 @@ namespace Ant {
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-	}
 
+		m_EditorScenePath = std::filesystem::path();
+	}
 
 	void EditorLayer::OpenScene()
 	{
 		std::string filepath = FileDialogs::OpenFile("Ant Scene (*.ant)\0*.ant\0");
 		if (!filepath.empty())
-		{
 			OpenScene(filepath);
-		}
 	}
 
 	void EditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
+
 		if (path.extension().string() != ".ant")
 		{
 			ANT_WARN("Could not load {0} - not a scene file", path.filename().string());
@@ -491,10 +498,21 @@ namespace Ant {
 		SceneSerializer serializer(newScene);
 		if (serializer.Deserialize(path.string()))
 		{
-			m_ActiveScene = newScene;
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+			m_EditorScene = newScene;
+			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_EditorScene);
+
+			m_ActiveScene = m_EditorScene;
+			m_EditorScenePath = path;
 		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		if (!m_EditorScenePath.empty())
+			SerializeScene(m_ActiveScene, m_EditorScenePath);
+		else
+			SaveSceneAs();
 	}
 
 	void EditorLayer::SaveSceneAs()
@@ -502,21 +520,45 @@ namespace Ant {
 		std::string filepath = FileDialogs::SaveFile("Ant Scene (*.ant)\0*.ant\0");
 		if (!filepath.empty())
 		{
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(filepath);
+			SerializeScene(m_ActiveScene, filepath);
+			m_EditorScenePath = filepath;
 		}
+	}
+
+	void EditorLayer::SerializeScene(Ref<Scene> scene, const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path.string());
 	}
 
 	void EditorLayer::OnScenePlay()
 	{
 		m_SceneState = SceneState::Play;
+
+		m_ActiveScene = Scene::Copy(m_EditorScene);
 		m_ActiveScene->OnRuntimeStart();
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnSceneStop()
 	{
 		m_SceneState = SceneState::Edit;
+
 		m_ActiveScene->OnRuntimeStop();
+		m_ActiveScene = m_EditorScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OnDuplicateEntity()
+	{
+		if (m_SceneState != SceneState::Edit)
+			return;
+
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (selectedEntity)
+			m_EditorScene->DuplicateEntity(selectedEntity);
 	}
 
 }

@@ -26,22 +26,27 @@ namespace Ant {
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Scene Hierarchy");
-		m_Context->m_Registry.each([&](auto entityID)
-			{
-				Entity entity{ entityID, m_Context.get() };
-				DrawEntityNode(entity);
-			});
-		
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			m_SelectionContext = {};
 
-		// Right-click on blank space
-		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
+		if (m_Context)
 		{
-			if (ImGui::MenuItem("Create Empty Entity"))
-				m_Context->CreateEntity("Empty Entity");
+			m_Context->m_Registry.each([&](auto entityID)
+				{
+					Entity entity{ entityID , m_Context.get() };
+					DrawEntityNode(entity);
+				});
 
-			ImGui::EndPopup();
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+				m_SelectionContext = {};
+
+			// Right-click on blank space
+			if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
+			{
+				if (ImGui::MenuItem("Create Empty Entity"))
+					m_Context->CreateEntity("Empty Entity");
+
+				ImGui::EndPopup();
+			}
+
 		}
 		ImGui::End();
 
@@ -87,7 +92,7 @@ namespace Ant {
 
 		if (entityDeleted)
 		{
-			m_Context->DestoryEntity(entity);
+			m_Context->DestroyEntity(entity);
 			if (m_SelectionContext == entity)
 				m_SelectionContext = {};
 		}

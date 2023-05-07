@@ -1,17 +1,19 @@
 #include "antpch.h"
-#include "Ant/Scene/Scene.h"
-#include "Ant/Scene/Entity.h"
-#include "Ant/Scene/Components.h"
+#include "Scene.h"
 
+#include "Components.h"
+#include "ScriptableEntity.h"
 #include "Ant/Renderer/Renderer2D.h"
 
 #include <glm/glm.hpp>
 
+#include "Entity.h"
+
 // Box2D
-#include <box2d/b2_world.h>
-#include <box2d/b2_body.h>
-#include <box2d/b2_fixture.h>
-#include <box2d/b2_polygon_shape.h>
+#include "box2d/b2_world.h"
+#include "box2d/b2_body.h"
+#include "box2d/b2_fixture.h"
+#include "box2d/b2_polygon_shape.h"
 
 namespace Ant {
 
@@ -19,42 +21,96 @@ namespace Ant {
 	{
 		switch (bodyType)
 		{
-			case Ant::Rigidbody2DComponent::BodyType::Static: return b2_staticBody;
-			case Ant::Rigidbody2DComponent::BodyType::Dynamic: return b2_dynamicBody;
-			case Ant::Rigidbody2DComponent::BodyType::Kinematic: return b2_kinematicBody;
+		case Rigidbody2DComponent::BodyType::Static:    return b2_staticBody;
+		case Rigidbody2DComponent::BodyType::Dynamic:   return b2_dynamicBody;
+		case Rigidbody2DComponent::BodyType::Kinematic: return b2_kinematicBody;
 		}
 
 		ANT_CORE_ASSERT(false, "Unknown body type");
 		return b2_staticBody;
-	};
+	}
 
 	Scene::Scene()
 	{
-
 	}
 
 	Scene::~Scene()
 	{
-
 	}
 
+	template<typename Component>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		auto view = src.view<Component>();
+		for (auto e : view)
+		{
+			UUID uuid = src.get<IDComponent>(e).ID;
+			ANT_CORE_ASSERT(enttMap.find(uuid) != enttMap.end());
+			entt::entity dstEnttID = enttMap.at(uuid);
+
+			auto& component = src.get<Component>(e);
+			dst.emplace_or_replace<Component>(dstEnttID, component);
+		}
+	}
+
+	template<typename Component>
+	static void CopyComponentIfExists(Entity dst, Entity src)
+	{
+		if (src.HasComponent<Component>())
+			dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
+	}
+
+	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = CreateRef<Scene>();
+
+		newScene->m_ViewportWidth = other->m_ViewportWidth;
+		newScene->m_ViewportHeight = other->m_ViewportHeight;
+
+		auto& srcSceneRegistry = other->m_Registry;
+		auto& dstSceneRegistry = newScene->m_Registry;
+		std::unordered_map<UUID, entt::entity> enttMap;
+
+		// Create entities in new scene
+		auto idView = srcSceneRegistry.view<IDComponent>();
+		for (auto e : idView)
+		{
+			UUID uuid = srcSceneRegistry.get<IDComponent>(e).ID;
+			const auto& name = srcSceneRegistry.get<TagComponent>(e).Tag;
+			Entity newEntity = newScene->CreateEntityWithUUID(uuid, name);
+			enttMap[uuid] = (entt::entity)newEntity;
+		}
+
+		// Copy components (except IDComponent and TagComponent)
+		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+
+		return newScene;
+	}
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
+		return CreateEntityWithUUID(UUID(), name);
+	}
+
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	{
 		Entity entity = { m_Registry.create(), this };
+		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
-
 		return entity;
 	}
 
-
-	void Scene::DestoryEntity(Entity entity)
+	void Scene::DestroyEntity(Entity entity)
 	{
 		m_Registry.destroy(entity);
 	}
-
 
 	void Scene::OnRuntimeStart()
 	{
@@ -94,24 +150,10 @@ namespace Ant {
 		}
 	}
 
-
 	void Scene::OnRuntimeStop()
 	{
 		delete m_PhysicsWorld;
 		m_PhysicsWorld = nullptr;
-	}
-
-	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
-	{
-		Renderer2D::BeginScene(camera);
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-		for (auto entity : group)
-		{
-			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-
-			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
-		}
-		Renderer2D::EndScene();
 	}
 
 	void Scene::OnUpdateRuntime(Timestep ts)
@@ -154,10 +196,9 @@ namespace Ant {
 			}
 		}
 
-
 		// Render 2D
-		Camera* maincamera = nullptr;
-		glm::mat4* cameraTransform;
+		Camera* mainCamera = nullptr;
+		glm::mat4 cameraTransform;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
 			for (auto entity : view)
@@ -166,17 +207,17 @@ namespace Ant {
 
 				if (camera.Primary)
 				{
-					maincamera = &camera.Camera;
-					cameraTransform = &transform.GetTransform();
+					mainCamera = &camera.Camera;
+					cameraTransform = transform.GetTransform();
 					break;
 				}
 			}
 		}
 
-
-		if (maincamera)
+		if (mainCamera)
 		{
-			Renderer2D::BeginScene(maincamera->GetProjection(), *cameraTransform);
+			Renderer2D::BeginScene(*mainCamera, cameraTransform);
+
 			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 			for (auto entity : group)
 			{
@@ -184,11 +225,26 @@ namespace Ant {
 
 				Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 			}
+
 			Renderer2D::EndScene();
 		}
 
 	}
 
+	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
+	{
+		Renderer2D::BeginScene(camera);
+
+		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+		for (auto entity : group)
+		{
+			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+		}
+
+		Renderer2D::EndScene();
+	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
@@ -201,13 +257,23 @@ namespace Ant {
 		{
 			auto& cameraComponent = view.get<CameraComponent>(entity);
 			if (!cameraComponent.FixedAspectRatio)
-			{
 				cameraComponent.Camera.SetViewportSize(width, height);
-			}
-
 		}
+
 	}
 
+	void Scene::DuplicateEntity(Entity entity)
+	{
+		std::string name = entity.GetName();
+		Entity newEntity = CreateEntity(name);
+
+		CopyComponentIfExists<TransformComponent>(newEntity, entity);
+		CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
+		CopyComponentIfExists<CameraComponent>(newEntity, entity);
+		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
+		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, entity);
+		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
+	}
 
 	Entity Scene::GetPrimaryCameraEntity()
 	{
@@ -224,13 +290,17 @@ namespace Ant {
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
-		static_assert(false);
+		// static_assert(false);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component)
+	{
 	}
 
 	template<>
 	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
 	{
-
 	}
 
 	template<>
@@ -243,29 +313,26 @@ namespace Ant {
 	template<>
 	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
 	{
-
 	}
 
 	template<>
 	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component)
 	{
-
 	}
 
 	template<>
 	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
 	{
-
 	}
 
 	template<>
-	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& compoenet)
+	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
 	{
-
 	}
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
 	{
 	}
+
 }

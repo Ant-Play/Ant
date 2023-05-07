@@ -244,7 +244,7 @@ namespace Ant {
 	#elif defined(__cplusplus) && (__cplusplus >= 201103)
 		#define ANT_FUNC_SIG __func__				// C++11 标准定义的函数签名宏
 	#else
-		#define ANT_FUNC_SIG "HZ_FUNC_SIG unknown!"
+		#define ANT_FUNC_SIG "ANT_FUNC_SIG unknown!"
 	#endif
 
 	#define ANT_PROFILE_BEGIN_SESSION(name, filepath) ::Ant::Instrumentor::Get().BeginSession(name, filepath)		// 开始性能分析会话
