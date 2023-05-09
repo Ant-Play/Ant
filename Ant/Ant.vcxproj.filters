@@ -10,17 +10,26 @@
     <Filter Include="src\Ant\Core">
       <UniqueIdentifier>{57027ACE-4365-0973-ECEA-4129D82CD5F5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Ant\Core\Events">
+      <UniqueIdentifier>{5BC6B81A-C727-9628-5095-DCDABCF5CCE7}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Ant\Debug">
       <UniqueIdentifier>{55A8C69D-C168-42D4-8AA3-8B51F62287B0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Ant\Events">
-      <UniqueIdentifier>{A305265A-8FD3-1960-7867-8A8664D4F5C4}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Ant\ImGui">
       <UniqueIdentifier>{0913259E-75D3-A0D4-3E0E-EA51AA8DE5B0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Ant\Math">
       <UniqueIdentifier>{D8427FCE-C4A5-0E73-6D2B-4729596DDAF5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Ant\Platform">
+      <UniqueIdentifier>{D301DC97-BFFA-FAE9-E82C-E06ED484DAF5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Ant\Platform\OpenGL">
+      <UniqueIdentifier>{A7FFCF86-1337-181E-1C41-7C4188F73E17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Ant\Platform\Windows">
+      <UniqueIdentifier>{0DCFEBB8-F9F3-3A39-223F-20C90EC33957}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Ant\Renderer">
       <UniqueIdentifier>{2509B972-1102-D8C4-3A34-BD49268CB7D0}</UniqueIdentifier>
@@ -33,15 +42,6 @@
     </Filter>
     <Filter Include="src\Ant\Utils">
       <UniqueIdentifier>{3F9F029F-AB5F-7ED5-749A-C752E019C3B1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Platform">
-      <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Platform\OpenGL">
-      <UniqueIdentifier>{35A49437-A105-7245-2A73-B8F796D3A804}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Platform\Windows">
-      <UniqueIdentifier>{5B054582-4794-CE4B-F0B2-E246DC20DFF1}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
@@ -90,6 +90,18 @@
     <ClInclude Include="src\Ant\Core\EntryPoint.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Core\Events\ApplicationEvent.h">
+      <Filter>src\Ant\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\Events\Event.h">
+      <Filter>src\Ant\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\Events\KeyEvent.h">
+      <Filter>src\Ant\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\Events\MouseEvent.h">
+      <Filter>src\Ant\Core\Events</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Core\FileSystem.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
@@ -129,23 +141,38 @@
     <ClInclude Include="src\Ant\Debug\Instrumentor.h">
       <Filter>src\Ant\Debug</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Events\ApplicationEvent.h">
-      <Filter>src\Ant\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Events\Event.h">
-      <Filter>src\Ant\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Events\KeyEvent.h">
-      <Filter>src\Ant\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Events\MouseEvent.h">
-      <Filter>src\Ant\Events</Filter>
-    </ClInclude>
     <ClInclude Include="src\Ant\ImGui\ImGuiLayer.h">
       <Filter>src\Ant\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Math\Math.h">
       <Filter>src\Ant\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLBuffer.h">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLContext.h">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLFramebuffer.h">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLRendererAPI.h">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLShader.h">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLTexture.h">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLUniformBuffer.h">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLVertexArray.h">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Platform\Windows\WindowsWindow.h">
+      <Filter>src\Ant\Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Buffer.h">
       <Filter>src\Ant\Renderer</Filter>
@@ -218,33 +245,6 @@
     </ClInclude>
     <ClInclude Include="src\Ant\Utils\PlatformUtils.h">
       <Filter>src\Ant\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLUniformBuffer.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
-      <Filter>src\Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\antpch.h">
       <Filter>src</Filter>
@@ -1503,9 +1503,15 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Core\Math\AABB.h" />
+    <ClInclude Include="src\Ant\Core\Math\Mat4.h" />
+    <ClInclude Include="src\Ant\Core\Math\Ray.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
+      <Filter>src\Ant\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Core\Base.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\FileSystem.cpp">
@@ -1534,6 +1540,39 @@
     </ClCompile>
     <ClCompile Include="src\Ant\Math\Math.cpp">
       <Filter>src\Ant\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLBuffer.cpp">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLContext.cpp">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLFramebuffer.cpp">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLRendererAPI.cpp">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLShader.cpp">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLTexture.cpp">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLUniformBuffer.cpp">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLVertexArray.cpp">
+      <Filter>src\Ant\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\Windows\WindowsInput.cpp">
+      <Filter>src\Ant\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\Windows\WindowsPlatformUtils.cpp">
+      <Filter>src\Ant\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\Windows\WindowsWindow.cpp">
+      <Filter>src\Ant\Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp">
       <Filter>src\Ant\Renderer</Filter>
@@ -1594,39 +1633,6 @@
     </ClCompile>
     <ClCompile Include="src\Ant\Scripts\ScriptsEngine.cpp">
       <Filter>src\Ant\Scripts</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLUniformBuffer.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
-      <Filter>src\Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Windows\WindowsPlatformUtils.cpp">
-      <Filter>src\Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
-      <Filter>src\Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\antpch.cpp">
       <Filter>src</Filter>

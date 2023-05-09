@@ -3,6 +3,14 @@
 
 #include <memory>
 
+namespace Hazel {
+
+	void InitializeCore();
+	void ShutdownCore();
+
+}
+
+
 #ifdef ANT_DEBUG
 #if defined(ANT_PLATFORM_WINDOWS)
 #define ANT_DEBUGBREAK() __debugbreak();

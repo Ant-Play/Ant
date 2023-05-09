@@ -33,6 +33,7 @@ project "Ant"
     {
         "src",
         "vendor/spdlog/include",
+        "vendor/assimp/include",
         "%{IncludeDir.Box2D}",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
@@ -66,6 +67,7 @@ project "Ant"
 
         defines
         {
+            "ANT_PLATFORM_WINDOWS",
         }
 
         links

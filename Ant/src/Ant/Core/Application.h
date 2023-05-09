@@ -4,8 +4,8 @@
 
 #include "Ant/Core/Window.h"
 #include "Ant/Core/LayerStack.h"
-#include "Ant/Events/Event.h"
-#include "Ant/Events/ApplicationEvent.h"
+#include "Ant/Core/Events/Event.h"
+#include "Ant/Core/Events/ApplicationEvent.h"
 
 #include "Ant/Core/Timestep.h"
 

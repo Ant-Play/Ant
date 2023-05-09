@@ -4,15 +4,12 @@
 
 #ifdef ANT_PLATFORM_WINDOWS
 
-// 创建应用程序实例
 extern Ant::Application* Ant::CreateApplication(ApplicationCommandLineArgs args);
 
-//程序运行进入点
 int main(int argc, char** argv)
 {
 	Ant::Log::Init();
 
-	//性能分析
 	ANT_PROFILE_BEGIN_SESSION("Startup", "AntProfile-Startup.json");
 	auto app = Ant::CreateApplication({ argc, argv });
 	ANT_PROFILE_END_SESSION();
@@ -27,4 +24,6 @@ int main(int argc, char** argv)
 
 	return 0;
 }
+#else
+	#error Ant only supports Windows
 #endif // ANT_PLATFORM_WINDOWS

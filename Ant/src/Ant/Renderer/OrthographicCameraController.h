@@ -2,8 +2,8 @@
 #include "Ant/Renderer/OrthographicCamera.h"
 #include "Ant/Core/Timestep.h"
 
-#include "Ant/Events/MouseEvent.h"
-#include "Ant/Events/ApplicationEvent.h"
+#include "Ant/Core/Events/MouseEvent.h"
+#include "Ant/Core/Events/ApplicationEvent.h"
 
 namespace Ant {
 	

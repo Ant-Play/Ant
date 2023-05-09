@@ -29,20 +29,60 @@ project "AntPlay"
         "Ant"
     }
 
+    postbuildcommands 
+	{
+		'{COPY} "../AntPlay/assets" "%{cfg.targetdir}/assets"'
+	}
+
 	filter "system:windows"
         systemversion "latest"
+
+        defines 
+		{ 
+			"ANT_PLATFORM_WINDOWS"
+		}
     
     filter "configurations:Debug"
         defines "ANT_DEBUG"
         runtime "Debug"
         symbols "on"
+
+        links
+		{
+			"%{wks.location}/Ant/vendor/assimp/bin/Debug/assimp-vc143-mtd.lib"
+		}
+
+        postbuildcommands 
+		{
+			'{COPY} "%{wks.location}/Ant/vendor/assimp/bin/Debug/assimp-vc143-mtd.dll" "%{cfg.targetdir}"'
+		}
     
     filter "configurations:Release"
         defines "ANT_RELEASE"
         runtime "Release"
         optimize "on"
+
+        links
+		{
+			"%{wks.location}/Ant/vendor/assimp/bin/Release/assimp-vc143-mt.lib"
+		}
+
+		postbuildcommands 
+		{
+			'{COPY} "%{wks.location}/Ant/vendor/assimp/bin/Release/assimp-vc143-mt.dll" "%{cfg.targetdir}"'
+		}
     
     filter "configurations:Dist"
         defines "ANT_DIST"
         runtime "Release"
         optimize "on"
+
+        links
+		{
+			"%{wks.location}/Ant/vendor/assimp/bin/Release/assimp-vc143-mt.lib"
+		}
+
+		postbuildcommands 
+		{
+			'{COPY} "%{wks.location}/Ant/vendor/assimp/bin/Release/assimp-vc143-mtd.dll" "%{cfg.targetdir}"'
+		}

@@ -1,7 +1,7 @@
 #include "antpch.h"
 #include "Ant/Renderer/Shader.h"
 #include "Ant/Renderer/Renderer.h"
-#include "Platform/OpenGL/OpenGLShader.h"
+#include "Ant/Platform/OpenGL/OpenGLShader.h"
 
 
 namespace Ant {

@@ -1,49 +1,49 @@
-[21:02:51] [info] Ant: Creating window AntPlay (1600, 900)
-[21:02:51] [info] Ant: OpenGL Info:
-[21:02:51] [info] Ant:   Vendor: NVIDIA Corporation
-[21:02:51] [info] Ant:   Renderer: NVIDIA GeForce RTX 3070 Laptop GPU/PCIe/SSE2
-[21:02:51] [info] Ant:   Version: 4.6.0 NVIDIA 516.91
-[21:02:51] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Renderer2D_Quad.glsl
-[21:02:51] [trace] Ant:     1 uniform buffers
-[21:02:51] [trace] Ant:     0 resources
-[21:02:51] [trace] Ant: Uniform buffers:
-[21:02:51] [trace] Ant:   _46_48
-[21:02:51] [trace] Ant:     Size = 64
-[21:02:51] [trace] Ant:     Binding = 0
-[21:02:51] [trace] Ant:     Members = 1
-[21:02:51] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Renderer2D_Quad.glsl
-[21:02:51] [trace] Ant:     0 uniform buffers
-[21:02:51] [trace] Ant:     1 resources
-[21:02:51] [trace] Ant: Uniform buffers:
-[21:02:51] [warning] Ant: Shader creation took 29.141506ms
-[21:02:51] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Renderer2D_Circle.glsl
-[21:02:51] [trace] Ant:     1 uniform buffers
-[21:02:51] [trace] Ant:     0 resources
-[21:02:51] [trace] Ant: Uniform buffers:
-[21:02:51] [trace] Ant:   _47_49
-[21:02:51] [trace] Ant:     Size = 64
-[21:02:51] [trace] Ant:     Binding = 0
-[21:02:51] [trace] Ant:     Members = 1
-[21:02:51] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Renderer2D_Circle.glsl
-[21:02:51] [trace] Ant:     0 uniform buffers
-[21:02:51] [trace] Ant:     0 resources
-[21:02:51] [trace] Ant: Uniform buffers:
-[21:02:51] [warning] Ant: Shader creation took 24.497904ms
-[21:02:51] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Renderer2D_Line.glsl
-[21:02:51] [trace] Ant:     1 uniform buffers
-[21:02:51] [trace] Ant:     0 resources
-[21:02:51] [trace] Ant: Uniform buffers:
-[21:02:51] [trace] Ant:   _30_32
-[21:02:51] [trace] Ant:     Size = 64
-[21:02:51] [trace] Ant:     Binding = 0
-[21:02:51] [trace] Ant:     Members = 1
-[21:02:51] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Renderer2D_Line.glsl
-[21:02:51] [trace] Ant:     0 uniform buffers
-[21:02:51] [trace] Ant:     0 resources
-[21:02:51] [trace] Ant: Uniform buffers:
-[21:02:51] [warning] Ant: Shader creation took 33.821205ms
-[21:02:57] [trace] Ant: Deserializing scene 'Untitled'
-[21:02:57] [trace] Ant: Deserialized entity with ID = 8039817404705721525, name = Empty Entity
-[21:02:57] [trace] Ant: Deserialized entity with ID = 7719088023965498189, name = Camera
-[21:02:57] [trace] Ant: Deserialized entity with ID = 9811137023733061944, name = Floor
-[21:02:57] [trace] Ant: Deserialized entity with ID = 4798822540820896989, name = Sprite
+[22:41:22] [info] Ant: Creating window AntPlay (1600, 900)
+[22:41:22] [info] Ant: OpenGL Info:
+[22:41:22] [info] Ant:   Vendor: NVIDIA Corporation
+[22:41:22] [info] Ant:   Renderer: NVIDIA GeForce RTX 3070 Laptop GPU/PCIe/SSE2
+[22:41:22] [info] Ant:   Version: 4.6.0 NVIDIA 516.91
+[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Renderer2D_Quad.glsl
+[22:41:22] [trace] Ant:     1 uniform buffers
+[22:41:22] [trace] Ant:     0 resources
+[22:41:22] [trace] Ant: Uniform buffers:
+[22:41:22] [trace] Ant:   _46_48
+[22:41:22] [trace] Ant:     Size = 64
+[22:41:22] [trace] Ant:     Binding = 0
+[22:41:22] [trace] Ant:     Members = 1
+[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Renderer2D_Quad.glsl
+[22:41:22] [trace] Ant:     0 uniform buffers
+[22:41:22] [trace] Ant:     1 resources
+[22:41:22] [trace] Ant: Uniform buffers:
+[22:41:22] [warning] Ant: Shader creation took 23.622704ms
+[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Renderer2D_Circle.glsl
+[22:41:22] [trace] Ant:     1 uniform buffers
+[22:41:22] [trace] Ant:     0 resources
+[22:41:22] [trace] Ant: Uniform buffers:
+[22:41:22] [trace] Ant:   _47_49
+[22:41:22] [trace] Ant:     Size = 64
+[22:41:22] [trace] Ant:     Binding = 0
+[22:41:22] [trace] Ant:     Members = 1
+[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Renderer2D_Circle.glsl
+[22:41:22] [trace] Ant:     0 uniform buffers
+[22:41:22] [trace] Ant:     0 resources
+[22:41:22] [trace] Ant: Uniform buffers:
+[22:41:22] [warning] Ant: Shader creation took 18.368ms
+[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Renderer2D_Line.glsl
+[22:41:22] [trace] Ant:     1 uniform buffers
+[22:41:22] [trace] Ant:     0 resources
+[22:41:22] [trace] Ant: Uniform buffers:
+[22:41:22] [trace] Ant:   _30_32
+[22:41:22] [trace] Ant:     Size = 64
+[22:41:22] [trace] Ant:     Binding = 0
+[22:41:22] [trace] Ant:     Members = 1
+[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Renderer2D_Line.glsl
+[22:41:22] [trace] Ant:     0 uniform buffers
+[22:41:22] [trace] Ant:     0 resources
+[22:41:22] [trace] Ant: Uniform buffers:
+[22:41:22] [warning] Ant: Shader creation took 21.376703ms
+[22:41:27] [trace] Ant: Deserializing scene 'Untitled'
+[22:41:27] [trace] Ant: Deserialized entity with ID = 8039817404705721525, name = Empty Entity
+[22:41:27] [trace] Ant: Deserialized entity with ID = 7719088023965498189, name = Camera
+[22:41:27] [trace] Ant: Deserialized entity with ID = 9811137023733061944, name = Floor
+[22:41:27] [trace] Ant: Deserialized entity with ID = 4798822540820896989, name = Sprite

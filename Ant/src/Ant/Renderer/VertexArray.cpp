@@ -1,7 +1,7 @@
 #include "antpch.h"
 #include "Ant/Renderer/VertexArray.h"
 #include "Ant/Renderer/Renderer.h"
-#include "Platform/OpenGL/OpenGLVertexArray.h"
+#include "Ant/Platform/OpenGL/OpenGLVertexArray.h"
 
 namespace Ant {
 

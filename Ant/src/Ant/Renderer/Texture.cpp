@@ -1,7 +1,7 @@
 #include "antpch.h"
 #include "Ant/Renderer/Texture.h"
 #include "Ant/Renderer/Renderer.h"
-#include "Platform/OpenGL/OpenGLTexture.h"
+#include "Ant/Platform/OpenGL/OpenGLTexture.h"
 
 namespace Ant {
 

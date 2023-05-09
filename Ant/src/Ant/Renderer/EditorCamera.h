@@ -2,8 +2,8 @@
 
 #include "Ant/Renderer/Camera.h"
 #include "Ant/Core/Timestep.h"
-#include "Ant/Events/Event.h"
-#include "Ant/Events/MouseEvent.h"
+#include "Ant/Core/Events/Event.h"
+#include "Ant/Core/Events/MouseEvent.h"
 
 #include <glm/glm.hpp>
 

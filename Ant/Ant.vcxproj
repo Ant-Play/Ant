@@ -76,8 +76,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>antpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;ANT_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Box2D\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\mono\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;ANT_PLATFORM_WINDOWS;ANT_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\assimp\include;vendor\Box2D\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\mono\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -99,8 +99,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>antpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;ANT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Box2D\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\mono\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;ANT_PLATFORM_WINDOWS;ANT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\assimp\include;vendor\Box2D\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\mono\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -125,8 +125,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>antpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;ANT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Box2D\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\mono\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;ANT_PLATFORM_WINDOWS;ANT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\assimp\include;vendor\Box2D\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\mono\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -153,12 +153,19 @@
     <ClInclude Include="src\Ant\Core\Base.h" />
     <ClInclude Include="src\Ant\Core\Buffer.h" />
     <ClInclude Include="src\Ant\Core\EntryPoint.h" />
+    <ClInclude Include="src\Ant\Core\Events\ApplicationEvent.h" />
+    <ClInclude Include="src\Ant\Core\Events\Event.h" />
+    <ClInclude Include="src\Ant\Core\Events\KeyEvent.h" />
+    <ClInclude Include="src\Ant\Core\Events\MouseEvent.h" />
     <ClInclude Include="src\Ant\Core\FileSystem.h" />
     <ClInclude Include="src\Ant\Core\Inputs.h" />
     <ClInclude Include="src\Ant\Core\KeyCodes.h" />
     <ClInclude Include="src\Ant\Core\Layer.h" />
     <ClInclude Include="src\Ant\Core\LayerStack.h" />
     <ClInclude Include="src\Ant\Core\Log.h" />
+    <ClInclude Include="src\Ant\Core\Math\AABB.h" />
+    <ClInclude Include="src\Ant\Core\Math\Mat4.h" />
+    <ClInclude Include="src\Ant\Core\Math\Ray.h" />
     <ClInclude Include="src\Ant\Core\MouseCodes.h" />
     <ClInclude Include="src\Ant\Core\PlatformDetection.h" />
     <ClInclude Include="src\Ant\Core\Timer.h" />
@@ -166,12 +173,17 @@
     <ClInclude Include="src\Ant\Core\UUID.h" />
     <ClInclude Include="src\Ant\Core\Window.h" />
     <ClInclude Include="src\Ant\Debug\Instrumentor.h" />
-    <ClInclude Include="src\Ant\Events\ApplicationEvent.h" />
-    <ClInclude Include="src\Ant\Events\Event.h" />
-    <ClInclude Include="src\Ant\Events\KeyEvent.h" />
-    <ClInclude Include="src\Ant\Events\MouseEvent.h" />
     <ClInclude Include="src\Ant\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Ant\Math\Math.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLBuffer.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLFramebuffer.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLRendererAPI.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLShader.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLTexture.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLUniformBuffer.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="src\Ant\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\Ant\Renderer\Buffer.h" />
     <ClInclude Include="src\Ant\Renderer\Camera.h" />
     <ClInclude Include="src\Ant\Renderer\EditorCamera.h" />
@@ -196,15 +208,6 @@
     <ClInclude Include="src\Ant\Scene\ScriptableEntity.h" />
     <ClInclude Include="src\Ant\Scripts\ScriptsEngine.h" />
     <ClInclude Include="src\Ant\Utils\PlatformUtils.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLUniformBuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
-    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\antpch.h" />
     <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
@@ -627,6 +630,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp" />
+    <ClCompile Include="src\Ant\Core\Base.cpp" />
     <ClCompile Include="src\Ant\Core\FileSystem.cpp" />
     <ClCompile Include="src\Ant\Core\Layer.cpp" />
     <ClCompile Include="src\Ant\Core\LayerStack.cpp" />
@@ -636,6 +640,17 @@
     <ClCompile Include="src\Ant\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Ant\Math\Math.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLBuffer.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLFramebuffer.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLRendererAPI.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLShader.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLTexture.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLUniformBuffer.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLVertexArray.cpp" />
+    <ClCompile Include="src\Ant\Platform\Windows\WindowsInput.cpp" />
+    <ClCompile Include="src\Ant\Platform\Windows\WindowsPlatformUtils.cpp" />
+    <ClCompile Include="src\Ant\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\Ant\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Ant\Renderer\EditorCamera.cpp" />
     <ClCompile Include="src\Ant\Renderer\Framebuffer.cpp" />
@@ -656,17 +671,6 @@
     <ClCompile Include="src\Ant\Scene\SceneCamera.cpp" />
     <ClCompile Include="src\Ant\Scene\SceneSerializer.cpp" />
     <ClCompile Include="src\Ant\Scripts\ScriptsEngine.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLUniformBuffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
-    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
-    <ClCompile Include="src\Platform\Windows\WindowsPlatformUtils.cpp" />
-    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\antpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

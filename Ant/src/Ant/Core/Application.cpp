@@ -1,7 +1,6 @@
 #include "antpch.h"
 #include "Ant/Core/Application.h"
 #include "Ant/Core/Log.h"
-#include "Ant/Core/Inputs.h"
 
 #include "Ant/Renderer/Renderer.h"
 
@@ -10,6 +9,11 @@
 #include "Ant/Scripts/ScriptsEngine.h"
 
 #include <GLFW/glfw3.h>
+//#include <imgui/imgui.h>
+
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#include <Windows.h>
 
 namespace Ant {
 	Application* Application::s_Instance = nullptr;
@@ -17,10 +21,11 @@ namespace Ant {
 	Application::Application(const ApplicationSpecification& specification)
 		: m_Specification(specification)
 	{
-		ANT_PROFILE_FUNCTION(); // 性能分析
+		ANT_PROFILE_FUNCTION();
 
-		ANT_CORE_ASSERT(!s_Instance, "Application already exists!"); // 断言，确保实例不存在
+		ANT_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
+
 		// Set working directory here
 		if (!m_Specification.WorkingDirectory.empty())
 			std::filesystem::current_path(m_Specification.WorkingDirectory);
@@ -31,17 +36,17 @@ namespace Ant {
 		m_Window->SetVSync(false); // 关闭垂直同步
 
 		Renderer::Init(); // 初始化渲染器
-		ScriptsEngine::Init();
+		ScriptsEngine::Init(); // 初始化脚本引擎
 
-		m_ImGuiLayer = new ImGuiLayer(); // 创建ImGui层
-		PushOverlay(m_ImGuiLayer); // 将ImGui层推入图层栈
+		m_ImGuiLayer = new ImGuiLayer();
+		PushOverlay(m_ImGuiLayer);
 	}
 
 	Application::~Application()
 	{
-		ANT_PROFILE_FUNCTION(); // 性能分析
+		ANT_PROFILE_FUNCTION();
 
-		ScriptsEngine::Shutdown();
+		ScriptsEngine::Shutdown(); // 关闭脚本引擎
 		Renderer::Shutdown(); // 关闭渲染器
 	}
 
