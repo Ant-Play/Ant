@@ -1,56 +1,119 @@
 #include "antpch.h"
-#include "Ant/Platform/OpenGL/OpenGLRendererAPI.h"
+#include "Ant/Renderer/RendererAPI.h"
+#include "Ant/Renderer/Shader.h"
 
 #include <glad/glad.h>
 
 namespace Ant {
 
 
-	void OpenGLRendererAPI::Init()
+	static void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 	{
-		ANT_PROFILE_FUNCTION();
+		switch (severity)
+		{
+			case GL_DEBUG_SEVERITY_HIGH:
+				ANT_CORE_ERROR("[OpenGL Debug HIGH] {0}", message);
+				ANT_CORE_ASSERT(false, "GL_DEBUG_SEVERITY_HIGH");
+				break;
+			case GL_DEBUG_SEVERITY_MEDIUM:
+				ANT_CORE_WARN("[OpenGL Debug MEDIUM] {0}", message);
+				break;
+			case GL_DEBUG_SEVERITY_LOW:
+				ANT_CORE_INFO("[OpenGL Debug LOW] {0}", message);
+				break;
+			case GL_DEBUG_SEVERITY_NOTIFICATION:
+				// ANT_CORE_TRACE("[OpenGL Debug NOTIFICATION] {0}", message);
+				break;
+		}
+	}
+
+	void RendererAPI::Init()
+	{
+		glDebugMessageCallback(OpenGLLogMessage, nullptr);
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+		unsigned int vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
+		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_CULL_FACE);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		glFrontFace(GL_CCW);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_MULTISAMPLE);
+
+		auto& caps = RendererAPI::GetCapabilities();
+
+		caps.Vendor = (const char*)glGetString(GL_VENDOR);
+		caps.Renderer = (const char*)glGetString(GL_RENDERER);
+		caps.Version = (const char*)glGetString(GL_VERSION);
+
+		glGetIntegerv(GL_MAX_SAMPLES, &caps.MaxSamples);
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &caps.MaxAnisotropy);
+
+		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &caps.MaxTextureUnits);
+
+		GLenum error = glGetError();
+		while (error != GL_NO_ERROR)
+		{
+			ANT_CORE_ERROR("OpenGL Error {0}", error);
+			error = glGetError();
+		}
+
+		LoadRequiredAssets();
 	}
 
-	void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+	void RendererAPI::Shutdown()
 	{
-		glViewport(x, y, width, height);
 	}
 
-
-	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
+	void RendererAPI::LoadRequiredAssets()
 	{
-		glClearColor(color.r, color.g, color.b, color.a);
 	}
 
-
-	void OpenGLRendererAPI::Clear()
+	void RendererAPI::Clear(float r, float g, float b, float a)
 	{
+		glClearColor(r, g, b, a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLRendererAPI::SetLineWidth(float width)
+	void RendererAPI::SetClearColor(float r, float g, float b, float a)
 	{
-		glLineWidth(width);
+		glClearColor(r, g, b, a);
 	}
 
-	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
+	void RendererAPI::DrawIndexed(uint32_t count, PrimitiveType type, bool depthTest)
 	{
-		vertexArray->Bind();
-		uint32_t count = indexCount ? vertexArray->GetIndexBuffers()->GetCount() : indexCount;
-		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+		if (!depthTest)
+			glDisable(GL_DEPTH_TEST);
+
+		GLenum glPrimitiveType = 0;
+		switch (type)
+		{
+		case PrimitiveType::Triangles:
+			glPrimitiveType = GL_TRIANGLES;
+			break;
+		case PrimitiveType::Lines:
+			glPrimitiveType = GL_LINES;
+			break;
+		}
+
+		glDrawElements(glPrimitiveType, count, GL_UNSIGNED_INT, nullptr);
+
+		if (!depthTest)
+			glEnable(GL_DEPTH_TEST);
 	}
 
-	void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	void RendererAPI::SetLineThickness(float thickness)
 	{
-		vertexArray->Bind();
-		glDrawArrays(GL_LINES, 0, vertexCount);
+		glLineWidth(thickness);
 	}
+
 }
 
 

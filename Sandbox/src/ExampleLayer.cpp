@@ -136,8 +136,8 @@ void ExampleLayer::OnUpdate(Ant::Timestep ts)
 	m_CameraController.OnUpdate(ts);
 
 	// Render
-	Ant::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-	Ant::RenderCommand::Clear();
+	Ant::RenderCommandQueue::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+	Ant::RenderCommandQueue::Clear();
 
 	Ant::Renderer::BeginScene(m_CameraController.GetCamera());
 

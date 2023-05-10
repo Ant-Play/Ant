@@ -1,6 +1,6 @@
 #pragma once
 #include "Ant/Core/Window.h"
-#include "Ant/Renderer/GraphicContext.h"
+//#include "Ant/Renderer/GraphicContext.h"
 
 #include <GLFW/glfw3.h>
 namespace Ant {
@@ -11,36 +11,37 @@ namespace Ant {
 		WindowsWindow(const WindowProps& props);
 		virtual ~WindowsWindow();
 
-		virtual void OnUpdate() override;
+		void OnUpdate() override;
 
-		inline virtual uint32_t GetWidth() const override { return m_Data.Width; }
-		inline virtual uint32_t GetHeight() const override { return m_Data.Height; }
+		inline unsigned int GetWidth() const override { return m_Data.Width; }
+		inline unsigned int GetHeight() const override { return m_Data.Height; }
 
-		//Window attributes
-		inline virtual void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
-		virtual void SetVSync(bool enabled) override;
-		virtual bool IsVSync() const override;
+		virtual std::pair<uint32_t, uint32_t> GetSize() const override { return { m_Data.Width, m_Data.Height }; }
+		virtual std::pair<float, float> GetWindowPos() const override;
 
-		virtual void* GetNativeWindow() const { return m_Window; }
+		// Window attributes
+		inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+		void SetVSync(bool enabled);
+		bool IsVSync() const;
 
+		inline void* GetNativeWindow() const { return m_Window; }
 	private:
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
-
-
 	private:
 		GLFWwindow* m_Window;
-		Scope<GraphicsContext> m_Context;
+		GLFWcursor* m_ImGuiMouseCursors[9] = { 0 };
 
 		struct WindowData
 		{
 			std::string Title;
-			unsigned int Width, Height;
+			uint32_t Width, Height;
 			bool VSync;
 
 			EventCallbackFn EventCallback;
 		};
 
 		WindowData m_Data;
+		float m_LastFrameTime = 0.0f;
 	};
 }

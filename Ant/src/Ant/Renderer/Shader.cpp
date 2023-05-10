@@ -6,80 +6,69 @@
 
 namespace Ant {
 
-	Ref<Shader> Shader::Create(const std::string& path)
-	{
-		switch (Renderer::GetAPI())
-		{
-			case RendererAPI::API::None:
-			{
-				ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
-				return nullptr;
-			}
-			case RendererAPI::API::OpenGL:
-			{
-				return CreateRef<OpenGLShader>(path);
-			}
-		}
+	std::vector<Ref<Shader>> Shader::s_AllShaders;
 
-		ANT_CORE_ASSERT(false, "Unknown RendererAPI!");
-		return nullptr;
+	Ref<Shader> Shader::Create(const std::string& filepath)
+	{
+		Ref<Shader> result = nullptr;
+
+		switch(RendererAPI::Current())
+		{
+			case RendererAPIType::None: return nullptr;
+			case RendererAPIType::OpenGL: result = CreateRef<OpenGLShader>(filepath);
+		}
+		s_AllShaders.push_back(result);
+		return result;
 	}
 
-	Ref<Shader> Shader::Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
+	Ref<Shader> Shader::CreateFromString(const std::string& source)
 	{
-		switch (Renderer::GetAPI())
+		Ref<Shader> result = nullptr;
+		switch(RendererAPI::Current())
 		{
-			case RendererAPI::API::None:
-			{
-				ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
-				return nullptr;
-			}
-			case RendererAPI::API::OpenGL:
-			{
-				return CreateRef<OpenGLShader>(name, vertexSrc, fragmentSrc);
-			}
+			case RendererAPIType::None: return nullptr;
+			case RendererAPIType::OpenGL: result = OpenGLShader::CreateFromString(source);
 		}
-
-		ANT_CORE_ASSERT(false, "Unknown RendererAPI!");
-		return nullptr;
+		s_AllShaders.push_back(result);
+		return result;	
 	}
 
 
-	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
+	ShaderLibrary::ShaderLibrary()
 	{
-		ANT_CORE_ASSERT(!Exits(name), "Shader already exists");
-		m_Shaders[name] = shader;
+
+	}
+
+	ShaderLibrary::~ShaderLibrary()
+	{
+
 	}
 
 	void ShaderLibrary::Add(const Ref<Shader>& shader)
 	{
-		auto name = shader->GetName();
-		Add(name, shader);
+		auto& name = shader->GetName();
+		ANT_CORE_ASSERT(m_Shaders.find(name) == m_Shaders.end());
+		m_Shaders[name] = shader;
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const std::string& filepath)
+	void ShaderLibrary::Load(const std::string& path)
 	{
-		auto shader = Shader::Create(filepath);
-		Add(shader);
-		return shader;
+		auto shader = Ref<Shader>(Shader::Create(path));
+		auto& name = shader->GetName();
+		ANT_CORE_ASSERT(m_Shaders.find(name) == m_Shaders.end());
+		m_Shaders[name] = shader;
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
+	void ShaderLibrary::Load(const std::string& name, const std::string& path)
 	{
-		auto shader = Shader::Create(filepath);
-		Add(name, shader);
-		return shader;
+		ANT_CORE_ASSERT(m_Shaders.find(name) == m_Shaders.end());
+		m_Shaders[name] = Ref<Shader>(Shader::Create(path));
 	}
 
-	Ref<Shader> ShaderLibrary::Get(const std::string& name)
+	Ref<Shader>& ShaderLibrary::Get(const std::string& name)
 	{
-		ANT_CORE_ASSERT(Exits(name), "Shader do not exists");
+		ANT_CORE_ASSERT(m_Shaders.find(name) != m_Shaders.end());
 		return m_Shaders[name];
-	}
-
-	bool ShaderLibrary::Exits(const std::string& name) const
-	{
-		return m_Shaders.find(name) != m_Shaders.end();
 	}
 
 }

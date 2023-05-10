@@ -27,12 +27,15 @@ namespace Ant {
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 
-		virtual ~Window() = default;
+		virtual ~Window() {}
 
 		virtual void OnUpdate() = 0;
 
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
+		virtual std::pair<uint32_t, uint32_t> GetSize() const = 0;
+		virtual std::pair<float, float> GetWindowPos() const = 0;
+
 
 		// Window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
@@ -41,6 +44,6 @@ namespace Ant {
 
 		virtual void* GetNativeWindow() const = 0;
 
-		static Scope<Window> Create(const WindowProps& props = WindowProps());
+		static Window* Create(const WindowProps& props = WindowProps());
 	};
 }

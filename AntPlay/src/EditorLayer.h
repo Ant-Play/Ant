@@ -1,87 +1,126 @@
 #pragma once
-#include <Ant.h>
-#include "Panels/SceneHierarchyPanel.h"
-#include "Panels/ContentBrowserPanel.h"
+//#include <Ant.h>
+#include "Ant/Core/Layer.h"
+#include "Ant/Editor/SceneHierarchyPanel.h"
 
 namespace Ant {
+
+
 	class EditorLayer : public Layer
 	{
 	public:
+		enum class PropertyFlag
+		{
+			None = 0, ColorProperty = 1
+		};
+	public:
 		EditorLayer();
-		virtual ~EditorLayer() = default;
+		virtual ~EditorLayer();
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
+		virtual void OnUpdate(Timestep ts) override;
 
-		void OnUpdate(Timestep ts);
 		virtual void OnImGuiRender() override;
-		void OnEvent(Event& event);
-	private:
-		bool OnKeyPressed(KeyPressedEvent& e);
+		virtual void OnEvent(Event& e) override;
+		bool OnKeyPressedEvent(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
-		void OnOverlayRender();
+		// ImGui UI helpers
+		bool Property(const std::string& name, bool& value);
+		void Property(const std::string& name, float& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
+		void Property(const std::string& name, glm::vec2& value, PropertyFlag flags);
+		void Property(const std::string& name, glm::vec2& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
+		void Property(const std::string& name, glm::vec3& value, PropertyFlag flags);
+		void Property(const std::string& name, glm::vec3& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
+		void Property(const std::string& name, glm::vec4& value, PropertyFlag flags);
+		void Property(const std::string& name, glm::vec4& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
 
-		void NewScene();
-		void OpenScene();
-		void OpenScene(const std::filesystem::path& path);
-		void SaveScene();
-		void SaveSceneAs();
-
-		void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
-
-		void OnScenePlay();
-		void OnSceneSimulate();
-		void OnSceneStop();
-
-		void OnDuplicateEntity();
-
-		// UI Panels
-		void UI_Toolbar();
+		void ShowBoundingBoxes(bool show, bool onTop = false);
 	private:
-		Ant::OrthographicCameraController m_CameraController;
+		std::pair<float, float> GetMouseViewportSpace();
+		std::pair<glm::vec3, glm::vec3> CastRay(float mx, float my);
+	private:
+		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
 
-		// Temp
-		Ref<VertexArray> m_SquareVA;
-		Ref<Shader> m_Shader;
-		Ref<Framebuffer> m_Framebuffer;
-
+		Ref<Scene> m_Scene;
+		Ref<Scene> m_SphereScene;
 		Ref<Scene> m_ActiveScene;
-		Ref<Scene> m_EditorScene;
-		std::filesystem::path m_EditorScenePath;
-		Entity m_SquareEntity;
-		Entity m_MainCamera;
-		Entity m_SecondCamera;
-		Entity m_HoveredEntity;
 
-		bool m_PrimaryCamera = true;
+		Entity* m_MeshEntity = nullptr;
 
-		EditorCamera m_EditorCamera;
+		Ref<Shader> m_BrushShader;
+		Ref<Mesh> m_PlaneMesh;
+		Ref<Material> m_SphereBaseMaterial;
 
-		Ref<Texture2D> m_CheckerboardTexture;
+		Ref<Material> m_MeshMaterial;
+		std::vector<Ref<MaterialInstance>> m_MetalSphereMaterialInstances;
+		std::vector<Ref<MaterialInstance>> m_DielectricSphereMaterialInstances;
 
-		bool m_ViewportFocused = false, m_ViewportHovered = false;
-		glm::vec2 m_ViewportSize = {0.0f, 0.0f};
-		glm::vec2 m_ViewportBounds[2];
+		float m_GridScale = 16.025f, m_GridSize = 0.025f;
 
-		glm::vec4 m_SquareColor = { 0.8f, 0.3f, 0.2f, 1.0f };
-
-		int m_GizmoType = -1;
-
-		bool m_ShowPhysicsColliders = false;
-
-		enum class SceneState
+		struct AlbedoInput
 		{
-			Edit = 0, Play = 1, Simulate = 2
+			glm::vec3 Color = { 0.972f, 0.96f, 0.915f }; // Silver, from https://docs.unrealengine.com/en-us/Engine/Rendering/Materials/PhysicallyBased
+			Ref<Texture2D> TextureMap;
+			bool SRGB = true;
+			bool UseTexture = false;
 		};
-		SceneState m_SceneState = SceneState::Edit;
+		AlbedoInput m_AlbedoInput;
 
-		// Panels
-		SceneHierarchyPanel m_SceneHierarchyPanel;
-		ContentBrowserPanel m_ContentBrowserPanel;
+		struct NormalInput
+		{
+			Ref<Texture2D> TextureMap;
+			bool UseTexture = false;
+		};
+		NormalInput m_NormalInput;
 
-		// Edit resources
-		Ref<Texture2D> m_IconPlay, m_IconSimulate, m_IconStop;
+		struct MetalnessInput
+		{
+			float Value = 1.0f;
+			Ref<Texture2D> TextureMap;
+			bool UseTexture = false;
+		};
+		MetalnessInput m_MetalnessInput;
+
+		struct RoughnessInput
+		{
+			float Value = 0.2f;
+			Ref<Texture2D> TextureMap;
+			bool UseTexture = false;
+		};
+		RoughnessInput m_RoughnessInput;
+
+		// PBR params
+		bool m_RadiancePrefilter = false;
+
+		float m_EnvMapRotation = 0.0f;
+
+		enum class SceneType : uint32_t
+		{
+			Spheres = 0, Model = 1
+		};
+		SceneType m_SceneType;
+
+		// Editor resources
+		Ref<Texture2D> m_CheckerboardTex;
+
+		glm::vec2 m_ViewportBounds[2];
+		int m_GizmoType = -1; // -1 = no gizmo
+		float m_SnapValue = 0.5f;
+		bool m_AllowViewportCameraEvents = false;
+		bool m_DrawOnTopBoundingBoxes = false;
+
+		bool m_UIShowBoundingBoxes = false;
+		bool m_UIShowBoundingBoxesOnTop = false;
+
+		struct SelectedSubmesh
+		{
+			Submesh* Mesh;
+			float Distance;
+		};
+		std::vector<SelectedSubmesh> m_SelectedSubmeshes;
+		glm::mat4* m_CurrentlySelectedTransform = nullptr;
 	};
 }
 

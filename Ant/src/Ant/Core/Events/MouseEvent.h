@@ -11,8 +11,8 @@ namespace Ant {
 		MouseMovedEvent(const float x, const float y)
 			:m_MouseX(x), m_MouseY(y) {}
 
-		float GetX() const { return m_MouseX; }
-		float GetY() const { return m_MouseY; }
+		inline float GetX() const { return m_MouseX; }
+		inline float GetY() const { return m_MouseY; }
 
 		std::string ToString() const override
 		{
@@ -22,7 +22,7 @@ namespace Ant {
 		}
 
 		EVENT_CLASS_TYPE(MouseMoved)
-			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 	private:
 		float m_MouseX, m_MouseY;
@@ -45,7 +45,7 @@ namespace Ant {
 		}
 
 		EVENT_CLASS_TYPE(MouseScrolled)
-			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput | EventCategoryMouseButton)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput | EventCategoryMouseButton)
 	private:
 		float m_XOffset, m_YOffset;
 	};

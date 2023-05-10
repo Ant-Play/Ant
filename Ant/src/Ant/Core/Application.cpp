@@ -9,140 +9,160 @@
 #include "Ant/Scripts/ScriptsEngine.h"
 
 #include <GLFW/glfw3.h>
-//#include <imgui/imgui.h>
+#include <imgui.h>
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <Windows.h>
+#include <commdlg.h>
+
+#include <glad/glad.h>
 
 namespace Ant {
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const ApplicationSpecification& specification)
-		: m_Specification(specification)
+	Application::Application(const ApplicationProps& props)
 	{
-		ANT_PROFILE_FUNCTION();
-
-		ANT_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
-		// Set working directory here
-		if (!m_Specification.WorkingDirectory.empty())
-			std::filesystem::current_path(m_Specification.WorkingDirectory);
+		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(props.Name, props.WindowWidth, props.WindowHeight)));
+		m_Window->SetEventCallback(ANT_BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetVSync(true);
 
-		m_Window = Window::Create(WindowProps(m_Specification.Name)); // 创建窗口
-
-		m_Window->SetEventCallback(ANT_BIND_EVENT_FN(Application::OnEvent)); // 设置事件回调函数
-		m_Window->SetVSync(false); // 关闭垂直同步
-
-		Renderer::Init(); // 初始化渲染器
-		ScriptsEngine::Init(); // 初始化脚本引擎
-
-		m_ImGuiLayer = new ImGuiLayer();
+		m_ImGuiLayer = new ImGuiLayer("ImGui");
 		PushOverlay(m_ImGuiLayer);
+
+		Renderer::Init();
+		Renderer::WaitAndRender();
 	}
 
 	Application::~Application()
 	{
-		ANT_PROFILE_FUNCTION();
 
-		ScriptsEngine::Shutdown(); // 关闭脚本引擎
-		Renderer::Shutdown(); // 关闭渲染器
 	}
 
 	void Application::PushLayer(Layer* layer)
 	{
-		ANT_PROFILE_FUNCTION(); // 性能分析
-
-		m_LayerStack.PushLayer(layer); // 将图层推入图层栈
-		layer->OnAttach(); // 调用图层的OnAttach函数
+		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* layer)
 	{
-		ANT_PROFILE_FUNCTION(); // 性能分析
-
-		m_LayerStack.PushOverlay(layer); // 将覆盖层推入图层栈
-		layer->OnAttach(); // 调用覆盖层的OnAttach函数
+		m_LayerStack.PushOverlay(layer);
+		layer->OnAttach();
 	}
 
-	// 关闭应用程序
-	void Application::Close()
+	void Application::RenderImGui()
 	{
-		m_Running = false;
+		m_ImGuiLayer->Begin();
+
+		ImGui::Begin("Renderer");
+		auto& caps = RendererAPI::GetCapabilities();
+		ImGui::Text("Vendor: %s", caps.Vendor.c_str());
+		ImGui::Text("Renderer: %s", caps.Renderer.c_str());
+		ImGui::Text("Version: %s", caps.Version.c_str());
+		ImGui::Text("Frame Time: %.2fms\n", m_TimeStep.GetMilliseconds());
+		ImGui::End();
+
+		for (Layer* layer : m_LayerStack)
+			layer->OnImGuiRender();
+
+		m_ImGuiLayer->End();
 	}
 
-	// 处理事件
-	void Application::OnEvent(Event& e)
-	{
-		ANT_PROFILE_FUNCTION();
-
-		EventDispatcher dispathcher(e);
-		dispathcher.Dispatch<WindowCloseEvent>(ANT_BIND_EVENT_FN(Application::OnWindowClosed));
-		dispathcher.Dispatch<WindowResizeEvent>(ANT_BIND_EVENT_FN(Application::OnWindowResized));
-
-		//事务响应从后往前
-		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
-		{
-			if (e.Handled)
-				break;
-			(*it)->OnEvent(e);
-		}
-	}
-
-	// 应用程序运行循环
 	void Application::Run()
 	{
-		ANT_PROFILE_FUNCTION();
-
+		//OnInit();
 		while (m_Running)
 		{
-			ANT_PROFILE_SCOPE("RunLoop");
-
-			float time = Time::GetTime(); // Platform::GetTime();
-			Timestep timestep = time - m_LastFrameTime;
-			m_LastFrameTime = time;
-
 			if (!m_Minimized)
 			{
-				{
-					ANT_PROFILE_SCOPE("LayerStack OnUpdate");
-
-					//绘制图层从前往后
-					for (Layer* layer : m_LayerStack)
-						layer->OnUpdate(timestep);
-				}
-			}
-			m_ImGuiLayer->Begin();
-			{
-				ANT_PROFILE_SCOPE("LayerStack OnImGuiRender");
 				for (Layer* layer : m_LayerStack)
-					layer->OnImGuiRender();
-			}
-			m_ImGuiLayer->End();
+					layer->OnUpdate(m_TimeStep);
 
+				// Render ImGui on render thread
+				Application* app = this;
+				Renderer::Submit([app]() { app->RenderImGui(); });
+
+				Renderer::WaitAndRender();
+			}
 			m_Window->OnUpdate();
+
+			float time = GetTime();
+			m_TimeStep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
+		}
+		OnShutdown();
+	}
+
+	void Application::OnEvent(Event& event)
+	{
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<WindowResizeEvent>(ANT_BIND_EVENT_FN(Application::OnWindowResize));
+		dispatcher.Dispatch<WindowCloseEvent>(ANT_BIND_EVENT_FN(Application::OnWindowClose));
+
+		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
+		{
+			(*--it)->OnEvent(event);
+			if (event.Handled)
+				break;
 		}
 	}
 
-	bool Application::OnWindowClosed(WindowCloseEvent& e)
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		int width = e.GetWidth(), height = e.GetHeight();
+		if (width == 0 || height == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+		m_Minimized = false;
+		Renderer::Submit([=]() { glViewport(0, 0, width, height); });
+		auto& fbs = FramebufferPool::GetGlobal()->GetAll();
+		for (auto& fb : fbs)
+		{
+			if (auto fbp = fb.lock())
+				fbp->Resize(width, height);
+		}
+		return false;
+	}
+
+	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
 		m_Running = false;
 		return true;
 	}
 
-	bool Application::OnWindowResized(WindowResizeEvent& e)
+	std::string Application::OpenFile(const std::string& filter) const
 	{
-		ANT_PROFILE_FUNCTION();
+		OPENFILENAMEA ofn;       // common dialog box structure
+		CHAR szFile[260] = { 0 };       // if using TCHAR macros
 
-		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		// Initialize OPENFILENAME
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = "All\0*.*\0";
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFileTitle = NULL;
+		ofn.nMaxFileTitle = 0;
+		ofn.lpstrInitialDir = NULL;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+		if (GetOpenFileNameA(&ofn) == TRUE)
 		{
-			m_Minimized = true;
-			return false;
+			return ofn.lpstrFile;
 		}
-
-		m_Minimized = false;
-		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
-		return false;
+		return std::string();
 	}
+
+	float Application::GetTime() const
+	{
+		return (float)glfwGetTime();
+	}
+
 }

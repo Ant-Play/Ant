@@ -11,7 +11,7 @@ namespace Ant{
 	void InitializeCore()
 	{
 		// Initialize the logger
-		Log::Init();
+		//Log::Init();
 		ANT_CORE_INFO("Initialized Core Log");
 		// Initialize the build id
 		ANT_CORE_TRACE("Ant Engine: {0}", ANT_BUILD_ID);

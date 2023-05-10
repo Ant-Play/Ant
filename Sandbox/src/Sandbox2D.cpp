@@ -74,8 +74,8 @@ void Sandbox2D::OnUpdate(Ant::Timestep ts)
 	Ant::Renderer2D::ResetStats();
 	{
 		ANT_PROFILE_SCOPE("Renderer Prep");
-		Ant::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-		Ant::RenderCommand::Clear();
+		Ant::RenderCommandQueue::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		Ant::RenderCommandQueue::Clear();
 
 	}
 

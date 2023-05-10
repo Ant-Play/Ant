@@ -3,12 +3,14 @@
 #include "Ant/Core/Events/Event.h"
 #include "Ant/Core/KeyCodes.h"
 
+#include <sstream>
+
 namespace Ant {
 
 	class KeyEvent : public Event
 	{
 	public:
-		KeyCode GetKeyCode() const { return m_KeyCode; }
+		inline KeyCode GetKeyCode() const { return m_KeyCode; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	protected:

@@ -1,80 +1,62 @@
 #pragma once
 
 #include "Ant/Core/Base.h"
-
+#include "Ant/Core/Timestep.h"
 #include "Ant/Core/Window.h"
 #include "Ant/Core/LayerStack.h"
-#include "Ant/Core/Events/Event.h"
-#include "Ant/Core/Events/ApplicationEvent.h"
 
-#include "Ant/Core/Timestep.h"
+#include "Ant/Core/Events/ApplicationEvent.h"
 
 #include "Ant/ImGui/ImGuiLayer.h"
 
-int main(int argc, char** argv);
-
 namespace Ant {
-	struct ApplicationCommandLineArgs
-	{
-		int Count = 0;
-		char** Args = nullptr;
 
-		const char* operator[](int index) const
-		{
-			ANT_CORE_ASSERT(index < Count);
-			return Args[index];
-		}
+	struct ApplicationProps
+	{
+		std::string Name;
+		uint32_t WindowWidth, WindowHeight;
 	};
 
-	struct ApplicationSpecification
-	{
-		std::string Name = "Ant Application";
-		std::string WorkingDirectory;
-		ApplicationCommandLineArgs CommandLineArgs;
-	};
-
-	// 应用程序类，作为所有应用程序的基类
 	class Application
 	{
 	public:
-		Application(const ApplicationSpecification& specification);
-
+		Application(const ApplicationProps& props = { "Ant Engine", 1280, 720 });
 		virtual ~Application();
 
-		// 事件处理函数
-		void OnEvent(Event& e);
+		void Run();
 
-		// 推入新图层
+		virtual void OnInit() {}
+		virtual void OnShutdown() {}
+		virtual void OnUpdate(Timestep ts) {}
+
+		virtual void OnEvent(Event& event);
+
 		void PushLayer(Layer* layer);
-		// 推入新覆盖层
 		void PushOverlay(Layer* layer);
+		void RenderImGui();
+
+		std::string OpenFile(const std::string& filter) const;
 
 		inline Window& GetWindow() { return *m_Window; }
-		inline ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
-		void Close();
+		static inline Application& Get() { return *s_Instance; }
 
-		inline static Application& Get() { return *s_Instance; }
-
-		const ApplicationSpecification& GetSpecification() const { return m_Specification; }
+		float GetTime() const; // TODO: This should be in "Platform"
 	private:
-		void Run();
-		bool OnWindowClosed(WindowCloseEvent& e);
-		bool OnWindowResized(WindowResizeEvent& e);
+		bool OnWindowResize(WindowResizeEvent& e);
+		bool OnWindowClose(WindowCloseEvent& e);
 	private:
-		ApplicationSpecification m_Specification;
-		Scope<Window> m_Window;
-		ImGuiLayer* m_ImGuiLayer;
-		bool m_Running = true;
-		bool m_Minimized = false;
+		std::unique_ptr<Window> m_Window;
+		bool m_Running = true, m_Minimized = false;
 		LayerStack m_LayerStack;
+		ImGuiLayer* m_ImGuiLayer;
+		Timestep m_TimeStep;
+
 		float m_LastFrameTime = 0.0f;
-	private:
+
 		static Application* s_Instance;
-		friend int ::main(int argc, char** argv);
 	};
 
-	// To be defined in CLIENT
+	// Implemented by CLIENT
 	Application* CreateApplication();
-	Application* CreateApplication(ApplicationCommandLineArgs args);
 }

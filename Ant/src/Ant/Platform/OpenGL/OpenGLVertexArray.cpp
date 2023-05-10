@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 
+#include "Ant/Renderer/Renderer.h"
+
 namespace Ant {
 
 	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
@@ -28,111 +30,71 @@ namespace Ant {
 
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
-		ANT_PROFILE_FUNCTION();
-
-		glCreateVertexArrays(1, &m_RendererID);
+		Renderer::Submit([this]() {
+			glCreateVertexArrays(1, &m_RendererID);
+			});
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
-		ANT_PROFILE_FUNCTION();
-
-		glDeleteVertexArrays(1, &m_RendererID);
+		Renderer::Submit([this]() {
+			glDeleteVertexArrays(1, &m_RendererID);
+			});
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
-		ANT_PROFILE_FUNCTION();
-
-		glBindVertexArray(m_RendererID);
+		Renderer::Submit([this]() {
+			glBindVertexArray(m_RendererID);
+			});
 	}
 
-
-	void OpenGLVertexArray::UnBind() const
+	void OpenGLVertexArray::Unbind() const
 	{
-		ANT_PROFILE_FUNCTION();
-
-		glBindVertexArray(0);
+		Renderer::Submit([this]() {
+			glBindVertexArray(0);
+			});
 	}
 
-
-	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
+	void OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
 	{
-		ANT_PROFILE_FUNCTION();
+		ANT_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
-		ANT_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffers has no layout!");
-
-		glBindVertexArray(m_RendererID);
+		Bind();
 		vertexBuffer->Bind();
 
-		uint32_t index = 0;
-		const auto& layout = vertexBuffer->GetLayout();
-		for (const auto& element : layout)
-		{
-			switch (element.Type)
+		Renderer::Submit([this, vertexBuffer]() {
+			const auto& layout = vertexBuffer->GetLayout();
+			for (const auto& element : layout)
 			{
-				case ShaderDataType::Float:
-				case ShaderDataType::Float2:
-				case ShaderDataType::Float3:
-				case ShaderDataType::Float4:
+				auto glBaseType = ShaderDataTypeToOpenGLBaseType(element.Type);
+				glEnableVertexAttribArray(m_VertexBufferIndex);
+				if (glBaseType == GL_INT)
 				{
-					glEnableVertexAttribArray(m_VertexBufferIndex);
-					glVertexAttribPointer(m_VertexBufferIndex,
-						element.GetComponentCount(),
-						ShaderDataTypeToOpenGLBaseType(element.Type),
-						element.Normalized ? GL_TRUE : GL_FALSE,
-						layout.GetStride(),
-						(const void*)element.Offset);
-					m_VertexBufferIndex++;
-					break;
-				}
-				case ShaderDataType::Int:
-				case ShaderDataType::Int2:
-				case ShaderDataType::Int3:
-				case ShaderDataType::Int4:
-				case ShaderDataType::Bool:
-				{
-					glEnableVertexAttribArray(m_VertexBufferIndex);
 					glVertexAttribIPointer(m_VertexBufferIndex,
 						element.GetComponentCount(),
-						ShaderDataTypeToOpenGLBaseType(element.Type),
+						glBaseType,
 						layout.GetStride(),
-						(const void*)element.Offset);
-					m_VertexBufferIndex++;
-					break;
+						(const void*)(intptr_t)element.Offset);
 				}
-				case ShaderDataType::Mat3:
-				case ShaderDataType::Mat4:
+				else
 				{
-					uint8_t count = element.GetComponentCount();
-					for (uint8_t i = 0; i < count; i++)
-					{
-						glEnableVertexAttribArray(m_VertexBufferIndex);
-						glVertexAttribPointer(m_VertexBufferIndex,
-							count,
-							ShaderDataTypeToOpenGLBaseType(element.Type),
-							element.Normalized ? GL_TRUE : GL_FALSE,
-							layout.GetStride(),
-							(const void*)(element.Offset + sizeof(float) * count * i));
-						glVertexAttribDivisor(m_VertexBufferIndex, 1);
-						m_VertexBufferIndex++;
-					}
-					break;
+					glVertexAttribPointer(m_VertexBufferIndex,
+						element.GetComponentCount(),
+						glBaseType,
+						element.Normalized ? GL_TRUE : GL_FALSE,
+						layout.GetStride(),
+						(const void*)(intptr_t)element.Offset);
 				}
-				default:
-					ANT_CORE_ASSERT(false, "Unknown ShaderDataType!");
+				m_VertexBufferIndex++;
 			}
-		}
-
-		m_VertexBuffers.emplace_back(vertexBuffer);
+			});
+		m_VertexBuffers.push_back(vertexBuffer);
 	}
 
-
-	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
+	void OpenGLVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
 	{
-		ANT_PROFILE_FUNCTION();
-
-		glBindVertexArray(m_RendererID);
+		Bind();
 		indexBuffer->Bind();
 
 		m_IndexBuffer = indexBuffer;

@@ -24,31 +24,36 @@ namespace Ant{
 	{
 	}
 
+	ImGuiLayer::ImGuiLayer(const std::string& name)
+	{
+		
+	}
+
 	void ImGuiLayer::OnAttach()
 	{
 		ANT_PROFILE_FUNCTION();
 
-		// 初始化 Dear ImGui 上下文
-		IMGUI_CHECKVERSION();	// 检查版本是否匹配
-		ImGui::CreateContext(); // 创建上下文对象
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // 启用键盘控制
-		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // 启用游戏手柄控制（可选）
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // 启用 Docking
-		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;        // 启用多窗口视图
-		//io.ConfigViewportsNoAutoMerge = true;					   // 禁用视图自动合并
-		//io.ConfigViewportsNoTaskBarIcon = true;				   // 禁用任务栏图标
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;        // Enable Multi-Viewport / Platform Windows
+		//io.ConfigViewportsNoAutoMerge = true;					   
+		//io.ConfigViewportsNoTaskBarIcon = true;			
 
 		float fontSize = 38.0f;
 		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", fontSize);
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", fontSize);
 
 
-		// 设置 Dear ImGui 样式
+		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsLight();
 
-		// 当启用视窗时，我们需要微调窗口边框和背景色，使其看起来与普通窗口相同。
+		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
 		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -58,9 +63,10 @@ namespace Ant{
 
 		SetDarkThemeColors();
 
-		// 初始化平台与渲染器后端
 		Application& app = Application::Get();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
+
+		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
@@ -158,5 +164,10 @@ namespace Ant{
 	{
 		return GImGui->ActiveId;
 	}
+
+	void ImGuiLayer::OnImGuiRender()
+	{
+	}
+
 
 }

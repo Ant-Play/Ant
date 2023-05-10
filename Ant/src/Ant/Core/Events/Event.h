@@ -1,7 +1,9 @@
 #pragma once
 
-#include "antpch.h"
 #include "Ant/Core/Base.h"
+
+#include <string>
+#include <iostream>
 
 namespace Ant {
 
@@ -52,7 +54,7 @@ namespace Ant {
 		virtual int GetCategoryFlags() const = 0;
 		virtual std::string ToString() const { return GetName(); }
 
-		bool IsInCategory(EventCategory category)
+		inline bool IsInCategory(EventCategory category)
 		{
 			return GetCategoryFlags() & category;
 		}

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Ant/Core/Base.h"
+
 #include <stdint.h>
 #include <cstring>
 
@@ -7,15 +9,21 @@ namespace Ant {
 	// Non-owning raw buffer class
 	struct Buffer
 	{
-		uint8_t* Data = nullptr;
+		byte* Data = nullptr;
 		uint64_t Size = 0;
 
-		Buffer() = default;
+		Buffer()
+			: Data(nullptr), Size(0)
+		{}
 
 		Buffer(uint64_t size)
 		{
 			Allocate(size);
 		}
+
+		Buffer(byte* data, uint64_t size)
+			: Data(data), Size(size)
+		{}
 
 		Buffer(const Buffer&) = default;
 
@@ -23,6 +31,14 @@ namespace Ant {
 		{
 			Buffer result(other.Size);
 			memcpy(result.Data, other.Data, other.Size);
+			return result;
+		}
+
+		static Buffer Copy(void* data, uint64_t size)
+		{
+			Buffer result;
+			result.Allocate(size);
+			memcpy(result.Data, data, size);
 			return result;
 		}
 
@@ -41,6 +57,18 @@ namespace Ant {
 			Size = 0;
 		}
 
+		void ZeroInitialize()
+		{
+			if (Data)
+				memset(Data, 0, Size);
+		}
+
+		void Write(void* data, uint64_t size, uint64_t offset = 0)
+		{
+			ANT_CORE_ASSERT(offset + size <= Size, "Buffer overflow");
+			memcpy(Data + offset, data, size);
+		}
+
 		template<typename T>
 		T* As()
 		{
@@ -51,31 +79,16 @@ namespace Ant {
 		{
 			return (bool)Data;
 		}
+
+		byte& operator[](int index)
+		{
+			return Data[index];
+		}
+
+		byte& operator[](int index) const
+		{
+			return Data[index];
+		}
 	};
 
-	struct ScopedBuffer
-	{
-		ScopedBuffer(Buffer buffer)
-			: m_Buffer(buffer)
-		{
-		}
-
-		ScopedBuffer(uint64_t size)
-			: m_Buffer(size)
-		{
-		}
-
-		uint8_t* Data() { return m_Buffer.Data; }
-		uint64_t Size() { return m_Buffer.Size; }
-
-		template<typename T>
-		T* As()
-		{
-			return m_Buffer.As<T>();
-		}
-
-		operator bool() const { return m_Buffer; }
-	private:
-		Buffer m_Buffer;
-	};
 }

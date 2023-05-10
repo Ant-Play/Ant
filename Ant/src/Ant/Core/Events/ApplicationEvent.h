@@ -2,9 +2,10 @@
 
 #include "Ant/Core/Events/Event.h"
 
-#include <string>
+#include <sstream>
 namespace Ant {
 
+	// TODO: Should this store previous size?
 	class WindowResizeEvent : public Event
 	{
 	public:

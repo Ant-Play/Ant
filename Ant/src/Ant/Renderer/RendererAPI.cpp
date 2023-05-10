@@ -1,12 +1,10 @@
 #include "antpch.h"
 #include "Ant/Renderer/RendererAPI.h"
-#include "Ant/Renderer/Renderer.h"
-#include "Ant/Platform/OpenGL/OpenGLRendererAPI.h"
 
 
 namespace Ant {
 
-	RendererAPI::API RendererAPI::s_API = RendererAPI::API::OpenGL;
+	/*RendererAPI::API RendererAPI::s_API = RendererAPI::API::OpenGL;
 
 	Ant::Scope<Ant::RendererAPI> RendererAPI::Create()
 	{
@@ -25,6 +23,6 @@ namespace Ant {
 
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
-	}
+	}*/
 
 }

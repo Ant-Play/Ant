@@ -1,7 +1,6 @@
 #pragma once
 #include "Ant/Core/UUID.h"
-#include "Ant/Scene/Scene.h"
-#include "Ant/Scene/Components.h"
+#include "Ant/Renderer/Mesh.h"
 
 #include <entt.hpp>
 namespace Ant{
@@ -9,70 +8,29 @@ namespace Ant{
 	class Entity
 	{
 	public:
-		Entity() = default;
-		Entity(entt::entity handle, Scene* scene);
-		Entity(const Entity& other) = default;
+		~Entity();
 
-		template<typename T, typename... Args>
-		T& AddComponent(Args&&... args)
-		{
-			ANT_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
-			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
-			m_Scene->OnComponentAdded<T>(*this, component);
+		// TODO: Move to Component
+		void SetMesh(const Ref<Mesh>& mesh) { m_Mesh = mesh; }
+		Ref<Mesh> GetMesh() { return m_Mesh; }
 
-			return component;
-		}
+		void SetMaterial(const Ref<MaterialInstance>& material) { m_Material = material; }
+		Ref<MaterialInstance> GetMaterial() { return m_Material; }
 
-		template<typename T, typename... Args>
-		T& AddOrReplaceComponent(Args&&... args)
-		{
-			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle, std::forward<Args>(args)...);
-			m_Scene->OnComponentAdded<T>(*this, component);
-			return component;
-		}
+		const glm::mat4& GetTransform() const { return m_Transform; }
+		glm::mat4& Transform() { return m_Transform; }
 
-		template<typename T>
-		T& GetComponent()
-		{
-			if (HasComponent<T>())
-				return m_Scene->m_Registry.get<T>(m_EntityHandle);
-			else
-				ANT_CORE_ASSERT(HasComponent<T>(), "Entity doesn't have component!");
-
-		}
-
-		template<typename T>
-		bool HasComponent()
-		{
-			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
-		}
-
-		template<typename T>
-		void RemoveComponent()
-		{
-			ANT_CORE_ASSERT(HasComponent<T>(), "Entity doesn't have component!");
-
-			m_Scene->m_Registry.remove<T>(m_EntityHandle);
-		}
-
-		operator bool() const { return m_EntityHandle != entt::null; }
-		operator entt::entity() const { return m_EntityHandle; }
-		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
-
-		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
-		const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
-
-		bool operator==(const Entity& other) const 
-		{
-			return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene;
-		}
-
-		bool operator!=(const Entity& other) const
-		{
-			return !(*this == other);
-		}
+		const std::string& GetName() const { return m_Name; }
 	private:
-		entt::entity m_EntityHandle = entt::null;
-		Scene* m_Scene = nullptr;
+		Entity(const std::string& name);
+	private:
+		std::string m_Name;
+		glm::mat4 m_Transform;
+
+		// TODO: Temp
+		Ref<Mesh> m_Mesh;
+		Ref<MaterialInstance> m_Material;
+
+		friend class Scene;
 	};
 }

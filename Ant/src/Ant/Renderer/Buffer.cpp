@@ -5,39 +5,25 @@
 
 namespace Ant {
 	
-	Ref<VertexBuffer> VertexBuffer::Create(uint32_t size)
+	Ref<VertexBuffer> VertexBuffer::Create(void* data, uint32_t size, VertexBufferUsage usage)
 	{
-		switch (Renderer::GetAPI())
+		switch (RendererAPI::Current())
 		{
-			case RendererAPI::API::None:
-			{
-				ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
-				return nullptr;
-			}
-			case RendererAPI::API::OpenGL:
-			{
-				return CreateRef<OpenGLVertexBuffer>(size);
-			}
+			case RendererAPIType::None:    return nullptr;
+			case RendererAPIType::OpenGL:  return std::make_shared<OpenGLVertexBuffer>(data, size, usage);
 		}
 
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
-	Ref<VertexBuffer> VertexBuffer::Create(float* vertices, uint32_t size)
+	Ref<VertexBuffer> VertexBuffer::Create(uint32_t size, VertexBufferUsage usage)
 	{
 
-		switch (Renderer::GetAPI())
+		switch (RendererAPI::Current())
 		{
-			case RendererAPI::API::None: 
-			{
-				ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
-				return nullptr;
-			}
-			case RendererAPI::API::OpenGL:
-			{
-				return CreateRef<OpenGLVertexBuffer>(vertices, size);
-			}
+			case RendererAPIType::None:    return nullptr;
+			case RendererAPIType::OpenGL:  return std::make_shared<OpenGLVertexBuffer>(size, usage);
 		}
 
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -45,20 +31,13 @@ namespace Ant {
 	}
 
 
-	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t count)
+	Ref<IndexBuffer> IndexBuffer::Create(void* data, uint32_t size)
 	{
 
-		switch (Renderer::GetAPI())
+		switch (RendererAPI::Current())
 		{
-			case RendererAPI::API::None:
-			{
-				ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
-				return nullptr;
-			}
-			case RendererAPI::API::OpenGL:
-			{
-				return CreateRef<OpenGLIndexBuffer>(indices, count);
-			}
+			case RendererAPIType::None:    return nullptr;
+			case RendererAPIType::OpenGL:  return std::make_shared<OpenGLIndexBuffer>(data, size);
 		}
 
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI!");

@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace Hazel {
+namespace Ant {
 
 	void InitializeCore();
 	void ShutdownCore();
@@ -50,6 +50,8 @@ namespace Ant {
 	{
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
+
+	using byte = uint8_t;
 }
 
 #include "Ant/Core/Log.h"

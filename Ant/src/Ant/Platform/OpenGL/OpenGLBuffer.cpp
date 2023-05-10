@@ -1,5 +1,6 @@
 #include "antpch.h"
 #include "Ant/Platform/OpenGL/OpenGLBuffer.h"
+#include "Ant/Renderer/Renderer.h"
 
 #include <glad/glad.h>
 
@@ -9,90 +10,95 @@ namespace Ant {
 	/////////////////////////////////////////////////////////////////////////////
 	// VertexBuffer /////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////
-	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size)
+	static GLenum OpenGLUsage(VertexBufferUsage usage)
 	{
-		ANT_PROFILE_FUNCTION();
-
-		glCreateBuffers(1, &m_RendererID);
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
-	}
-	OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size)
-	{
-		ANT_PROFILE_FUNCTION();
-
-		glCreateBuffers(1,&m_RendererID);
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+		switch (usage)
+		{
+			case VertexBufferUsage::Static:    return GL_STATIC_DRAW;
+			case VertexBufferUsage::Dynamic:   return GL_DYNAMIC_DRAW;
+		}
+		ANT_CORE_ASSERT(false, "Unknown vertex buffer usage");
+		return 0;
 	}
 
+	OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, uint32_t size, VertexBufferUsage usage)
+		: m_Size(size), m_Usage(usage)
+	{
+		m_LocalData = Buffer::Copy(data, size);
+
+		Renderer::Submit([=]() {
+			glCreateBuffers(1, &m_RendererID);
+			glNamedBufferData(m_RendererID, m_Size, m_LocalData.Data, OpenGLUsage(m_Usage));
+			});
+	}
+
+	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size, VertexBufferUsage usage)
+		: m_Size(size), m_Usage(usage)
+	{
+		Renderer::Submit([this]()
+		{
+			glCreateBuffers(1, &m_RendererID);
+			glNamedBufferData(m_RendererID, m_Size, nullptr, OpenGLUsage(m_Usage));
+		});
+	}
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
-		ANT_PROFILE_FUNCTION();
+		Renderer::Submit([this]() {
+			glDeleteBuffers(1, &m_RendererID);
+			});
+	}
 
-		glDeleteBuffers(1, &m_RendererID);
+	void OpenGLVertexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
+	{
+		m_LocalData = Buffer::Copy(data, size);
+		m_Size = size;
+		Renderer::Submit([this, offset]() {
+			glNamedBufferSubData(m_RendererID, offset, m_Size, m_LocalData.Data);
+			});
 	}
 
 	void OpenGLVertexBuffer::Bind() const
 	{
-		ANT_PROFILE_FUNCTION();
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-	}
-
-
-	void OpenGLVertexBuffer::UnBind() const
-	{
-		ANT_PROFILE_FUNCTION();
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
-
-	void OpenGLVertexBuffer::SetData(const void* data, uint32_t size)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+		Renderer::Submit([this]() {
+			glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+			});
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
 	// IndexBuffer /////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count)
-		: m_Count(count)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(void* data, uint32_t size)
+		: m_RendererID(0), m_Size(size)
 	{
-		ANT_PROFILE_FUNCTION();
+		m_LocalData = Buffer::Copy(data, size);
 
-		glCreateBuffers(1, &m_RendererID);
-
-		// GL_ELEMENT_ARRAY_BUFFER is not valid without an actively bound VAO
-		// Binding with GL_ARRAY_BUFFER allows the data to be loaded regardless of VAO state. 
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferData(GL_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		Renderer::Submit([this]() {
+			glCreateBuffers(1, &m_RendererID);
+			glNamedBufferData(m_RendererID, m_Size, m_LocalData.Data, GL_STATIC_DRAW);
+			});
 	}
-
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
-		ANT_PROFILE_FUNCTION();
+		Renderer::Submit([this]() {
+			glDeleteBuffers(1, &m_RendererID);
+			});
+	}
 
-		glDeleteBuffers(1, &m_RendererID);
+	void OpenGLIndexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
+	{
+		m_LocalData = Buffer::Copy(data, size);
+		m_Size = size;
+		Renderer::Submit([this, offset]() {
+			glNamedBufferSubData(m_RendererID, offset, m_Size, m_LocalData.Data);
+			});
 	}
 
 	void OpenGLIndexBuffer::Bind() const
 	{
-		ANT_PROFILE_FUNCTION();
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+		Renderer::Submit([this]() {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+			});
 	}
-
-
-	void OpenGLIndexBuffer::UnBind() const
-	{
-		ANT_PROFILE_FUNCTION();
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	}
-
 }

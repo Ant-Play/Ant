@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Ant/Renderer/RendererAPI.h"
+
 #include <string>
 #include <vector>
 
@@ -56,8 +58,8 @@ namespace Ant{
 				case ShaderDataType::Float2:		return 2;
 				case ShaderDataType::Float3:		return 3;
 				case ShaderDataType::Float4:		return 4;
-				case ShaderDataType::Mat3:			return 3; // 3* float3
-				case ShaderDataType::Mat4:			return 4; // 4* float4
+				case ShaderDataType::Mat3:			return 3 * 3; // 3* float3
+				case ShaderDataType::Mat4:			return 4 * 4; // 4* float4
 				case ShaderDataType::Int:			return 1;
 				case ShaderDataType::Int2:			return 2;
 				case ShaderDataType::Int3:			return 3;
@@ -109,41 +111,43 @@ namespace Ant{
 		uint32_t m_Stride = 0;
 	};
 
+	enum class VertexBufferUsage
+	{
+		None = 0, Static = 1, Dynamic = 2
+	};
+
 	class VertexBuffer
 	{
 	public:
-		virtual ~VertexBuffer() = default;
+		virtual ~VertexBuffer() {}
 
-		// 绑定/解绑顶点缓冲区
+		virtual void SetData(void* buffer, uint32_t size, uint32_t offset = 0) = 0;
 		virtual void Bind() const = 0;
-		virtual void UnBind() const = 0;
 
-		// 设置顶点数据
-		virtual void SetData(const void* data, uint32_t size) = 0;
-
-		// 获取/设置顶点缓冲区布局
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 
-		// 创建并初始化顶点缓冲区
-		static Ref<VertexBuffer> Create(uint32_t size);
-		static Ref<VertexBuffer> Create(float* vertices, uint32_t size);
+		virtual unsigned int GetSize() const = 0;
+		virtual RendererID GetRendererID() const = 0;
+
+		static Ref<VertexBuffer> Create(void* data, uint32_t size, VertexBufferUsage usage = VertexBufferUsage::Static);
+		static Ref<VertexBuffer> Create(uint32_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
 	};
 
 	// Currently Ant only supports 32-bit index buffers
 	class IndexBuffer
 	{
 	public:
-		virtual ~IndexBuffer() = default;
+		virtual ~IndexBuffer() {}
 
-		// 绑定/解绑索引缓冲区
+		virtual void SetData(void* buffer, uint32_t size, uint32_t offset = 0) = 0;
 		virtual void Bind() const = 0;
-		virtual void UnBind() const = 0;
 
-		// 获取索引数量
 		virtual uint32_t GetCount() const = 0;
 
-		// 创建索引缓冲区
-		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);
+		virtual unsigned int GetSize() const = 0;
+		virtual RendererID GetRendererID() const = 0;
+
+		static Ref<IndexBuffer> Create(void* data, uint32_t size = 0);
 	};
 }

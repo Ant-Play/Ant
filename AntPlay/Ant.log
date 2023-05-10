@@ -1,49 +1,107 @@
-[22:41:22] [info] Ant: Creating window AntPlay (1600, 900)
-[22:41:22] [info] Ant: OpenGL Info:
-[22:41:22] [info] Ant:   Vendor: NVIDIA Corporation
-[22:41:22] [info] Ant:   Renderer: NVIDIA GeForce RTX 3070 Laptop GPU/PCIe/SSE2
-[22:41:22] [info] Ant:   Version: 4.6.0 NVIDIA 516.91
-[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Renderer2D_Quad.glsl
-[22:41:22] [trace] Ant:     1 uniform buffers
-[22:41:22] [trace] Ant:     0 resources
-[22:41:22] [trace] Ant: Uniform buffers:
-[22:41:22] [trace] Ant:   _46_48
-[22:41:22] [trace] Ant:     Size = 64
-[22:41:22] [trace] Ant:     Binding = 0
-[22:41:22] [trace] Ant:     Members = 1
-[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Renderer2D_Quad.glsl
-[22:41:22] [trace] Ant:     0 uniform buffers
-[22:41:22] [trace] Ant:     1 resources
-[22:41:22] [trace] Ant: Uniform buffers:
-[22:41:22] [warning] Ant: Shader creation took 23.622704ms
-[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Renderer2D_Circle.glsl
-[22:41:22] [trace] Ant:     1 uniform buffers
-[22:41:22] [trace] Ant:     0 resources
-[22:41:22] [trace] Ant: Uniform buffers:
-[22:41:22] [trace] Ant:   _47_49
-[22:41:22] [trace] Ant:     Size = 64
-[22:41:22] [trace] Ant:     Binding = 0
-[22:41:22] [trace] Ant:     Members = 1
-[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Renderer2D_Circle.glsl
-[22:41:22] [trace] Ant:     0 uniform buffers
-[22:41:22] [trace] Ant:     0 resources
-[22:41:22] [trace] Ant: Uniform buffers:
-[22:41:22] [warning] Ant: Shader creation took 18.368ms
-[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_VERTEX_SHADER assets/shaders/Renderer2D_Line.glsl
-[22:41:22] [trace] Ant:     1 uniform buffers
-[22:41:22] [trace] Ant:     0 resources
-[22:41:22] [trace] Ant: Uniform buffers:
-[22:41:22] [trace] Ant:   _30_32
-[22:41:22] [trace] Ant:     Size = 64
-[22:41:22] [trace] Ant:     Binding = 0
-[22:41:22] [trace] Ant:     Members = 1
-[22:41:22] [trace] Ant: OpenGLShader::Reflect - GL_FRAGMENT_SHADER assets/shaders/Renderer2D_Line.glsl
-[22:41:22] [trace] Ant:     0 uniform buffers
-[22:41:22] [trace] Ant:     0 resources
-[22:41:22] [trace] Ant: Uniform buffers:
-[22:41:22] [warning] Ant: Shader creation took 21.376703ms
-[22:41:27] [trace] Ant: Deserializing scene 'Untitled'
-[22:41:27] [trace] Ant: Deserialized entity with ID = 8039817404705721525, name = Empty Entity
-[22:41:27] [trace] Ant: Deserialized entity with ID = 7719088023965498189, name = Camera
-[22:41:27] [trace] Ant: Deserialized entity with ID = 9811137023733061944, name = Floor
-[22:41:27] [trace] Ant: Deserialized entity with ID = 4798822540820896989, name = Sprite
+[21:33:13] [info] Ant: Initialized Core Log
+[21:33:13] [trace] Ant: Ant Engine: v0.1a
+[21:33:13] [trace] Ant: Initializing...
+[21:33:13] [info] Ant: Creating window AntPlay (1600, 900)
+[21:33:13] [info] Ant: Loading texture assets/textures/BRDF_LUT.tga, srgb=false
+[21:33:13] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
+[21:33:13] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
+[21:33:13] [info] Ant: Loading HDR texture assets/env/birchwood_4k.hdr, srgb=false
+[21:33:14] [info] Ant: Load mesh: assets/meshes/TestScene.fbx
+[21:33:14] [trace] Ant: ---- Materials - assets/meshes/TestScene.fbx ----
+[21:33:14] [trace] Ant:   Wall (Index = 0)
+[21:33:14] [trace] Ant:     TextureCount = 0
+[21:33:14] [trace] Ant:     COLOR = 0.4256456, 0.4256456, 0.4256456
+[21:33:14] [trace] Ant:     ROUGHNESS = 0.75
+[21:33:14] [trace] Ant:     No albedo map
+[21:33:14] [trace] Ant:     No normal map
+[21:33:14] [trace] Ant:     No roughness map
+[21:33:14] [trace] Ant:     No metalness map
+[21:33:14] [trace] Ant:   Sphere (Index = 1)
+[21:33:14] [trace] Ant:     TextureCount = 0
+[21:33:14] [trace] Ant:     COLOR = 0.8000001, 0.046761245, 0.021217817
+[21:33:14] [trace] Ant:     ROUGHNESS = 0.100000024
+[21:33:14] [trace] Ant:     No albedo map
+[21:33:14] [trace] Ant:     No normal map
+[21:33:14] [trace] Ant:     No roughness map
+[21:33:14] [trace] Ant:     No metalness map
+[21:33:14] [trace] Ant:   Cone (Index = 2)
+[21:33:14] [trace] Ant:     TextureCount = 0
+[21:33:14] [trace] Ant:     COLOR = 0.011804402, 0.34609163, 0.8000001
+[21:33:14] [trace] Ant:     ROUGHNESS = 0.19999999
+[21:33:14] [trace] Ant:     No albedo map
+[21:33:14] [trace] Ant:     No normal map
+[21:33:14] [trace] Ant:     No roughness map
+[21:33:14] [trace] Ant:     No metalness map
+[21:33:14] [trace] Ant:   Cube (Index = 3)
+[21:33:14] [trace] Ant:     TextureCount = 0
+[21:33:14] [trace] Ant:     COLOR = 0.025761034, 0.8000001, 0
+[21:33:14] [trace] Ant:     ROUGHNESS = 0.5
+[21:33:14] [trace] Ant:     No albedo map
+[21:33:14] [trace] Ant:     No normal map
+[21:33:14] [trace] Ant:     No roughness map
+[21:33:14] [trace] Ant:     No metalness map
+[21:33:14] [trace] Ant:   Ground (Index = 4)
+[21:33:14] [trace] Ant:     TextureCount = 0
+[21:33:14] [trace] Ant:     COLOR = 0.022522327, 0.014681508, 0.014681508
+[21:33:14] [trace] Ant:     ROUGHNESS = 1
+[21:33:14] [trace] Ant:     No albedo map
+[21:33:14] [trace] Ant:     No normal map
+[21:33:14] [trace] Ant:     No roughness map
+[21:33:14] [trace] Ant:     No metalness map
+[21:33:14] [trace] Ant: ------------------------
+[21:33:14] [info] Ant: Load mesh: assets/models/m1911/M1911Materials.fbx
+[21:33:14] [trace] Ant: ---- Materials - assets/models/m1911/M1911Materials.fbx ----
+[21:33:14] [trace] Ant:   lambert1 (Index = 0)
+[21:33:14] [trace] Ant:     TextureCount = 1
+[21:33:14] [trace] Ant:     COLOR = 1, 1, 1
+[21:33:14] [trace] Ant:     ROUGHNESS = 0.5527864
+[21:33:14] [trace] Ant:     Albedo map path = assets/models/m1911\m1911_color.png
+[21:33:14] [info] Ant: Loading texture assets/models/m1911\m1911_color.png, srgb=true
+[21:33:14] [trace] Ant:     Normal map path = assets/models/m1911\m1911_normal.png
+[21:33:14] [info] Ant: Loading texture assets/models/m1911\m1911_normal.png, srgb=false
+[21:33:15] [trace] Ant:     Roughness map path = assets/models/m1911\m1911_roughness.png
+[21:33:15] [info] Ant: Loading texture assets/models/m1911\m1911_roughness.png, srgb=false
+[21:33:15] [trace] Ant:     Metalness map path = assets/models/m1911\m1911_metalness.png
+[21:33:15] [info] Ant: Loading texture assets/models/m1911\m1911_metalness.png, srgb=false
+[21:33:15] [trace] Ant: ------------------------
+[21:33:15] [info] Ant: Load mesh: assets/models/Sphere1m.fbx
+[21:33:15] [error] Ant: Assimp error: Error, T19204: FBX: no material assigned to mesh, setting default material
+
+[21:33:15] [trace] Ant: ---- Materials - assets/models/Sphere1m.fbx ----
+[21:33:15] [trace] Ant:   DefaultMaterial (Index = 0)
+[21:33:15] [trace] Ant:     TextureCount = 0
+[21:33:15] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
+[21:33:15] [trace] Ant:     ROUGHNESS = -nan
+[21:33:15] [trace] Ant:     No albedo map
+[21:33:15] [trace] Ant:     No normal map
+[21:33:15] [trace] Ant:     No roughness map
+[21:33:15] [trace] Ant:     No metalness map
+[21:33:15] [trace] Ant: ------------------------
+[21:33:15] [info] Ant: Load mesh: assets/models/Plane1m.obj
+[21:33:15] [error] Ant: Assimp error: Error, T19204: OBJ: Unable to locate material file Plane1m.mtl
+
+[21:33:15] [error] Ant: Assimp error: Error, T19204: OBJ: Unable to locate fallback material file assets/models/Plane1m.mtl
+
+[21:33:15] [error] Ant: Assimp error: Error, T19204: OBJ: failed to locate material None, creating new material
+
+[21:33:15] [trace] Ant: ---- Materials - assets/models/Plane1m.obj ----
+[21:33:15] [trace] Ant:   DefaultMaterial (Index = 0)
+[21:33:15] [trace] Ant:     TextureCount = 0
+[21:33:15] [trace] Ant:     COLOR = 0.6, 0.6, 0.6
+[21:33:15] [trace] Ant:     ROUGHNESS = 1
+[21:33:15] [trace] Ant:     No albedo map
+[21:33:15] [trace] Ant:     No normal map
+[21:33:15] [trace] Ant:     No roughness map
+[21:33:15] [trace] Ant:     No metalness map
+[21:33:15] [trace] Ant:   None (Index = 1)
+[21:33:15] [trace] Ant:     TextureCount = 0
+[21:33:15] [trace] Ant:     COLOR = 0.6, 0.6, 0.6
+[21:33:15] [trace] Ant:     ROUGHNESS = 1
+[21:33:15] [trace] Ant:     No albedo map
+[21:33:15] [trace] Ant:     No normal map
+[21:33:15] [trace] Ant:     No roughness map
+[21:33:15] [trace] Ant:     No metalness map
+[21:33:15] [trace] Ant: ------------------------
+[21:33:15] [info] Ant: Loading texture assets/editor/Checkerboard.tga, srgb=false
+[21:39:27] [info] Ant: Loading HDR texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\env\pink_sunrise_4k.hdr, srgb=false
+[21:40:07] [trace] Ant: Shutting down...

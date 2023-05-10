@@ -8,20 +8,13 @@ namespace Ant {
 
 	Ref<VertexArray> VertexArray::Create()
 	{
-		switch (Renderer::GetAPI())
+		switch (RendererAPI::Current())
 		{
-			case RendererAPI::API::None:
-			{
-				ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
-				return nullptr;
-			}
-			case RendererAPI::API::OpenGL:
-			{
-				return CreateRef<OpenGLVertexArray>();
-			}
+			case RendererAPIType::None:    ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+			case RendererAPIType::OpenGL:  return std::make_shared<OpenGLVertexArray>();
 		}
 
-		ANT_CORE_ASSERT(false, "Unknown RendererAPI!");
+		ANT_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;
 	}
 
