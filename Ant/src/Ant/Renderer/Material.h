@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Ant/Core/Base.h"
+#include "Ant/Core/Buffer.h"
+#include "Ant/Core/Ref.h"
 #include "Ant/Renderer/Shader.h"
 #include "Ant/Renderer/Texture.h"
-#include "Ant/Core/Buffer.h"
 
 #include <unordered_set>
+
 
 namespace Ant{
 
@@ -24,14 +26,14 @@ namespace Ant{
 		FrontFace			= BIT(9),
 	};
 
-	class Material
+	class Material : public RefCounted
 	{
 		friend class MaterialInstance;
 	public:
 		Material(const Ref<Shader>& shader);
 		virtual ~Material();
 
-		void Bind() const;
+		void Bind();
 
 		uint32_t GetFlags() const { return m_MaterialFlags; }
 		void SetFlag(MaterialFlag flag) { m_MaterialFlags |= static_cast<uint32_t>(flag); };
@@ -72,7 +74,7 @@ namespace Ant{
 	private:
 		void AllocateStorage();
 		void OnShaderReloaded();
-		void BindTextures() const;
+		void BindTextures();
 
 		ShaderUniformDeclaration* FindUniformDeclaration(const std::string& name);
 		ShaderResourceDeclaration* FindResourceDeclaration(const std::string& name);
@@ -88,7 +90,7 @@ namespace Ant{
 		uint32_t m_MaterialFlags;
 	};
 
-	class MaterialInstance
+	class MaterialInstance : public RefCounted
 	{
 		friend class Material;
 	public:
@@ -130,7 +132,7 @@ namespace Ant{
 			Set(name, (const Ref<Texture>&)texture);
 		}
 
-		void Bind() const;
+		void Bind();
 
 		uint32_t GetFlags() const { return m_Material->m_MaterialFlags; }
 		bool GetFlag(MaterialFlag flag) const { return (uint32_t)flag & m_Material->m_MaterialFlags; }

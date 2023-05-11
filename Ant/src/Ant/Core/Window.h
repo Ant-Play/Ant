@@ -1,8 +1,11 @@
 #pragma once
 #include "Ant/Core/Base.h"
 #include "Ant/Core/Events/Event.h"
+#include "Ref.h"
 
 #include <sstream>
+
+
 namespace Ant {
 
 	//¥∞ø⁄ Ù–‘
@@ -22,7 +25,7 @@ namespace Ant {
 	};
 
 	// Interface representing a desktop system based Window
-	class Window
+	class Window : public RefCounted
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;

@@ -21,6 +21,7 @@ namespace Ant {
 		return 0;
 	}
 
+
 	OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, uint32_t size, VertexBufferUsage usage)
 		: m_Size(size), m_Usage(usage)
 	{
@@ -68,14 +69,28 @@ namespace Ant {
 	/////////////////////////////////////////////////////////////////////////////
 	// IndexBuffer /////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////
+
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t size)
+		: m_Size(size)
+	{
+		// m_LocalData = Buffer(size);
+
+		Ref<OpenGLIndexBuffer> instance = this;
+		Renderer::Submit([instance]() mutable {
+			glCreateBuffers(1, &instance->m_RendererID);
+			glNamedBufferData(instance->m_RendererID, instance->m_Size, nullptr, GL_DYNAMIC_DRAW);
+			});
+	}
+
 	OpenGLIndexBuffer::OpenGLIndexBuffer(void* data, uint32_t size)
 		: m_RendererID(0), m_Size(size)
 	{
 		m_LocalData = Buffer::Copy(data, size);
 
-		Renderer::Submit([this]() {
-			glCreateBuffers(1, &m_RendererID);
-			glNamedBufferData(m_RendererID, m_Size, m_LocalData.Data, GL_STATIC_DRAW);
+		Ref<OpenGLIndexBuffer> instance = this;
+		Renderer::Submit([instance]() mutable {
+			glCreateBuffers(1, &instance->m_RendererID);
+			glNamedBufferData(instance->m_RendererID, instance->m_Size, instance->m_LocalData.Data, GL_STATIC_DRAW);
 			});
 	}
 
@@ -90,8 +105,9 @@ namespace Ant {
 	{
 		m_LocalData = Buffer::Copy(data, size);
 		m_Size = size;
-		Renderer::Submit([this, offset]() {
-			glNamedBufferSubData(m_RendererID, offset, m_Size, m_LocalData.Data);
+		Ref<OpenGLIndexBuffer> instance = this;
+		Renderer::Submit([instance, offset]() {
+			glNamedBufferSubData(instance->m_RendererID, offset, instance->m_Size, instance->m_LocalData.Data);
 			});
 	}
 

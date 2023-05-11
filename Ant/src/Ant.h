@@ -34,7 +34,6 @@
 #include "Ant/Renderer/Shader.h"
 #include "Ant/Renderer/FrameBuffer.h"
 #include "Ant/Renderer/Texture.h"
-#include "Ant/Renderer/SubTexture.h"
 #include "Ant/Renderer/VertexArray.h"
 #include "Ant/Renderer/SceneRenderer.h"
 #include "Ant/Renderer/Material.h"
@@ -42,8 +41,6 @@
 #include "Ant/Renderer/Camera.h"
 #include "Ant/Renderer/RenderPass.h"
 
-#include "Ant/Renderer/OrthographicCamera.h"
-#include "Ant/Renderer/OrthographicCameraController.h"
 // ---------------------------------------------------
 
 // Scenes

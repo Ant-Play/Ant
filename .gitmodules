@@ -19,3 +19,6 @@
 [submodule "Ant/vendor/Box2D"]
 	path = Ant/vendor/Box2D
 	url = https://github.com/TheCherno/box2d.git
+[submodule "Ant/vendor/FastNoise"]
+	path = Ant/vendor/FastNoise
+	url = https://github.com/Auburn/FastNoiseLite.git

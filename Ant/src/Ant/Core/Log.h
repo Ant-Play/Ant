@@ -9,6 +9,8 @@
 #pragma warning(push, 0)
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
+
+#include "Ref.h"
 #pragma warning(pop)
 
 
@@ -20,12 +22,12 @@ namespace Ant{
 	public:
 		static void Init();
 
-		inline static Ref<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
-		inline static Ref<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
+		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
+		inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
 
 	private:
-		static Ref<spdlog::logger> s_CoreLogger;
-		static Ref<spdlog::logger> s_ClientLogger;
+		static std::shared_ptr<spdlog::logger> s_CoreLogger;
+		static std::shared_ptr<spdlog::logger> s_ClientLogger;
 	};
 }
 

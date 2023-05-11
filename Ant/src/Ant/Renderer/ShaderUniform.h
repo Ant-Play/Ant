@@ -13,7 +13,7 @@ namespace Ant{
 		None = 0, Vertex = 0, Pixel = 1
 	};
 
-	class ShaderUniformDeclaration
+	class ShaderUniformDeclaration : public RefCounted
 	{
 	private:
 		friend class Shader;

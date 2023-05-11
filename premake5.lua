@@ -38,6 +38,10 @@ group "Core"
     include "Ant-ScriptCore"
 group ""
 
+group "Examples"
+    include "ExampleApp"
+group ""
+
 group "Tools"
 	include "AntPlay"
 group ""

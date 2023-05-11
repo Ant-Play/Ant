@@ -146,7 +146,7 @@ namespace Ant{
 		return m_FocalPoint - GetForwardDirection() * m_Distance;
 	}
 
-	glm::quat Camera::GetOrientation()
+	glm::quat Camera::GetOrientation() const
 	{
 		return glm::quat(glm::vec3(-m_Pitch, -m_Yaw, 0.0f));
 	}

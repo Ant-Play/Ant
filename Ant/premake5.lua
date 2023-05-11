@@ -2,7 +2,7 @@ project "Ant"
     kind "StaticLib"
     language "C++"
     cppdialect "C++17"
-    staticruntime "on"
+    staticruntime "off"
     
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -21,8 +21,9 @@ project "Ant"
 
         "vendor/ImGuizmo/ImGuizmo.h",
         "vendor/ImGuizmo/ImGuizmo.cpp",
-        "/vendor/assimp/include"
+        "/vendor/assimp/include",
 
+        "/vendor/FastNoise/Cpp/**.h"
     }
 
     defines
@@ -43,6 +44,7 @@ project "Ant"
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.entt}",
+        "%{IncludeDir.FastNoise}",
         "%{IncludeDir.mono}",
         "%{IncludeDir.yaml_cpp}",
         "%{IncludeDir.ImGuizmo}",

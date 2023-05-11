@@ -2,6 +2,7 @@
 
 #include "Ant/Core/Base.h"
 #include "Ant/Core/Buffer.h"
+#include "Ant/Core/Ref.h"
 
 #include "Ant/Renderer/RendererAPI.h"
 #include "Ant/Renderer/ShaderUniform.h"
@@ -10,16 +11,17 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+
 namespace Ant{
 
 	struct ShaderUniform
 	{
-		
+
 	};
 
 	struct ShaderUniformCollection
 	{
-		
+
 	};
 
 	enum class UniformType
@@ -102,9 +104,10 @@ namespace Ant{
 			memcpy(Buffer + Cursor, glm::value_ptr(data), sizeof(glm::mat4));
 			Cursor += sizeof(glm::mat4);
 		}
+
 	};
 
-	class Shader
+	class Shader : public RefCounted
 	{
 	public:
 		using ShaderReloadedCallback = std::function<void()>;
@@ -118,6 +121,7 @@ namespace Ant{
 		// Temporary while we don't have materials
 		virtual void SetFloat(const std::string& name, float value) = 0;
 		virtual void SetInt(const std::string& name, int value) = 0;
+		virtual void SetFloat3(const std::string& name, const glm::vec3& value) = 0;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
 		virtual void SetMat4FromRenderThread(const std::string& name, const glm::mat4& value, bool bind = true) = 0;
 
@@ -150,7 +154,7 @@ namespace Ant{
 	};
 
 	// This should be eventually handled by the Asset Manager
-	class ShaderLibrary 
+	class ShaderLibrary : public RefCounted
 	{
 	public:
 		ShaderLibrary();
@@ -160,8 +164,9 @@ namespace Ant{
 		void Load(const std::string& path);
 		void Load(const std::string& name, const std::string& path);
 
-		Ref<Shader>& Get(const std::string& name);
+		const Ref<Shader>& Get(const std::string& name) const;
 	private:
 		std::unordered_map<std::string, Ref<Shader>> m_Shaders;
 	};
+
 }

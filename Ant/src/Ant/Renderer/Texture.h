@@ -2,6 +2,7 @@
 
 #include "Ant/Core/Base.h"
 #include "Ant/Core/Buffer.h"
+#include "Ant/Core/Ref.h"
 #include "Ant/Renderer/RendererAPI.h"
 
 namespace Ant{
@@ -21,7 +22,7 @@ namespace Ant{
 		Repeat = 2
 	};
 
-	class Texture
+	class Texture : public RefCounted
 	{
 	public:
 		virtual ~Texture() {}

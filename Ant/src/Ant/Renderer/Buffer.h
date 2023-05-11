@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Ant/Core/Ref.h"
 #include "Ant/Renderer/RendererAPI.h"
 
 #include <string>
 #include <vector>
+
 
 namespace Ant{
 
@@ -116,7 +118,7 @@ namespace Ant{
 		None = 0, Static = 1, Dynamic = 2
 	};
 
-	class VertexBuffer
+	class VertexBuffer : public RefCounted
 	{
 	public:
 		virtual ~VertexBuffer() {}
@@ -135,7 +137,7 @@ namespace Ant{
 	};
 
 	// Currently Ant only supports 32-bit index buffers
-	class IndexBuffer
+	class IndexBuffer : public RefCounted
 	{
 	public:
 		virtual ~IndexBuffer() {}
@@ -148,6 +150,7 @@ namespace Ant{
 		virtual unsigned int GetSize() const = 0;
 		virtual RendererID GetRendererID() const = 0;
 
+		static Ref<IndexBuffer> Create(uint32_t size);
 		static Ref<IndexBuffer> Create(void* data, uint32_t size = 0);
 	};
 }

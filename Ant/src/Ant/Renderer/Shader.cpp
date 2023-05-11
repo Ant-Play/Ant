@@ -1,5 +1,6 @@
 #include "antpch.h"
 #include "Ant/Renderer/Shader.h"
+
 #include "Ant/Renderer/Renderer.h"
 #include "Ant/Platform/OpenGL/OpenGLShader.h"
 
@@ -12,10 +13,10 @@ namespace Ant {
 	{
 		Ref<Shader> result = nullptr;
 
-		switch(RendererAPI::Current())
+		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::None: return nullptr;
-			case RendererAPIType::OpenGL: result = CreateRef<OpenGLShader>(filepath);
+		case RendererAPIType::None: return nullptr;
+		case RendererAPIType::OpenGL: result = Ref<OpenGLShader>::Create(filepath);
 		}
 		s_AllShaders.push_back(result);
 		return result;
@@ -24,27 +25,25 @@ namespace Ant {
 	Ref<Shader> Shader::CreateFromString(const std::string& source)
 	{
 		Ref<Shader> result = nullptr;
-		switch(RendererAPI::Current())
+
+		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::None: return nullptr;
-			case RendererAPIType::OpenGL: result = OpenGLShader::CreateFromString(source);
+		case RendererAPIType::None: return nullptr;
+		case RendererAPIType::OpenGL: result = OpenGLShader::CreateFromString(source);
 		}
 		s_AllShaders.push_back(result);
-		return result;	
+		return result;
 	}
-
 
 	ShaderLibrary::ShaderLibrary()
 	{
-
 	}
 
 	ShaderLibrary::~ShaderLibrary()
 	{
-
 	}
 
-	void ShaderLibrary::Add(const Ref<Shader>& shader)
+	void ShaderLibrary::Add(const Ant::Ref<Shader>& shader)
 	{
 		auto& name = shader->GetName();
 		ANT_CORE_ASSERT(m_Shaders.find(name) == m_Shaders.end());
@@ -65,10 +64,9 @@ namespace Ant {
 		m_Shaders[name] = Ref<Shader>(Shader::Create(path));
 	}
 
-	Ref<Shader>& ShaderLibrary::Get(const std::string& name)
+	const Ref<Shader>& ShaderLibrary::Get(const std::string& name) const
 	{
 		ANT_CORE_ASSERT(m_Shaders.find(name) != m_Shaders.end());
-		return m_Shaders[name];
+		return m_Shaders.at(name);
 	}
-
 }

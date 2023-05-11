@@ -49,12 +49,6 @@
     <Filter Include="src\Ant\Utils">
       <UniqueIdentifier>{3F9F029F-AB5F-7ED5-749A-C752E019C3B1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="\vendor">
-      <UniqueIdentifier>{C2335340-2E13-D2DB-372B-5DB2A389383D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="\vendor\assimp">
-      <UniqueIdentifier>{9E90D678-8A5E-CA7E-73F2-3AA55F5FA6E3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
@@ -210,12 +204,6 @@
     <ClInclude Include="src\Ant\Renderer\Mesh.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Renderer\OrthographicCamera.h">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Renderer\OrthographicCameraController.h">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\Ant\Renderer\RenderCommandQueue.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
@@ -240,9 +228,6 @@
     <ClInclude Include="src\Ant\Renderer\ShaderUniform.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Renderer\SubTexture.h">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Texture.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
@@ -255,7 +240,7 @@
     <ClInclude Include="src\Ant\Scene\Scene.h">
       <Filter>src\Ant\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Scripts\ScriptsEngine.h">
+    <ClInclude Include="src\Ant\Scripts\ScriptEngine.h">
       <Filter>src\Ant\Scripts</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Utils\PlatformUtils.h">
@@ -1518,6 +1503,11 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Core\Ref.h" />
+    <ClInclude Include="src\Ant\Core\Math\Noise.h" />
+    <ClInclude Include="src\Ant\Scene\Component.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptEngineRegistry.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptWrappers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
@@ -1607,12 +1597,6 @@
     <ClCompile Include="src\Ant\Renderer\Mesh.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\OrthographicCamera.cpp">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\OrthographicCameraController.cpp">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="src\Ant\Renderer\RenderCommandQueue.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
@@ -1634,9 +1618,6 @@
     <ClCompile Include="src\Ant\Renderer\Shader.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\SubTexture.cpp">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Texture.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
@@ -1649,7 +1630,7 @@
     <ClCompile Include="src\Ant\Scene\Scene.cpp">
       <Filter>src\Ant\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Scripts\ScriptsEngine.cpp">
+    <ClCompile Include="src\Ant\Scripts\ScriptEngine.cpp">
       <Filter>src\Ant\Scripts</Filter>
     </ClCompile>
     <ClCompile Include="src\antpch.cpp">
@@ -1661,10 +1642,11 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Core\Math\Noise.cpp" />
+    <ClCompile Include="src\Ant\Scripts\ScriptEngineRegistry.cpp" />
+    <ClCompile Include="src\Ant\Scripts\ScriptWrappers.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="\vendor\assimp\include">
-      <Filter>\vendor\assimp</Filter>
-    </None>
+    <None Include="\vendor\assimp\include" />
   </ItemGroup>
 </Project>

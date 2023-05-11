@@ -30,7 +30,7 @@ namespace Ant {
 
 	Ref<OpenGLShader> OpenGLShader::CreateFromString(const std::string& source)
 	{
-		Ref<OpenGLShader> shader = std::make_shared<OpenGLShader>();
+		Ref<OpenGLShader> shader = Ref<OpenGLShader>::Create();
 		shader->Load(source);
 		return shader;
 	}
@@ -231,6 +231,8 @@ namespace Ant {
 		m_Structs.clear();
 		m_VSMaterialUniformBuffer.reset();
 		m_PSMaterialUniformBuffer.reset();
+		//m_VSMaterialUniformBuffer.Reset();
+		//m_PSMaterialUniformBuffer.Reset();
 
 		auto& vertexSource = m_ShaderSource[GL_VERTEX_SHADER];
 		auto& fragmentSource = m_ShaderSource[GL_FRAGMENT_SHADER];
@@ -625,7 +627,7 @@ namespace Ant {
 			});
 	}
 
-	void OpenGLShader::ResolveAndSetUniforms(const Scope<OpenGLShaderUniformBufferDeclaration>& decl, Buffer buffer)
+	void OpenGLShader::ResolveAndSetUniforms(const std::shared_ptr<OpenGLShaderUniformBufferDeclaration>& decl, Buffer buffer)
 	{
 		const ShaderUniformList& uniforms = decl->GetUniformDeclarations();
 		for (size_t i = 0; i < uniforms.size(); i++)
@@ -797,6 +799,13 @@ namespace Ant {
 	{
 		Renderer::Submit([=]() {
 			UploadUniformInt(name, value);
+			});
+	}
+
+	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
+	{
+		Renderer::Submit([=]() {
+			UploadUniformFloat3(name, value);
 			});
 	}
 
