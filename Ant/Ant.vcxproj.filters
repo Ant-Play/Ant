@@ -49,9 +49,6 @@
     <Filter Include="src\Ant\Utils">
       <UniqueIdentifier>{3F9F029F-AB5F-7ED5-749A-C752E019C3B1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="\vendor">
-      <UniqueIdentifier>{C2335340-2E13-D2DB-372B-5DB2A389383D}</UniqueIdentifier>
-    </Filter>
     <Filter Include="\vendor\assimp">
       <UniqueIdentifier>{9E90D678-8A5E-CA7E-73F2-3AA55F5FA6E3}</UniqueIdentifier>
     </Filter>
@@ -177,9 +174,6 @@
     <ClInclude Include="src\Ant\Math\Math.h">
       <Filter>src\Ant\Math</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLBuffer.h">
-      <Filter>src\Ant\Platform\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLFramebuffer.h">
       <Filter>src\Ant\Platform\OpenGL</Filter>
     </ClInclude>
@@ -195,14 +189,8 @@
     <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLTexture.h">
       <Filter>src\Ant\Platform\OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLVertexArray.h">
-      <Filter>src\Ant\Platform\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="src\Ant\Platform\Windows\WindowsWindow.h">
       <Filter>src\Ant\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Renderer\Buffer.h">
-      <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Camera.h">
       <Filter>src\Ant\Renderer</Filter>
@@ -241,9 +229,6 @@
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Renderer\Texture.h">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Renderer\VertexArray.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Scene\Component.h">
@@ -1530,6 +1515,12 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Renderer\IndexBuffer.h" />
+    <ClInclude Include="src\Ant\Renderer\Pipeline.h" />
+    <ClInclude Include="src\Ant\Renderer\VertexBuffer.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLIndexBuffer.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLPipeline.h" />
+    <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLVertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
@@ -1574,9 +1565,6 @@
     <ClCompile Include="src\Ant\Math\Math.cpp">
       <Filter>src\Ant\Math</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLBuffer.cpp">
-      <Filter>src\Ant\Platform\OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLFramebuffer.cpp">
       <Filter>src\Ant\Platform\OpenGL</Filter>
     </ClCompile>
@@ -1595,9 +1583,6 @@
     <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLTexture.cpp">
       <Filter>src\Ant\Platform\OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLVertexArray.cpp">
-      <Filter>src\Ant\Platform\OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Ant\Platform\Windows\WindowsInput.cpp">
       <Filter>src\Ant\Platform\Windows</Filter>
     </ClCompile>
@@ -1606,9 +1591,6 @@
     </ClCompile>
     <ClCompile Include="src\Ant\Platform\Windows\WindowsWindow.cpp">
       <Filter>src\Ant\Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\Buffer.cpp">
-      <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Renderer\Camera.cpp">
       <Filter>src\Ant\Renderer</Filter>
@@ -1646,9 +1628,6 @@
     <ClCompile Include="src\Ant\Renderer\Texture.cpp">
       <Filter>src\Ant\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Renderer\VertexArray.cpp">
-      <Filter>src\Ant\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="src\Ant\Scene\Entity.cpp">
       <Filter>src\Ant\Scene</Filter>
     </ClCompile>
@@ -1679,6 +1658,12 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Renderer\IndexBuffer.cpp" />
+    <ClCompile Include="src\Ant\Renderer\Pipeline.cpp" />
+    <ClCompile Include="src\Ant\Renderer\VertexBuffer.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLIndexBuffer.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLPipeline.cpp" />
+    <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLVertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="\vendor\assimp\include">

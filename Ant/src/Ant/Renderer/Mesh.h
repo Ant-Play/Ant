@@ -2,8 +2,9 @@
 
 #include "Ant/Core/Timestep.h"
 
-#include "Ant/Renderer/VertexArray.h"
-#include "Ant/Renderer/Buffer.h"
+#include "Ant/Renderer/Pipeline.h"
+#include "Ant/Renderer/IndexBuffer.h"
+#include "Ant/Renderer/VertexBuffer.h"
 #include "Ant/Renderer/Shader.h"
 #include "Ant/Renderer/Material.h"
 
@@ -166,7 +167,9 @@ namespace Ant{
 		uint32_t m_BoneCount = 0;
 		std::vector<BoneInfo> m_BoneInfo;
 
-		Ref<VertexArray> m_VertexArray;
+		Ref<Pipeline> m_Pipeline;
+		Ref<VertexBuffer> m_VertexBuffer;
+		Ref<IndexBuffer> m_IndexBuffer;
 
 		std::vector<Vertex> m_StaticVertices;
 		std::vector<AnimatedVertex> m_AnimatedVertices;

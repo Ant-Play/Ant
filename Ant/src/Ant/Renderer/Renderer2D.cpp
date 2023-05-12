@@ -1,7 +1,7 @@
 #include "antpch.h"
 #include "Ant/Renderer/Renderer2D.h"
 
-#include "Ant/Renderer/VertexArray.h"
+#include "Ant/Renderer/Pipeline.h"
 #include "Ant/Renderer/Shader.h"
 #include "Ant/Renderer/Renderer.h"
 
@@ -36,8 +36,11 @@ namespace Ant{
 		static const uint32_t MaxLineVertices = MaxLines * 2;
 		static const uint32_t MaxLineIndices = MaxLines * 6;
 
-		Ref<VertexArray> QuadVertexArray;
+		Ref<Pipeline> QuadPipeline;
 		Ref<VertexBuffer> QuadVertexBuffer;
+		Ref<IndexBuffer> QuadIndexBuffer;
+
+
 		Ref<Shader> TextureShader;
 		Ref<Texture2D> WhiteTexture;
 
@@ -51,9 +54,10 @@ namespace Ant{
 		glm::vec4 QuadVertexPositions[4];
 
 		// Lines
-		Ref<VertexArray> LineVertexArray;
+		Ref<Pipeline> LinePipeline;
 		Ref<VertexBuffer> LineVertexBuffer;
 		Ref<Shader> LineShader;
+		Ref<IndexBuffer> LineIndexBuffer;
 
 		uint32_t LineIndexCount = 0;
 		LineVertex* LineVertexBufferBase = nullptr;
@@ -69,39 +73,38 @@ namespace Ant{
 
 	void Renderer2D::Init()
 	{
-		s_Data.QuadVertexArray = VertexArray::Create();
-
-		s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
-		s_Data.QuadVertexBuffer->SetLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color" },
-			{ ShaderDataType::Float2, "a_TexCoord" },
-			{ ShaderDataType::Float, "a_TexIndex" },
-			{ ShaderDataType::Float, "a_TilingFactor" }
-			});
-		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
-
-		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
-
-		uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
-
-		uint32_t offset = 0;
-		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+		
 		{
-			quadIndices[i + 0] = offset + 0;
-			quadIndices[i + 1] = offset + 1;
-			quadIndices[i + 2] = offset + 2;
+			PipelineSpecification pipelineSpecification;
+			pipelineSpecification.Layout = {
+				{ ShaderDataType::Float3, "a_Position" },
+				{ ShaderDataType::Float4, "a_Color" },
+				{ ShaderDataType::Float2, "a_TexCoord" },
+				{ ShaderDataType::Float, "a_TexIndex" },
+				{ ShaderDataType::Float, "a_TilingFactor" }
+			};
+			s_Data.QuadPipeline = Pipeline::Create(pipelineSpecification);
 
-			quadIndices[i + 3] = offset + 2;
-			quadIndices[i + 4] = offset + 3;
-			quadIndices[i + 5] = offset + 0;
+			s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
+			s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 
-			offset += 4;
+			uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
+
+			uint32_t offset = 0;
+			for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+			{
+				quadIndices[i + 0] = offset + 0;
+				quadIndices[i + 1] = offset + 1;
+				quadIndices[i + 2] = offset + 2;
+				quadIndices[i + 3] = offset + 2;
+				quadIndices[i + 4] = offset + 3;
+				quadIndices[i + 5] = offset + 0;
+
+				offset += 4;
+			}
+			s_Data.QuadIndexBuffer = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
+			delete[] quadIndices;
 		}
-
-		Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
-		s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
-		delete[] quadIndices;
 
 		s_Data.WhiteTexture = Texture2D::Create(TextureFormat::RGBA, 1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
@@ -120,25 +123,21 @@ namespace Ant{
 		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 
 		// Lines
-		s_Data.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
-		s_Data.LineVertexArray = VertexArray::Create();
-
-		s_Data.LineVertexBuffer = VertexBuffer::Create(s_Data.MaxLineVertices * sizeof(LineVertex));
-		s_Data.LineVertexBuffer->SetLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color" }
-			});
-		s_Data.LineVertexArray->AddVertexBuffer(s_Data.LineVertexBuffer);
-
-		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxLineVertices];
-
-		uint32_t* lineIndices = new uint32_t[s_Data.MaxLineIndices];
-		for (uint32_t i = 0; i < s_Data.MaxLineIndices; i++)
-			lineIndices[i] = i;
-
-		Ref<IndexBuffer> lineIB = IndexBuffer::Create(lineIndices, s_Data.MaxLineIndices);
-		s_Data.LineVertexArray->SetIndexBuffer(lineIB);
-		delete[] lineIndices;
+		{
+			PipelineSpecification pipelineSpecification;
+			pipelineSpecification.Layout = {
+				{ ShaderDataType::Float3, "a_Position" },
+				{ ShaderDataType::Float4, "a_Color" }
+			};
+			s_Data.LinePipeline = Pipeline::Create(pipelineSpecification);
+			s_Data.LineVertexBuffer = VertexBuffer::Create(s_Data.MaxLineVertices * sizeof(LineVertex));
+			s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxLineVertices];
+			uint32_t* lineIndices = new uint32_t[s_Data.MaxLineIndices];
+			for (uint32_t i = 0; i < s_Data.MaxLineIndices; i++)
+				lineIndices[i] = i;
+			s_Data.LineIndexBuffer = IndexBuffer::Create(lineIndices, s_Data.MaxLineIndices);
+			delete[] lineIndices;
+		}
 	}
 
 	void Renderer2D::Shutdown()
@@ -175,7 +174,8 @@ namespace Ant{
 			for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 				s_Data.TextureSlots[i]->Bind(i);
 
-			s_Data.QuadVertexArray->Bind();
+			s_Data.QuadPipeline->Bind();
+			s_Data.QuadIndexBuffer->Bind();
 			Renderer::DrawIndexed(s_Data.QuadIndexCount, PrimitiveType::Triangles, s_Data.DepthTest);
 			s_Data.Stats.DrawCalls++;
 		}
@@ -188,7 +188,8 @@ namespace Ant{
 			s_Data.LineShader->Bind();
 			s_Data.LineShader->SetMat4("u_ViewProjection", s_Data.CameraViewProj);
 
-			s_Data.LineVertexArray->Bind();
+			s_Data.LinePipeline->Bind();
+			s_Data.LineIndexBuffer->Bind();
 			Renderer::SetLineThickness(2.0f);
 			Renderer::DrawIndexed(s_Data.LineIndexCount, PrimitiveType::Lines, s_Data.DepthTest);
 			s_Data.Stats.DrawCalls++;
