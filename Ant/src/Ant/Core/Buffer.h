@@ -2,59 +2,42 @@
 
 #include "Ant/Core/Base.h"
 
-#include <stdint.h>
-#include <cstring>
-
 namespace Ant {
+
 	// Non-owning raw buffer class
 	struct Buffer
 	{
-		byte* Data = nullptr;
-		uint64_t Size = 0;
+		byte* Data;
+		uint32_t Size;
 
 		Buffer()
 			: Data(nullptr), Size(0)
-		{}
-
-		Buffer(uint64_t size)
 		{
-			Allocate(size);
 		}
 
-		Buffer(byte* data, uint64_t size)
+		Buffer(byte* data, uint32_t size)
 			: Data(data), Size(size)
-		{}
-
-		Buffer(const Buffer&) = default;
-
-		static Buffer Copy(Buffer other)
 		{
-			Buffer result(other.Size);
-			memcpy(result.Data, other.Data, other.Size);
-			return result;
 		}
 
-		static Buffer Copy(void* data, uint64_t size)
+		static Buffer Copy(void* data, uint32_t size)
 		{
-			Buffer result;
-			result.Allocate(size);
-			memcpy(result.Data, data, size);
-			return result;
+			Buffer buffer;
+			buffer.Allocate(size);
+			memcpy(buffer.Data, data, size);
+			return buffer;
 		}
 
-		void Allocate(uint64_t size)
-		{
-			Release();
-
-			Data = new uint8_t[size];
-			Size = size;
-		}
-
-		void Release()
+		void Allocate(uint32_t size)
 		{
 			delete[] Data;
 			Data = nullptr;
-			Size = 0;
+
+			if (size == 0)
+				return;
+
+			Data = new byte[size];
+			Size = size;
 		}
 
 		void ZeroInitialize()
@@ -63,10 +46,25 @@ namespace Ant {
 				memset(Data, 0, Size);
 		}
 
-		void Write(void* data, uint64_t size, uint64_t offset = 0)
+		void Write(void* data, uint32_t size, uint32_t offset = 0)
 		{
-			ANT_CORE_ASSERT(offset + size <= Size, "Buffer overflow");
+			ANT_CORE_ASSERT(offset + size <= Size, "Buffer overflow!");
 			memcpy(Data + offset, data, size);
+		}
+
+		operator bool() const
+		{
+			return Data;
+		}
+
+		byte& operator[](int index)
+		{
+			return Data[index];
+		}
+
+		byte operator[](int index) const
+		{
+			return Data[index];
 		}
 
 		template<typename T>
@@ -75,20 +73,7 @@ namespace Ant {
 			return (T*)Data;
 		}
 
-		operator bool() const
-		{
-			return (bool)Data;
-		}
-
-		byte& operator[](int index)
-		{
-			return Data[index];
-		}
-
-		byte& operator[](int index) const
-		{
-			return Data[index];
-		}
+		inline uint32_t GetSize() const { return Size; }
 	};
 
 }

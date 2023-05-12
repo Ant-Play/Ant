@@ -1,5 +1,7 @@
 #include "antpch.h"
 #include "Ant/Scripts/ScriptEngine.h"
+
+#include "Ant/Scripts/ScriptEngineRegistry.h"
 #include "Ant/Scene/Scene.h"
 
 #include <mono/jit/jit.h>
@@ -15,14 +17,15 @@
 #include <Windows.h>
 #include <winioctl.h>
 
-#include "ScriptEngineRegistry.h"
+#include <imgui.h>
 
 namespace Ant {
 
 	static MonoDomain* s_MonoDomain = nullptr;
 	static std::string s_AssemblyPath;
+	static Ref<Scene> s_SceneContext;
 
-	static ScriptModuleFieldMap s_PublicFields;
+	static EntityInstanceMap s_EntityInstanceMap;
 
 	static MonoMethod* GetMethod(MonoImage* image, const std::string& methodDesc);
 
@@ -32,10 +35,10 @@ namespace Ant {
 		std::string ClassName;
 		std::string NamespaceName;
 
-		MonoClass* Class;
-		MonoMethod* OnCreateMethod;
-		MonoMethod* OnDestroyMethod;
-		MonoMethod* OnUpdateMethod;
+		MonoClass* Class = nullptr;
+		MonoMethod* OnCreateMethod = nullptr;
+		MonoMethod* OnDestroyMethod = nullptr;
+		MonoMethod* OnUpdateMethod = nullptr;
 
 		void InitClassMethods(MonoImage* image)
 		{
@@ -44,40 +47,36 @@ namespace Ant {
 		}
 	};
 
-	struct EntityInstance
+	MonoObject* EntityInstance::GetInstance()
 	{
-		EntityScriptClass* ScriptClass;
-
-		uint32_t Handle;
-		Scene* SceneInstance;
-
-		MonoObject* GetInstance()
-		{
-			return mono_gchandle_get_target(Handle);
-		}
-	};
+		ANT_CORE_ASSERT(Handle, "Entity has not been instantiated!");
+		return mono_gchandle_get_target(Handle);
+	}
 
 	static std::unordered_map<std::string, EntityScriptClass> s_EntityClassMap;
-	static std::unordered_map<uint32_t, EntityInstance> s_EntityInstanceMap;
 
 	MonoAssembly* LoadAssemblyFromFile(const char* filepath)
 	{
-		if(filepath == NULL)
+		if (filepath == NULL)
+		{
 			return NULL;
+		}
 
 		HANDLE file = CreateFileA(filepath, FILE_READ_ACCESS, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		if(file == INVALID_HANDLE_VALUE)
+		if (file == INVALID_HANDLE_VALUE)
+		{
 			return NULL;
+		}
 
 		DWORD file_size = GetFileSize(file, NULL);
-		if(file_size == INVALID_FILE_SIZE)
+		if (file_size == INVALID_FILE_SIZE)
 		{
 			CloseHandle(file);
 			return NULL;
 		}
 
 		void* file_data = malloc(file_size);
-		if(file_data == NULL)
+		if (file_data == NULL)
 		{
 			CloseHandle(file);
 			return NULL;
@@ -85,7 +84,7 @@ namespace Ant {
 
 		DWORD read = 0;
 		ReadFile(file, file_data, file_size, &read, NULL);
-		if(file_size != read)
+		if (file_size != read)
 		{
 			free(file_data);
 			CloseHandle(file);
@@ -95,8 +94,9 @@ namespace Ant {
 		MonoImageOpenStatus status;
 		MonoImage* image = mono_image_open_from_data_full(reinterpret_cast<char*>(file_data), file_size, 1, &status, 0);
 		if (status != MONO_IMAGE_OK)
+		{
 			return NULL;
-
+		}
 		auto assemb = mono_assembly_load_from_full(image, filepath, &status, 0);
 		free(file_data);
 		CloseHandle(file);
@@ -107,34 +107,35 @@ namespace Ant {
 	static void InitMono()
 	{
 		mono_set_assemblies_path("mono/lib");
+		// mono_jit_set_trace_options("--verbose");
 		auto domain = mono_jit_init("Ant");
 
 		char* name = (char*)"AntRuntime";
 		s_MonoDomain = mono_domain_create_appdomain(name, nullptr);
 	}
 
-	static MonoAssembly* LoadAssembly(const std::string& filepath)
+	static void ShutdownMono()
 	{
-		auto assembly = LoadAssemblyFromFile(filepath.c_str()); //mono_domain_assembly_open(s_MonoDomain, path.c_str());
+		mono_jit_cleanup(s_MonoDomain);
+	}
 
-		if(!assembly)
-		{
-			ANT_CORE_ERROR("Failed to load assembly: {0}", filepath);
-			return NULL;
-		}
+	static MonoAssembly* LoadAssembly(const std::string& path)
+	{
+		MonoAssembly* assembly = LoadAssemblyFromFile(path.c_str());
 
-		ANT_CORE_INFO("Successfully loaded assembly: {0}", filepath);
+		if (!assembly)
+			std::cout << "Could not load assembly: " << path << std::endl;
+		else
+			std::cout << "Successfully loaded assembly: " << path << std::endl;
+
 		return assembly;
 	}
 
 	static MonoImage* GetAssemblyImage(MonoAssembly* assembly)
 	{
 		MonoImage* image = mono_assembly_get_image(assembly);
-		if(!image)
-		{
-			ANT_CORE_ERROR("ScriptsEngine::GetAssemblyImage::Failed to get assembly image");
-			return NULL;
-		}
+		if (!image)
+			std::cout << "mono_assembly_get_image failed" << std::endl;
 
 		return image;
 	}
@@ -142,11 +143,8 @@ namespace Ant {
 	static MonoClass* GetClass(MonoImage* image, const EntityScriptClass& scriptClass)
 	{
 		MonoClass* monoClass = mono_class_from_name(image, scriptClass.NamespaceName.c_str(), scriptClass.ClassName.c_str());
-		if(!monoClass)
-		{
-			ANT_CORE_ERROR("ScriptsEngine::GetClass::Failed to get class: {0}", scriptClass.FullName);
-			return NULL;
-		}
+		if (!monoClass)
+			std::cout << "mono_class_from_name failed" << std::endl;
 
 		return monoClass;
 	}
@@ -154,11 +152,9 @@ namespace Ant {
 	static uint32_t Instantiate(EntityScriptClass& scriptClass)
 	{
 		MonoObject* instance = mono_object_new(s_MonoDomain, scriptClass.Class);
-		if(!instance)
-		{
-			ANT_CORE_ERROR("ScriptsEngine::Instantiate::Failed to create instance of class: {0}", scriptClass.FullName);
-			return 0;
-		}
+		if (!instance)
+			std::cout << "mono_object_new failed" << std::endl;
+
 		mono_runtime_object_init(instance);
 		uint32_t handle = mono_gchandle_new(instance, false);
 		return handle;
@@ -167,31 +163,20 @@ namespace Ant {
 	static MonoMethod* GetMethod(MonoImage* image, const std::string& methodDesc)
 	{
 		MonoMethodDesc* desc = mono_method_desc_new(methodDesc.c_str(), NULL);
-		if(!desc)
-		{
-			ANT_CORE_ERROR("ScriptsEngine::GetMethod::Failed to create method desc: {0}", methodDesc);
-			return NULL;
-		}
+		if (!desc)
+			std::cout << "mono_method_desc_new failed" << std::endl;
 
 		MonoMethod* method = mono_method_desc_search_in_image(desc, image);
-		if(!method)
-		{
-			ANT_CORE_ERROR("ScriptsEngine::GetMethod::Failed to get method: {0}", methodDesc);
-			return NULL;
-		}
+		if (!method)
+			std::cout << "mono_method_desc_search_in_image failed" << std::endl;
 
 		return method;
 	}
 
 	static MonoObject* CallMethod(MonoObject* object, MonoMethod* method, void** params = nullptr)
 	{
-		MonoObject* exception = nullptr;
-		MonoObject* result = mono_runtime_invoke(method, object, params, &exception);
-		if(exception)
-		{
-			ANT_CORE_ERROR("ScriptsEngine::CallMethod::Failed to call method");
-			return nullptr;
-		}
+		MonoObject* pException = NULL;
+		MonoObject* result = mono_runtime_invoke(method, object, params, &pException);
 		return result;
 	}
 
@@ -201,15 +186,15 @@ namespace Ant {
 		void* ptr = 0;
 		while ((iter = mono_class_get_methods(monoClass, &ptr)) != NULL)
 		{
-			ANT_CORE_INFO("--------------------------------");
+			printf("--------------------------------\n");
 			const char* name = mono_method_get_name(iter);
 			MonoMethodDesc* methodDesc = mono_method_desc_from_method(iter);
 
 			const char* paramNames = "";
 			mono_method_get_param_names(iter, &paramNames);
 
-			ANT_CORE_INFO("Name: {0}", name);
-			ANT_CORE_INFO("Full name: {0}", mono_method_full_name(iter, true));
+			printf("Name: %s\n", name);
+			printf("Full name: %s\n", mono_method_full_name(iter, true));
 		}
 	}
 
@@ -219,9 +204,10 @@ namespace Ant {
 		void* ptr = 0;
 		while ((iter = mono_class_get_properties(monoClass, &ptr)) != NULL)
 		{
-			ANT_CORE_INFO("--------------------------------");
+			printf("--------------------------------\n");
 			const char* name = mono_property_get_name(iter);
-			ANT_CORE_INFO("Name: {0}", name);
+
+			printf("Name: %s\n", name);
 		}
 	}
 
@@ -232,26 +218,56 @@ namespace Ant {
 
 	static MonoString* GetName()
 	{
-		return mono_string_new(s_MonoDomain, "Hello");
+		return mono_string_new(s_MonoDomain, "Hello!");
 	}
 
-	static void LoadAntRuntimeAssembly(const std::string& path)
+	void ScriptEngine::LoadAntRuntimeAssembly(const std::string& path)
 	{
-		if(s_AppAssembly)
+		MonoDomain* domain = nullptr;
+		bool cleanup = false;
+		if (s_MonoDomain)
 		{
-			mono_domain_unload(s_MonoDomain);
-			mono_assembly_close(s_AppAssembly);
+			domain = mono_domain_create_appdomain("Ant Runtime", nullptr);
+			mono_domain_set(domain, false);
 
-			char* name = (char*)"AntRuntime";
-			s_MonoDomain = mono_domain_create_appdomain(name, nullptr);
+			cleanup = true;
 		}
 
 		s_CoreAssembly = LoadAssembly("assets/scripts/Ant-ScriptCore.dll");
 		s_CoreAssemblyImage = GetAssemblyImage(s_CoreAssembly);
 
-		s_AppAssembly = LoadAssembly(path);
-		s_AppAssemblyImage = GetAssemblyImage(s_AppAssembly);
-		ScriptEngineRegistry::RegistryAll();
+		auto appAssembly = LoadAssembly(path);
+		auto appAssemblyImage = GetAssemblyImage(appAssembly);
+		ScriptEngineRegistry::RegisterAll();
+
+		if (cleanup)
+		{
+			mono_domain_unload(s_MonoDomain);
+			s_MonoDomain = domain;
+		}
+
+		s_AppAssembly = appAssembly;
+		s_AppAssemblyImage = appAssemblyImage;
+	}
+
+	void ScriptEngine::ReloadAssembly(const std::string& path)
+	{
+		LoadAntRuntimeAssembly(path);
+		if (s_EntityInstanceMap.size())
+		{
+			Ref<Scene> scene = ScriptEngine::GetCurrentSceneContext();
+			ANT_CORE_ASSERT(scene, "No active scene!");
+			if (s_EntityInstanceMap.find(scene->GetUUID()) != s_EntityInstanceMap.end())
+			{
+				auto& entityMap = s_EntityInstanceMap.at(scene->GetUUID());
+				for (auto& [entityID, entityInstanceData] : entityMap)
+				{
+					const auto& entityMap = scene->GetEntityMap();
+					ANT_CORE_ASSERT(entityMap.find(entityID) != entityMap.end(), "Invalid entity ID or entity doesn't exist in scene!");
+					InitScriptEntity(entityMap.at(entityID));
+				}
+			}
+		}
 	}
 
 	void ScriptEngine::Init(const std::string& assemblyPath)
@@ -266,26 +282,98 @@ namespace Ant {
 	void ScriptEngine::Shutdown()
 	{
 		// shutdown mono
+		s_SceneContext = nullptr;
+		s_EntityInstanceMap.clear();
+	}
+
+	void ScriptEngine::OnSceneDestruct(UUID sceneID)
+	{
+		if (s_EntityInstanceMap.find(sceneID) != s_EntityInstanceMap.end())
+		{
+			s_EntityInstanceMap.at(sceneID).clear();
+			s_EntityInstanceMap.erase(sceneID);
+		}
+	}
+
+	void ScriptEngine::SetSceneContext(const Ref<Scene>& scene)
+	{
+		s_SceneContext = scene;
+	}
+
+	const Ref<Scene>& ScriptEngine::GetCurrentSceneContext()
+	{
+		return s_SceneContext;
+	}
+
+	void ScriptEngine::CopyEntityScriptData(UUID dst, UUID src)
+	{
+		ANT_CORE_ASSERT(s_EntityInstanceMap.find(dst) != s_EntityInstanceMap.end());
+		ANT_CORE_ASSERT(s_EntityInstanceMap.find(src) != s_EntityInstanceMap.end());
+
+		auto& dstEntityMap = s_EntityInstanceMap.at(dst);
+		auto& srcEntityMap = s_EntityInstanceMap.at(src);
+
+		for (auto& [entityID, entityInstanceData] : srcEntityMap)
+		{
+			for (auto& [moduleName, srcFieldMap] : srcEntityMap[entityID].ModuleFieldMap)
+			{
+				auto& dstModuleFieldMap = dstEntityMap[entityID].ModuleFieldMap;
+				for (auto& [fieldName, field] : srcFieldMap)
+				{
+					ANT_CORE_ASSERT(dstModuleFieldMap.find(moduleName) != dstModuleFieldMap.end());
+					auto& fieldMap = dstModuleFieldMap.at(moduleName);
+					ANT_CORE_ASSERT(fieldMap.find(fieldName) != fieldMap.end());
+					fieldMap.at(fieldName).SetStoredValueRaw(field.m_StoredValueBuffer);
+				}
+			}
+		}
 	}
 
 	void ScriptEngine::OnCreateEntity(Entity entity)
 	{
-		EntityInstance& entityInstance = s_EntityInstanceMap[(uint32_t)entity.m_EntityHandle];
+		OnCreateEntity(entity.m_Scene->GetUUID(), entity.GetComponent<IDComponent>().ID);
+	}
+
+	void ScriptEngine::OnCreateEntity(UUID sceneID, UUID entityID)
+	{
+		EntityInstance& entityInstance = GetEntityInstanceData(sceneID, entityID).Instance;
 		if (entityInstance.ScriptClass->OnCreateMethod)
 			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnCreateMethod);
 	}
 
-	void ScriptEngine::OnUpdateEntity(uint32_t entityID, Timestep ts)
+	void ScriptEngine::OnUpdateEntity(UUID sceneID, UUID entityID, Timestep ts)
 	{
-		ANT_CORE_ASSERT(s_EntityInstanceMap.find(entityID) != s_EntityInstanceMap.end(), "Could not find entity in instance map!");
-
-		auto& entity = s_EntityInstanceMap[entityID];
-
-		if(entity.ScriptClass->OnUpdateMethod)
+		EntityInstance& entityInstance = GetEntityInstanceData(sceneID, entityID).Instance;
+		if (entityInstance.ScriptClass->OnUpdateMethod)
 		{
 			void* args[] = { &ts };
-			CallMethod(entity.GetInstance(), entity.ScriptClass->OnUpdateMethod, args);
+			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnUpdateMethod, args);
 		}
+	}
+
+	void ScriptEngine::OnScriptComponentDestroyed(UUID sceneID, UUID entityID)
+	{
+		ANT_CORE_ASSERT(s_EntityInstanceMap.find(sceneID) != s_EntityInstanceMap.end());
+		auto& entityMap = s_EntityInstanceMap.at(sceneID);
+		ANT_CORE_ASSERT(entityMap.find(entityID) != entityMap.end());
+		entityMap.erase(entityID);
+	}
+
+	bool ScriptEngine::ModuleExists(const std::string& moduleName)
+	{
+		std::string NamespaceName, ClassName;
+		if (moduleName.find('.') != std::string::npos)
+		{
+			NamespaceName = moduleName.substr(0, moduleName.find_last_of('.'));
+			ClassName = moduleName.substr(moduleName.find_last_of('.') + 1);
+		}
+		else
+		{
+			ClassName = moduleName;
+		}
+
+		MonoClass* monoClass = mono_class_from_name(s_AppAssemblyImage, NamespaceName.c_str(), ClassName.c_str());
+		return monoClass != nullptr;
 	}
 
 	static FieldType GetAntFieldType(MonoType* monoType)
@@ -293,95 +381,293 @@ namespace Ant {
 		int type = mono_type_get_type(monoType);
 		switch (type)
 		{
-			case MONO_TYPE_R4: return FieldType::Float;
-			case MONO_TYPE_I4: return FieldType::Int;
-			case MONO_TYPE_U4: return FieldType::UnsignedInt;
-			case MONO_TYPE_STRING: return FieldType::String;
-			case MONO_TYPE_VALUETYPE:
-			{
-				char* name = mono_type_get_name(monoType);
-				if (strcmp(name, "Ant.Vector2") == 0) return FieldType::Vec2;
-				if (strcmp(name, "Ant.Vector3") == 0) return FieldType::Vec3;
-				if (strcmp(name, "Ant.Vector4") == 0) return FieldType::Vec4;
-			}
+		case MONO_TYPE_R4: return FieldType::Float;
+		case MONO_TYPE_I4: return FieldType::Int;
+		case MONO_TYPE_U4: return FieldType::UnsignedInt;
+		case MONO_TYPE_STRING: return FieldType::String;
+		case MONO_TYPE_VALUETYPE:
+		{
+			char* name = mono_type_get_name(monoType);
+			if (strcmp(name, "Ant.Vector2") == 0) return FieldType::Vec2;
+			if (strcmp(name, "Ant.Vector3") == 0) return FieldType::Vec3;
+			if (strcmp(name, "Ant.Vector4") == 0) return FieldType::Vec4;
 		}
-
+		}
 		return FieldType::None;
 	}
 
-	void ScriptEngine::OnInitEntity(ScriptComponent& script, uint32_t entityID, uint32_t sceneID)
+	const char* FieldTypeToString(FieldType type)
 	{
-		EntityScriptClass& scriptClass = s_EntityClassMap[script.ModuleName];
-		scriptClass.FullName = script.ModuleName;
-		if(script.ModuleName.find('.') != std::string::npos)
+		switch (type)
 		{
-			scriptClass.NamespaceName = script.ModuleName.substr(0, script.ModuleName.find_last_of('.'));
-			scriptClass.ClassName = script.ModuleName.substr(script.ModuleName.find_last_of('.') + 1);
+		case FieldType::Float:       return "Float";
+		case FieldType::Int:         return "Int";
+		case FieldType::UnsignedInt: return "UnsignedInt";
+		case FieldType::String:      return "String";
+		case FieldType::Vec2:        return "Vec2";
+		case FieldType::Vec3:        return "Vec3";
+		case FieldType::Vec4:        return "Vec4";
+		}
+		return "Unknown";
+	}
+
+	void ScriptEngine::InitScriptEntity(Entity entity)
+	{
+		Scene* scene = entity.m_Scene;
+		UUID id = entity.GetComponent<IDComponent>().ID;
+		auto& moduleName = entity.GetComponent<ScriptComponent>().ModuleName;
+		if (moduleName.empty())
+			return;
+
+		if (!ModuleExists(moduleName))
+		{
+			ANT_CORE_ERROR("Entity references non-existent script module '{0}'", moduleName);
+			return;
+		}
+
+		EntityScriptClass& scriptClass = s_EntityClassMap[moduleName];
+		scriptClass.FullName = moduleName;
+		if (moduleName.find('.') != std::string::npos)
+		{
+			scriptClass.NamespaceName = moduleName.substr(0, moduleName.find_last_of('.'));
+			scriptClass.ClassName = moduleName.substr(moduleName.find_last_of('.') + 1);
 		}
 		else
 		{
-			scriptClass.ClassName = script.ModuleName;
+			scriptClass.ClassName = moduleName;
 		}
 
 		scriptClass.Class = GetClass(s_AppAssemblyImage, scriptClass);
 		scriptClass.InitClassMethods(s_AppAssemblyImage);
 
-		EntityInstance& entityInstance = s_EntityInstanceMap[entityID];
+		EntityInstanceData& entityInstanceData = s_EntityInstanceMap[scene->GetUUID()][id];
+		EntityInstance& entityInstance = entityInstanceData.Instance;
 		entityInstance.ScriptClass = &scriptClass;
-		entityInstance.Handle = Instantiate(scriptClass);
+		ScriptModuleFieldMap& moduleFieldMap = entityInstanceData.ModuleFieldMap;
+		auto& fieldMap = moduleFieldMap[moduleName];
 
-		MonoProperty* entityIDProperty = mono_class_get_property_from_name(scriptClass.Class, "EntityID");
-		mono_property_get_get_method(entityIDProperty);
-		MonoMethod* entityIDSetMethod = mono_property_get_set_method(entityIDProperty);
-		void* params[] = { &entityID };
-		CallMethod(entityInstance.GetInstance(), entityIDSetMethod, params);
+		// Save old fields
+		std::unordered_map<std::string, PublicField> oldFields;
+		oldFields.reserve(fieldMap.size());
+		for (auto& [fieldName, field] : fieldMap)
+			oldFields.emplace(fieldName, std::move(field));
+		fieldMap.clear();
 
-		MonoProperty* sceneIDProperty = mono_class_get_property_from_name(scriptClass.Class, "SceneID");
-		mono_property_get_get_method(sceneIDProperty);
-		MonoMethod* sceneIDSetMethod = mono_property_get_set_method(sceneIDProperty);
-		params[0] = { &sceneID };
-		CallMethod(entityInstance.GetInstance(), sceneIDSetMethod, params);
-
-		if(scriptClass.OnCreateMethod)
-			CallMethod(entityInstance.GetInstance(), scriptClass.OnCreateMethod);
-
-		// Retrieve public fields
+		// Retrieve public fields (TODO: cache these fields if the module is used more than once)
 		{
 			MonoClassField* iter;
 			void* ptr = 0;
 			while ((iter = mono_class_get_fields(scriptClass.Class, &ptr)) != NULL)
 			{
 				const char* name = mono_field_get_name(iter);
-				uint32_t flag = mono_field_get_flags(iter);
-				if(flag & MONO_FIELD_ATTR_PUBLIC == 0)
+				uint32_t flags = mono_field_get_flags(iter);
+				if ((flags & MONO_FIELD_ATTR_PUBLIC) == 0)
 					continue;
 
 				MonoType* fieldType = mono_field_get_type(iter);
-				FieldType antFieldType = GetAntFieldType(fieldType);
-
+				FieldType AntFieldType = GetAntFieldType(fieldType);
 
 				// TODO: Attributes
 				MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(scriptClass.Class, iter);
 
-				auto& publicField = s_PublicFields[script.ModuleName].emplace_back(name, antFieldType);
-				publicField.m_EntityInstance = &entityInstance;
-				publicField.m_MonoClassField = iter;
+				if (oldFields.find(name) != oldFields.end())
+				{
+					fieldMap.emplace(name, std::move(oldFields.at(name)));
+				}
+				else
+				{
+					PublicField field = { name, AntFieldType };
+					field.m_EntityInstance = &entityInstance;
+					field.m_MonoClassField = iter;
+					fieldMap.emplace(name, std::move(field));
+				}
 			}
 		}
 	}
 
-	const Ant::ScriptModuleFieldMap& ScriptEngine::GetFieldMap()
+	void ScriptEngine::ShutdownScriptEntity(Entity entity, const std::string& moduleName)
 	{
-		return s_PublicFields;
+		EntityInstanceData& entityInstanceData = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID());
+		ScriptModuleFieldMap& moduleFieldMap = entityInstanceData.ModuleFieldMap;
+		if (moduleFieldMap.find(moduleName) != moduleFieldMap.end())
+			moduleFieldMap.erase(moduleName);
 	}
 
-	void PublicField::SetValue_Internal(void* value) const
+	void ScriptEngine::InstantiateEntityClass(Entity entity)
 	{
+		Scene* scene = entity.m_Scene;
+		UUID id = entity.GetComponent<IDComponent>().ID;
+		auto& moduleName = entity.GetComponent<ScriptComponent>().ModuleName;
+
+		EntityInstanceData& entityInstanceData = GetEntityInstanceData(scene->GetUUID(), id);
+		EntityInstance& entityInstance = entityInstanceData.Instance;
+		ANT_CORE_ASSERT(entityInstance.ScriptClass);
+		entityInstance.Handle = Instantiate(*entityInstance.ScriptClass);
+
+		MonoProperty* entityIDPropery = mono_class_get_property_from_name(entityInstance.ScriptClass->Class, "ID");
+		mono_property_get_get_method(entityIDPropery);
+		MonoMethod* entityIDSetMethod = mono_property_get_set_method(entityIDPropery);
+		void* param[] = { &id };
+		CallMethod(entityInstance.GetInstance(), entityIDSetMethod, param);
+
+		// Set all public fields to appropriate values
+		ScriptModuleFieldMap& moduleFieldMap = entityInstanceData.ModuleFieldMap;
+		if (moduleFieldMap.find(moduleName) != moduleFieldMap.end())
+		{
+			auto& publicFields = moduleFieldMap.at(moduleName);
+			for (auto& [name, field] : publicFields)
+				field.CopyStoredValueToRuntime();
+		}
+
+		// Call OnCreate function (if exists)
+		OnCreateEntity(entity);
+	}
+
+	EntityInstanceData& ScriptEngine::GetEntityInstanceData(UUID sceneID, UUID entityID)
+	{
+		ANT_CORE_ASSERT(s_EntityInstanceMap.find(sceneID) != s_EntityInstanceMap.end(), "Invalid scene ID!");
+		auto& entityIDMap = s_EntityInstanceMap.at(sceneID);
+		ANT_CORE_ASSERT(entityIDMap.find(entityID) != entityIDMap.end(), "Invalid entity ID!");
+		return entityIDMap.at(entityID);
+	}
+
+	EntityInstanceMap& ScriptEngine::GetEntityInstanceMap()
+	{
+		return s_EntityInstanceMap;
+	}
+
+	static uint32_t GetFieldSize(FieldType type)
+	{
+		switch (type)
+		{
+		case FieldType::Float:       return 4;
+		case FieldType::Int:         return 4;
+		case FieldType::UnsignedInt: return 4;
+			// case FieldType::String:   return 8; // TODO
+		case FieldType::Vec2:        return 4 * 2;
+		case FieldType::Vec3:        return 4 * 3;
+		case FieldType::Vec4:        return 4 * 4;
+		}
+		ANT_CORE_ASSERT(false, "Unknown field type!");
+		return 0;
+	}
+
+	PublicField::PublicField(const std::string& name, FieldType type)
+		: Name(name), Type(type)
+	{
+		m_StoredValueBuffer = AllocateBuffer(type);
+	}
+
+	PublicField::PublicField(PublicField&& other)
+	{
+		Name = std::move(other.Name);
+		Type = other.Type;
+		m_EntityInstance = other.m_EntityInstance;
+		m_MonoClassField = other.m_MonoClassField;
+		m_StoredValueBuffer = other.m_StoredValueBuffer;
+
+		other.m_EntityInstance = nullptr;
+		other.m_MonoClassField = nullptr;
+		other.m_StoredValueBuffer = nullptr;
+	}
+
+	PublicField::~PublicField()
+	{
+		delete[] m_StoredValueBuffer;
+	}
+
+	void PublicField::CopyStoredValueToRuntime()
+	{
+		ANT_CORE_ASSERT(m_EntityInstance->GetInstance());
+		mono_field_set_value(m_EntityInstance->GetInstance(), m_MonoClassField, m_StoredValueBuffer);
+	}
+
+	bool PublicField::IsRuntimeAvailable() const
+	{
+		return m_EntityInstance->Handle != 0;
+	}
+
+	void PublicField::SetStoredValueRaw(void* src)
+	{
+		uint32_t size = GetFieldSize(Type);
+		memcpy(m_StoredValueBuffer, src, size);
+	}
+
+	uint8_t* PublicField::AllocateBuffer(FieldType type)
+	{
+		uint32_t size = GetFieldSize(type);
+		uint8_t* buffer = new uint8_t[size];
+		memset(buffer, 0, size);
+		return buffer;
+	}
+
+	void PublicField::SetStoredValue_Internal(void* value) const
+	{
+		uint32_t size = GetFieldSize(Type);
+		memcpy(m_StoredValueBuffer, value, size);
+	}
+
+	void PublicField::GetStoredValue_Internal(void* outValue) const
+	{
+		uint32_t size = GetFieldSize(Type);
+		memcpy(outValue, m_StoredValueBuffer, size);
+	}
+
+	void PublicField::SetRuntimeValue_Internal(void* value) const
+	{
+		ANT_CORE_ASSERT(m_EntityInstance->GetInstance());
 		mono_field_set_value(m_EntityInstance->GetInstance(), m_MonoClassField, value);
 	}
 
-	void PublicField::GetValue_Internal(void* outValue) const
+	void PublicField::GetRuntimeValue_Internal(void* outValue) const
 	{
+		ANT_CORE_ASSERT(m_EntityInstance->GetInstance());
 		mono_field_get_value(m_EntityInstance->GetInstance(), m_MonoClassField, outValue);
+	}
+
+	// Debug
+	void ScriptEngine::OnImGuiRender()
+	{
+		ImGui::Begin("Script Engine Debug");
+		for (auto& [sceneID, entityMap] : s_EntityInstanceMap)
+		{
+			bool opened = ImGui::TreeNode((void*)(uint64_t)sceneID, "Scene (%llx)", sceneID);
+			if (opened)
+			{
+				Ref<Scene> scene = Scene::GetScene(sceneID);
+				for (auto& [entityID, entityInstanceData] : entityMap)
+				{
+					Entity entity = scene->GetScene(sceneID)->GetEntityMap().at(entityID);
+					std::string entityName = "Unnamed Entity";
+					if (entity.HasComponent<TagComponent>())
+						entityName = entity.GetComponent<TagComponent>().Tag;
+					opened = ImGui::TreeNode((void*)(uint64_t)entityID, "%s (%llx)", entityName.c_str(), entityID);
+					if (opened)
+					{
+						for (auto& [moduleName, fieldMap] : entityInstanceData.ModuleFieldMap)
+						{
+							opened = ImGui::TreeNode(moduleName.c_str());
+							if (opened)
+							{
+								for (auto& [fieldName, field] : fieldMap)
+								{
+
+									opened = ImGui::TreeNodeEx((void*)&field, ImGuiTreeNodeFlags_Leaf, fieldName.c_str());
+									if (opened)
+									{
+
+										ImGui::TreePop();
+									}
+								}
+								ImGui::TreePop();
+							}
+						}
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+		}
+		ImGui::End();
 	}
 }

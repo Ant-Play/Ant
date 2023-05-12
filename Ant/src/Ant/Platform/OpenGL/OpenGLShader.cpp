@@ -1,13 +1,13 @@
 #include "antpch.h"
-#include "OpenGLShader.h"
+#include "Ant/Platform/OpenGL/OpenGLShader.h"
+
+#include "Ant/Renderer/Renderer.h"
 
 #include <string>
 #include <sstream>
 #include <limits>
 
 #include <glm/gtc/type_ptr.hpp>
-
-#include "Ant/Renderer/Renderer.h"
 
 namespace Ant {
 #define UNIFORM_LOGGING 0
@@ -83,21 +83,25 @@ namespace Ant {
 
 	std::string OpenGLShader::ReadShaderFromFile(const std::string& filepath) const
 	{
+		std::filesystem::current_path("D:/career/graphic/workspace/Ant-dev/AntPlay");
 		std::string result;
-		std::ifstream in(filepath, std::ios::in | std::ios::binary);
+		char* buffer = nullptr;
+		buffer = getcwd(NULL, 0);
+		std::cout << buffer << std::endl;
+		//std::ifstream in(filepath, std::ios::in | std::ios::binary);
+		std::ifstream in = std::ifstream(filepath.c_str(), std::ios::in | std::ios::binary);
 		if (in)
 		{
 			in.seekg(0, std::ios::end);
 			result.resize(in.tellg());
 			in.seekg(0, std::ios::beg);
 			in.read(&result[0], result.size());
-			in.close();
 		}
 		else
 		{
 			ANT_CORE_ASSERT(false, "Could not load shader!");
 		}
-
+		in.close();
 		return result;
 	}
 
@@ -229,10 +233,8 @@ namespace Ant {
 
 		m_Resources.clear();
 		m_Structs.clear();
-		m_VSMaterialUniformBuffer.reset();
-		m_PSMaterialUniformBuffer.reset();
-		//m_VSMaterialUniformBuffer.Reset();
-		//m_PSMaterialUniformBuffer.Reset();
+		m_VSMaterialUniformBuffer.Reset();
+		m_PSMaterialUniformBuffer.Reset();
 
 		auto& vertexSource = m_ShaderSource[GL_VERTEX_SHADER];
 		auto& fragmentSource = m_ShaderSource[GL_FRAGMENT_SHADER];
@@ -333,14 +335,14 @@ namespace Ant {
 				if (domain == ShaderDomain::Vertex)
 				{
 					if (!m_VSMaterialUniformBuffer)
-						m_VSMaterialUniformBuffer.reset(new OpenGLShaderUniformBufferDeclaration("", domain));
+						m_VSMaterialUniformBuffer.Reset(new OpenGLShaderUniformBufferDeclaration("", domain));
 
 					m_VSMaterialUniformBuffer->PushUniform(declaration);
 				}
 				else if (domain == ShaderDomain::Pixel)
 				{
 					if (!m_PSMaterialUniformBuffer)
-						m_PSMaterialUniformBuffer.reset(new OpenGLShaderUniformBufferDeclaration("", domain));
+						m_PSMaterialUniformBuffer.Reset(new OpenGLShaderUniformBufferDeclaration("", domain));
 
 					m_PSMaterialUniformBuffer->PushUniform(declaration);
 				}
@@ -627,7 +629,7 @@ namespace Ant {
 			});
 	}
 
-	void OpenGLShader::ResolveAndSetUniforms(const std::shared_ptr<OpenGLShaderUniformBufferDeclaration>& decl, Buffer buffer)
+	void OpenGLShader::ResolveAndSetUniforms(const Ref<OpenGLShaderUniformBufferDeclaration>& decl, Buffer buffer)
 	{
 		const ShaderUniformList& uniforms = decl->GetUniformDeclarations();
 		for (size_t i = 0; i < uniforms.size(); i++)

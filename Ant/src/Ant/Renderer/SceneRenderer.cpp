@@ -3,7 +3,6 @@
 
 #include "Ant/Renderer/Renderer.h"
 #include "Ant/Renderer/Renderer2D.h"
-#include "Ant/Renderer/Texture.h"
 
 #include <Glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,7 +14,7 @@ namespace Ant {
 		const Scene* ActiveScene = nullptr;
 		struct SceneInfo
 		{
-			Camera SceneCamera;
+			SceneRendererCamera SceneCamera;
 
 			// Resources
 			Ref<MaterialInstance> SkyboxMaterial;
@@ -36,9 +35,11 @@ namespace Ant {
 			glm::mat4 Transform;
 		};
 		std::vector<DrawCommand> DrawList;
+		std::vector<DrawCommand> SelectedMeshDrawList;
 
 		// Grid
 		Ref<MaterialInstance> GridMaterial;
+		Ref<MaterialInstance> OutlineMaterial;
 
 		SceneRendererOptions Options;
 	};
@@ -50,23 +51,23 @@ namespace Ant {
 		FramebufferSpecification geoFramebufferSpec;
 		geoFramebufferSpec.Width = 1280;
 		geoFramebufferSpec.Height = 720;
-		geoFramebufferSpec.Format = FramebufferTextureFormat::RGBA16F;
+		geoFramebufferSpec.Format = FramebufferFormat::RGBA16F;
 		geoFramebufferSpec.Samples = 8;
-		geoFramebufferSpec.ClearColor = {0.1f, 0.1f, 0.1f, 1.0f };
+		geoFramebufferSpec.ClearColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 		RenderPassSpecification geoRenderPassSpec;
 		geoRenderPassSpec.TargetFramebuffer = Ant::Framebuffer::Create(geoFramebufferSpec);
 		s_Data.GeoPass = RenderPass::Create(geoRenderPassSpec);
 
-		FramebufferSpecification comFramebufferSpec;
-		comFramebufferSpec.Width = 1280;
-		comFramebufferSpec.Height = 720;
-		comFramebufferSpec.Format = FramebufferTextureFormat::RGBA8;
-		comFramebufferSpec.ClearColor = { 0.5f, 0.1f, 0.1f, 1.0f };
+		FramebufferSpecification compFramebufferSpec;
+		compFramebufferSpec.Width = 1280;
+		compFramebufferSpec.Height = 720;
+		compFramebufferSpec.Format = FramebufferFormat::RGBA8;
+		compFramebufferSpec.ClearColor = { 0.5f, 0.1f, 0.1f, 1.0f };
 
-		RenderPassSpecification comRenderPassSpec;
-		comRenderPassSpec.TargetFramebuffer = Ant::Framebuffer::Create(comFramebufferSpec);
-		s_Data.CompositePass = RenderPass::Create(comRenderPassSpec);
+		RenderPassSpecification compRenderPassSpec;
+		compRenderPassSpec.TargetFramebuffer = Ant::Framebuffer::Create(compFramebufferSpec);
+		s_Data.CompositePass = RenderPass::Create(compRenderPassSpec);
 
 		s_Data.CompositeShader = Shader::Create("assets/shaders/SceneComposite.glsl");
 		s_Data.BRDFLUT = Texture2D::Create("assets/textures/BRDF_LUT.tga");
@@ -75,9 +76,13 @@ namespace Ant {
 		auto gridShader = Shader::Create("assets/shaders/Grid.glsl");
 		s_Data.GridMaterial = MaterialInstance::Create(Material::Create(gridShader));
 		float gridScale = 16.025f, gridSize = 0.025f;
-		s_Data.GridMaterial->Set("u_GridScale", gridScale);
+		s_Data.GridMaterial->Set("u_Scale", gridScale);
 		s_Data.GridMaterial->Set("u_Res", gridSize);
 
+		// Outline
+		auto outlineShader = Shader::Create("assets/shaders/Outline.glsl");
+		s_Data.OutlineMaterial = MaterialInstance::Create(Material::Create(outlineShader));
+		s_Data.OutlineMaterial->SetFlag(MaterialFlag::DepthTest, false);
 	}
 
 	void SceneRenderer::SetViewportSize(uint32_t width, uint32_t height)
@@ -86,7 +91,7 @@ namespace Ant {
 		s_Data.CompositePass->GetSpecification().TargetFramebuffer->Resize(width, height);
 	}
 
-	void SceneRenderer::BeginScene(const Scene* scene, const Camera& camera)
+	void SceneRenderer::BeginScene(const Scene* scene, const SceneRendererCamera& camera)
 	{
 		ANT_CORE_ASSERT(!s_Data.ActiveScene, "");
 
@@ -110,8 +115,12 @@ namespace Ant {
 	void SceneRenderer::SubmitMesh(Ref<Mesh> mesh, const glm::mat4& transform, Ref<MaterialInstance> overrideMaterial)
 	{
 		// TODO: Culling, sorting, etc.
-
 		s_Data.DrawList.push_back({ mesh, overrideMaterial, transform });
+	}
+
+	void SceneRenderer::SubmitSelectedMesh(Ref<Mesh> mesh, const glm::mat4& transform)
+	{
+		s_Data.SelectedMeshDrawList.push_back({ mesh, nullptr, transform });
 	}
 
 	static Ref<Shader> equirectangularConversionShader, envFilteringShader, envIrradianceShader;
@@ -124,6 +133,7 @@ namespace Ant {
 		Ref<TextureCube> envUnfiltered = TextureCube::Create(TextureFormat::Float16, cubemapSize, cubemapSize);
 		if (!equirectangularConversionShader)
 			equirectangularConversionShader = Shader::Create("assets/shaders/EquirectangularToCubeMap.glsl");
+			//equirectangularConversionShader = Shader::Create("D:\\career\\graphic\\workspace\\Ant-dev\\AntPlay\\assets\\shaders\\EquirectangularToCubeMap.glsl");
 		Ref<Texture2D> envEquirect = Texture2D::Create(filepath);
 		ANT_CORE_ASSERT(envEquirect->GetFormat() == TextureFormat::Float16, "Texture is not HDR!");
 
@@ -136,8 +146,10 @@ namespace Ant {
 				glGenerateTextureMipmap(envUnfiltered->GetRendererID());
 			});
 
+
 		if (!envFilteringShader)
 			envFilteringShader = Shader::Create("assets/shaders/EnvironmentMipFilter.glsl");
+			//envFilteringShader = Shader::Create("D:\\career\\graphic\\workspace\\Ant-dev\\AntPlay\\assets\\shaders\\EnvironmentMipFilter.glsl");
 
 		Ref<TextureCube> envFiltered = TextureCube::Create(TextureFormat::Float16, cubemapSize, cubemapSize);
 
@@ -164,6 +176,7 @@ namespace Ant {
 
 		if (!envIrradianceShader)
 			envIrradianceShader = Shader::Create("assets/shaders/EnvironmentIrradiance.glsl");
+			//envIrradianceShader = Shader::Create("D:\\career\\graphic\\workspace\\Ant-dev\\AntPlay\\assets\\shaders\\EnvironmentIrradiance.glsl");
 
 		Ref<TextureCube> irradianceMap = TextureCube::Create(TextureFormat::Float16, irradianceMapSize, irradianceMapSize);
 		envIrradianceShader->Bind();
@@ -180,9 +193,28 @@ namespace Ant {
 
 	void SceneRenderer::GeometryPass()
 	{
+		bool outline = s_Data.SelectedMeshDrawList.size() > 0;
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+				});
+		}
+
 		Renderer::BeginRenderPass(s_Data.GeoPass);
 
-		auto viewProjection = s_Data.SceneData.SceneCamera.GetViewProjection();
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilMask(0);
+				});
+		}
+
+		auto viewProjection = s_Data.SceneData.SceneCamera.Camera.GetProjectionMatrix() * s_Data.SceneData.SceneCamera.ViewMatrix;
+		glm::vec3 cameraPosition = glm::inverse(s_Data.SceneData.SceneCamera.ViewMatrix)[3];
 
 		// Skybox
 		auto skyboxShader = s_Data.SceneData.SkyboxMaterial->GetShader();
@@ -194,7 +226,7 @@ namespace Ant {
 		{
 			auto baseMaterial = dc.Mesh->GetMaterial();
 			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
-			baseMaterial->Set("u_CameraPosition", s_Data.SceneData.SceneCamera.GetPosition());
+			baseMaterial->Set("u_CameraPosition", cameraPosition);
 
 			// Environment (TODO: don't do this per mesh)
 			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment.RadianceMap);
@@ -206,6 +238,71 @@ namespace Ant {
 
 			auto overrideMaterial = nullptr; // dc.Material;
 			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
+		}
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilFunc(GL_ALWAYS, 1, 0xff);
+					glStencilMask(0xff);
+				});
+		}
+		for (auto& dc : s_Data.SelectedMeshDrawList)
+		{
+			auto baseMaterial = dc.Mesh->GetMaterial();
+			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
+			baseMaterial->Set("u_CameraPosition", cameraPosition);
+
+			// Environment (TODO: don't do this per mesh)
+			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment.RadianceMap);
+			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment.IrradianceMap);
+			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
+
+			// Set lights (TODO: move to light environment and don't do per mesh)
+			baseMaterial->Set("lights", s_Data.SceneData.ActiveLight);
+
+			auto overrideMaterial = nullptr; // dc.Material;
+			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
+		}
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilFunc(GL_NOTEQUAL, 1, 0xff);
+					glStencilMask(0);
+
+					glLineWidth(10);
+					glEnable(GL_LINE_SMOOTH);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glDisable(GL_DEPTH_TEST);
+				});
+
+			// Draw outline here
+			s_Data.OutlineMaterial->Set("u_ViewProjection", viewProjection);
+			for (auto& dc : s_Data.SelectedMeshDrawList)
+			{
+				Renderer::SubmitMesh(dc.Mesh, dc.Transform, s_Data.OutlineMaterial);
+			}
+
+			Renderer::Submit([]()
+				{
+					glPointSize(10);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+				});
+			for (auto& dc : s_Data.SelectedMeshDrawList)
+			{
+				Renderer::SubmitMesh(dc.Mesh, dc.Transform, s_Data.OutlineMaterial);
+			}
+
+			Renderer::Submit([]()
+				{
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					glStencilMask(0xff);
+					glStencilFunc(GL_ALWAYS, 1, 0xff);
+					glEnable(GL_DEPTH_TEST);
+				});
 		}
 
 		// Grid
@@ -230,7 +327,7 @@ namespace Ant {
 	{
 		Renderer::BeginRenderPass(s_Data.CompositePass);
 		s_Data.CompositeShader->Bind();
-		s_Data.CompositeShader->SetFloat("u_Exposure", s_Data.SceneData.SceneCamera.GetExposure());
+		s_Data.CompositeShader->SetFloat("u_Exposure", s_Data.SceneData.SceneCamera.Camera.GetExposure());
 		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
 		s_Data.GeoPass->GetSpecification().TargetFramebuffer->BindTexture();
 		Renderer::SubmitFullscreenQuad(nullptr);
@@ -245,6 +342,7 @@ namespace Ant {
 		CompositePass();
 
 		s_Data.DrawList.clear();
+		s_Data.SelectedMeshDrawList.clear();
 		s_Data.SceneData = {};
 	}
 

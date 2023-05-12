@@ -24,6 +24,8 @@ namespace Ant {
 	{
 		s_Instance = this;
 
+		std::filesystem::current_path("D:/career/graphic/workspace/Ant-dev/AntPlay");
+
 		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(props.Name, props.WindowWidth, props.WindowHeight)));
 		m_Window->SetEventCallback(ANT_BIND_EVENT_FN(Application::OnEvent));
 		m_Window->SetVSync(true);
@@ -39,7 +41,7 @@ namespace Ant {
 
 	Application::~Application()
 	{
-
+		ScriptEngine::Shutdown();
 	}
 
 	void Application::PushLayer(Layer* layer)
@@ -74,7 +76,7 @@ namespace Ant {
 
 	void Application::Run()
 	{
-		//OnInit();
+		OnInit();
 		while (m_Running)
 		{
 			if (!m_Minimized)
@@ -133,7 +135,7 @@ namespace Ant {
 		return true;
 	}
 
-	std::string Application::OpenFile(const std::string& filter) const
+	std::string Application::OpenFile(const char* filter) const
 	{
 		OPENFILENAMEA ofn;       // common dialog box structure
 		CHAR szFile[260] = { 0 };       // if using TCHAR macros
@@ -152,6 +154,28 @@ namespace Ant {
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 		if (GetOpenFileNameA(&ofn) == TRUE)
+		{
+			return ofn.lpstrFile;
+		}
+		return std::string();
+	}
+
+	std::string Application::SaveFile(const char* filter /*= "All\0*.*\0"*/) const
+	{
+		OPENFILENAMEA ofn;       // common dialog box structure
+		CHAR szFile[260] = { 0 };       // if using TCHAR macros
+
+		// Initialize OPENFILENAME
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = filter;
+		ofn.nFilterIndex = 1;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+		if (GetSaveFileNameA(&ofn) == TRUE)
 		{
 			return ofn.lpstrFile;
 		}

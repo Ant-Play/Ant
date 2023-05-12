@@ -1,9 +1,20 @@
 #pragma once
-//#include <Ant.h>
-#include "Ant/Core/Layer.h"
-#include "Ant/Core/Math/Ray.h"
-#include "Ant/Scene/Entity.h"
+#include "Ant.h"
+
+#include "Ant/ImGui/ImGuiLayer.h"
+#include "Ant/Editor/EditorCamera.h"
 #include "Ant/Editor/SceneHierarchyPanel.h"
+
+#include "imgui/imgui_internal.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
+#include <string>
+
 
 namespace Ant {
 
@@ -39,27 +50,31 @@ namespace Ant {
 		void Property(const std::string& name, glm::vec4& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
 
 		void ShowBoundingBoxes(bool show, bool onTop = false);
+		void SelectEntity(Entity entity);
 	private:
 		std::pair<float, float> GetMouseViewportSpace();
 		std::pair<glm::vec3, glm::vec3> CastRay(float mx, float my);
 
 		struct SelectedSubmesh
 		{
-			Entity Entity;
-			Submesh* Mesh;
-			float Distance;
+			Ant::Entity Entity;
+			Submesh* Mesh = nullptr;
+			float Distance = 0.0f;
 		};
+
 		void OnSelected(const SelectedSubmesh& selectionContext);
+		void OnEntityDeleted(Entity e);
 		Ray CastMouseRay();
+
+		void OnScenePlay();
+		void OnSceneStop();
 	private:
 		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
 
-		Ref<Scene> m_Scene;
-		Ref<Scene> m_SphereScene;
 		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_RuntimeScene, m_EditorScene;
 
-		Entity m_MeshEntity;
-		Entity m_CameraEntity;
+		EditorCamera m_EditorCamera;
 
 		Ref<Shader> m_BrushShader;
 		Ref<Material> m_SphereBaseMaterial;
@@ -113,6 +128,7 @@ namespace Ant {
 
 		// Editor resources
 		Ref<Texture2D> m_CheckerboardTex;
+		Ref<Texture2D> m_PlayButtonTex;
 
 		glm::vec2 m_ViewportBounds[2];
 		int m_GizmoType = -1; // -1 = no gizmo
@@ -123,10 +139,20 @@ namespace Ant {
 		bool m_UIShowBoundingBoxes = false;
 		bool m_UIShowBoundingBoxesOnTop = false;
 
+		bool m_ViewportPanelMouseOver = false;
+		bool m_ViewportPanelFocused = false;
+
+		enum class SceneState
+		{
+			Edit = 0, Play = 1, Pause = 2
+		};
+		SceneState m_SceneState = SceneState::Edit;
+
 		enum class SelectionMode
 		{
 			None = 0, Entity = 1, SubMesh = 2
 		};
+
 		SelectionMode m_SelectionMode = SelectionMode::Entity;
 		std::vector<SelectedSubmesh> m_SelectionContext;
 		glm::mat4* m_RelativeTransform = nullptr;

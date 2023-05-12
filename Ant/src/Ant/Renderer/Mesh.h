@@ -1,6 +1,4 @@
 #pragma once
-#include <vector>
-#include <glm/glm.hpp>
 
 #include "Ant/Core/Timestep.h"
 
@@ -10,6 +8,9 @@
 #include "Ant/Renderer/Material.h"
 
 #include "Ant/Core/Math/AABB.h"
+
+#include <vector>
+#include <glm/glm.hpp>
 
 struct aiNode;
 struct aiAnimation;
@@ -26,27 +27,27 @@ namespace Ant{
 	{
 		glm::vec3 Position;
 		glm::vec3 Normal;
-		glm::vec2 Texcoord;
 		glm::vec3 Tangent;
 		glm::vec3 Binormal;
+		glm::vec2 Texcoord;
 	};
 
 	struct AnimatedVertex
 	{
 		glm::vec3 Position;
 		glm::vec3 Normal;
-		glm::vec2 Texcoord;
 		glm::vec3 Tangent;
 		glm::vec3 Binormal;
+		glm::vec2 Texcoord;
 
-		uint32_t IDs[4] = { 0, 0, 0, 0 };
-		float Weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		uint32_t IDs[4] = { 0, 0,0, 0 };
+		float Weights[4]{ 0.0f, 0.0f, 0.0f, 0.0f };
 
 		void AddBoneData(uint32_t BoneID, float Weight)
 		{
-			for (uint32_t i = 0; i < 4; i++)
+			for (size_t i = 0; i < 4; i++)
 			{
-				if (Weights[i] == 0.0f)
+				if (Weights[i] == 0.0)
 				{
 					IDs[i] = BoneID;
 					Weights[i] = Weight;
@@ -68,7 +69,7 @@ namespace Ant{
 
 	static_assert(sizeof(Index) == 3 * sizeof(uint32_t));
 
-	struct  BoneInfo
+	struct BoneInfo
 	{
 		glm::mat4 BoneOffset;
 		glm::mat4 FinalTransformation;
@@ -87,9 +88,9 @@ namespace Ant{
 
 		void AddBoneData(uint32_t BoneID, float Weight)
 		{
-			for (uint32_t i = 0; i < 4; i++)
+			for (size_t i = 0; i < 4; i++)
 			{
-				if (Weights[i] == 0.0f)
+				if (Weights[i] == 0.0)
 				{
 					IDs[i] = BoneID;
 					Weights[i] = Weight;
@@ -145,7 +146,7 @@ namespace Ant{
 		const std::vector<Triangle> GetTriangleCache(uint32_t index) const { return m_TriangleCache.at(index); }
 	private:
 		void BoneTransform(float time);
-		void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& parentTransform);
+		void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
 		void TraverseNodes(aiNode* node, const glm::mat4& parentTransform = glm::mat4(1.0f), uint32_t level = 0);
 
 		const aiNodeAnim* FindNodeAnim(const aiAnimation* animation, const std::string& nodeName);
@@ -158,7 +159,7 @@ namespace Ant{
 	private:
 		std::vector<Submesh> m_Submeshes;
 
-		Scope<Assimp::Importer> m_Importer;
+		std::unique_ptr<Assimp::Importer> m_Importer;
 
 		glm::mat4 m_InverseTransform;
 

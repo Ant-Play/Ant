@@ -50,7 +50,7 @@ namespace Ant {
 			s_GLFWInitialized = true;
 		}
 
-		m_Window = glfwCreateWindow(static_cast<int>(props.Width), static_cast<int>(props.Height), m_Data.Title.c_str(), nullptr, nullptr);
+		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
 		glfwMaximizeWindow(m_Window);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -60,9 +60,9 @@ namespace Ant {
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 			{
-				auto& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 
-				WindowResizeEvent event(static_cast<unsigned int>(width), static_cast<unsigned int>(height));
+				WindowResizeEvent event((unsigned int)width, (unsigned int)height);
 				data.EventCallback(event);
 				data.Width = width;
 				data.Height = height;
@@ -70,7 +70,7 @@ namespace Ant {
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
-				auto& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 
 				WindowCloseEvent event;
 				data.EventCallback(event);
@@ -78,25 +78,25 @@ namespace Ant {
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 			{
-				auto& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 
 				switch (action)
 				{
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent event(static_cast<KeyCode>(key), false);
+					KeyPressedEvent event((KeyCode)key, 0);
 					data.EventCallback(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					KeyReleasedEvent event(static_cast<KeyCode>(key));
+					KeyReleasedEvent event((KeyCode)key);
 					data.EventCallback(event);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					KeyPressedEvent event(static_cast<KeyCode>(key), true);
+					KeyPressedEvent event((KeyCode)key, 1);
 					data.EventCallback(event);
 					break;
 				}
@@ -105,27 +105,27 @@ namespace Ant {
 
 		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int codepoint)
 			{
-				auto& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 
-				KeyTypedEvent event(static_cast<KeyCode>(codepoint));
+				KeyTypedEvent event((KeyCode)codepoint);
 				data.EventCallback(event);
 			});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 			{
-				auto& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 
 				switch (action)
 				{
 				case GLFW_PRESS:
 				{
-					MouseButtonPressedEvent event(static_cast<MouseCode>(button));
+					MouseButtonPressedEvent event((MouseCode)button);
 					data.EventCallback(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					MouseButtonReleasedEvent event(static_cast<MouseCode>(button));
+					MouseButtonReleasedEvent event((MouseCode)button);
 					data.EventCallback(event);
 					break;
 				}
@@ -134,17 +134,17 @@ namespace Ant {
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 			{
-				auto& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 
-				MouseScrolledEvent event(static_cast<float>(xOffset), static_cast<float>(yOffset));
+				MouseScrolledEvent event((float)xOffset, (float)yOffset);
 				data.EventCallback(event);
 			});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double x, double y)
 			{
-				auto& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 
-				MouseMovedEvent event(static_cast<float>(x), static_cast<float>(y));
+				MouseMovedEvent event((float)x, (float)y);
 				data.EventCallback(event);
 			});
 

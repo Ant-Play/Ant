@@ -6,12 +6,11 @@
 
 namespace Ant{
 
-	//显示图层的基类抽象
 	class Layer
 	{
 	public:
 		Layer(const std::string& name = "Layer");
-		virtual ~Layer() = default;
+		virtual ~Layer();
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
@@ -20,7 +19,6 @@ namespace Ant{
 		virtual void OnEvent(Event& event) {}
 
 		inline const std::string& GetName() const { return m_DebugName; }
-
 	protected:
 		std::string m_DebugName;
 	};

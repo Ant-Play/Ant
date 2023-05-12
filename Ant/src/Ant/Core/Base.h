@@ -28,9 +28,12 @@ namespace Ant {
 #define ANT_EXPAND_MACRO(x) x
 #define ANT_STRINGIFY_MACRO(x) #x
 
+// __VA_ARGS__ expansion to get past MSVC "bug"
+#define ANT_EXPAND_VARGS(x) x
+
 #define BIT(x) (1 << x)
 
-#define ANT_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+#define ANT_BIND_EVENT_FN(fn) std::bind(&##fn, this, std::placeholders::_1)
 
 #include <memory>
 

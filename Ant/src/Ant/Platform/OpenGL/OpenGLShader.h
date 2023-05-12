@@ -50,7 +50,7 @@ namespace Ant {
 		void CompileAndUploadShader();
 		static GLenum ShaderTypeFromString(const std::string& type);
 
-		void ResolveAndSetUniforms(const std::shared_ptr<OpenGLShaderUniformBufferDeclaration>& decl, Buffer buffer);
+		void ResolveAndSetUniforms(const Ref<OpenGLShaderUniformBufferDeclaration>& decl, Buffer buffer);
 		void ResolveAndSetUniform(OpenGLShaderUniformDeclaration* uniform, Buffer buffer);
 		void ResolveAndSetUniformArray(OpenGLShaderUniformDeclaration* uniform, Buffer buffer);
 		void ResolveAndSetUniformField(const OpenGLShaderUniformDeclaration& field, byte* data, int32_t offset);
@@ -96,8 +96,8 @@ namespace Ant {
 
 		ShaderUniformBufferList m_VSRendererUniformBuffers;
 		ShaderUniformBufferList m_PSRendererUniformBuffers;
-		std::shared_ptr<OpenGLShaderUniformBufferDeclaration> m_VSMaterialUniformBuffer;
-		std::shared_ptr<OpenGLShaderUniformBufferDeclaration> m_PSMaterialUniformBuffer;
+		Ref<OpenGLShaderUniformBufferDeclaration> m_VSMaterialUniformBuffer;
+		Ref<OpenGLShaderUniformBufferDeclaration> m_PSMaterialUniformBuffer;
 		ShaderResourceList m_Resources;
 		ShaderStructList m_Structs;
 

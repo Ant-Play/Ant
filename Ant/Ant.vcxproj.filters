@@ -49,6 +49,12 @@
     <Filter Include="src\Ant\Utils">
       <UniqueIdentifier>{3F9F029F-AB5F-7ED5-749A-C752E019C3B1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="\vendor">
+      <UniqueIdentifier>{C2335340-2E13-D2DB-372B-5DB2A389383D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="\vendor\assimp">
+      <UniqueIdentifier>{9E90D678-8A5E-CA7E-73F2-3AA55F5FA6E3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
@@ -93,9 +99,6 @@
     <ClInclude Include="src\Ant\Core\Buffer.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Core\EntryPoint.h">
-      <Filter>src\Ant\Core</Filter>
-    </ClInclude>
     <ClInclude Include="src\Ant\Core\Events\ApplicationEvent.h">
       <Filter>src\Ant\Core\Events</Filter>
     </ClInclude>
@@ -107,9 +110,6 @@
     </ClInclude>
     <ClInclude Include="src\Ant\Core\Events\MouseEvent.h">
       <Filter>src\Ant\Core\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Ant\Core\FileSystem.h">
-      <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\Inputs.h">
       <Filter>src\Ant\Core</Filter>
@@ -132,6 +132,9 @@
     <ClInclude Include="src\Ant\Core\Math\Mat4.h">
       <Filter>src\Ant\Core\Math</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Core\Math\Noise.h">
+      <Filter>src\Ant\Core\Math</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Core\Math\Ray.h">
       <Filter>src\Ant\Core\Math</Filter>
     </ClInclude>
@@ -139,6 +142,9 @@
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\PlatformDetection.h">
+      <Filter>src\Ant\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Core\Ref.h">
       <Filter>src\Ant\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Core\Timer.h">
@@ -156,8 +162,14 @@
     <ClInclude Include="src\Ant\Debug\Instrumentor.h">
       <Filter>src\Ant\Debug</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Editor\EditorCamera.h">
+      <Filter>src\Ant\Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Editor\SceneHierarchyPanel.h">
       <Filter>src\Ant\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\EntryPoint.h">
+      <Filter>src\Ant</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\ImGui\ImGuiLayer.h">
       <Filter>src\Ant\ImGui</Filter>
@@ -234,13 +246,28 @@
     <ClInclude Include="src\Ant\Renderer\VertexArray.h">
       <Filter>src\Ant\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Scene\Component.h">
+      <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Scene\Entity.h">
       <Filter>src\Ant\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Scene\Scene.h">
       <Filter>src\Ant\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\Ant\Scene\SceneCamera.h">
+      <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Scene\SceneSerializer.h">
+      <Filter>src\Ant\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="src\Ant\Scripts\ScriptEngine.h">
+      <Filter>src\Ant\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Scripts\ScriptEngineRegistry.h">
+      <Filter>src\Ant\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ant\Scripts\ScriptWrappers.h">
       <Filter>src\Ant\Scripts</Filter>
     </ClInclude>
     <ClInclude Include="src\Ant\Utils\PlatformUtils.h">
@@ -1503,20 +1530,12 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ant\Core\Ref.h" />
-    <ClInclude Include="src\Ant\Core\Math\Noise.h" />
-    <ClInclude Include="src\Ant\Scene\Component.h" />
-    <ClInclude Include="src\Ant\Scripts\ScriptEngineRegistry.h" />
-    <ClInclude Include="src\Ant\Scripts\ScriptWrappers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\Base.cpp">
-      <Filter>src\Ant\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Ant\Core\FileSystem.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\Layer.cpp">
@@ -1531,11 +1550,17 @@
     <ClCompile Include="src\Ant\Core\Math\Mat4.cpp">
       <Filter>src\Ant\Core\Math</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Core\Math\Noise.cpp">
+      <Filter>src\Ant\Core\Math</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ant\Core\UUID.cpp">
       <Filter>src\Ant\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Core\Window.cpp">
       <Filter>src\Ant\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Editor\EditorCamera.cpp">
+      <Filter>src\Ant\Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Ant\Editor\SceneHierarchyPanel.cpp">
       <Filter>src\Ant\Editor</Filter>
@@ -1630,7 +1655,19 @@
     <ClCompile Include="src\Ant\Scene\Scene.cpp">
       <Filter>src\Ant\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ant\Scene\SceneCamera.cpp">
+      <Filter>src\Ant\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Scene\SceneSerializer.cpp">
+      <Filter>src\Ant\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ant\Scripts\ScriptEngine.cpp">
+      <Filter>src\Ant\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Scripts\ScriptEngineRegistry.cpp">
+      <Filter>src\Ant\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Scripts\ScriptWrappers.cpp">
       <Filter>src\Ant\Scripts</Filter>
     </ClCompile>
     <ClCompile Include="src\antpch.cpp">
@@ -1642,11 +1679,10 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ant\Core\Math\Noise.cpp" />
-    <ClCompile Include="src\Ant\Scripts\ScriptEngineRegistry.cpp" />
-    <ClCompile Include="src\Ant\Scripts\ScriptWrappers.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="\vendor\assimp\include" />
+    <None Include="\vendor\assimp\include">
+      <Filter>\vendor\assimp</Filter>
+    </None>
   </ItemGroup>
 </Project>

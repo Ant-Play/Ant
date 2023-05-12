@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Ant/Core/Base.h"
-#include "Ant/Core/Buffer.h"
-#include "Ant/Core/Ref.h"
+
 #include "Ant/Renderer/Shader.h"
 #include "Ant/Renderer/Texture.h"
 
@@ -13,17 +12,9 @@ namespace Ant{
 
 	enum class MaterialFlag
 	{
-		None = 0,
-		DepthTest			= BIT(0),
-		DepthWrite			= BIT(1),
-		DepthFunc			= BIT(2),
-		Blend				= BIT(3),
-		BlendSrc			= BIT(4),
-		BlendDst			= BIT(5),
-		BlendEquation		= BIT(6),
-		CullFace			= BIT(7),
-		CullFaceMode		= BIT(8),
-		FrontFace			= BIT(9),
+		None = BIT(0),
+		DepthTest = BIT(1),
+		Blend = BIT(2)
 	};
 
 	class Material : public RefCounted
@@ -36,7 +27,7 @@ namespace Ant{
 		void Bind();
 
 		uint32_t GetFlags() const { return m_MaterialFlags; }
-		void SetFlag(MaterialFlag flag) { m_MaterialFlags |= static_cast<uint32_t>(flag); };
+		void SetFlag(MaterialFlag flag) { m_MaterialFlags |= (uint32_t)flag; }
 
 		template <typename T>
 		void Set(const std::string& name, const T& value)
@@ -78,7 +69,7 @@ namespace Ant{
 
 		ShaderUniformDeclaration* FindUniformDeclaration(const std::string& name);
 		ShaderResourceDeclaration* FindResourceDeclaration(const std::string& name);
-		Buffer& GetUniformBufferTarget(const ShaderUniformDeclaration* uniformDeclaration);
+		Buffer& GetUniformBufferTarget(ShaderUniformDeclaration* uniformDeclaration);
 	private:
 		Ref<Shader> m_Shader;
 		std::unordered_set<MaterialInstance*> m_MaterialInstances;
@@ -144,7 +135,7 @@ namespace Ant{
 	private:
 		void AllocateStorage();
 		void OnShaderReloaded();
-		Buffer& GetUniformBufferTarget(const ShaderUniformDeclaration* uniformDeclaration);
+		Buffer& GetUniformBufferTarget(ShaderUniformDeclaration* uniformDeclaration);
 		void OnMaterialValueUpdated(ShaderUniformDeclaration* decl);
 	private:
 		Ref<Material> m_Material;
@@ -153,7 +144,7 @@ namespace Ant{
 		Buffer m_PSUniformStorageBuffer;
 		std::vector<Ref<Texture>> m_Textures;
 
-		// TODO: This is a temporary; come up with a pproper system to track overrides
+		// TODO: This is temporary; come up with a proper system to track overrides
 		std::unordered_set<std::string> m_OverriddenValues;
 	};
 }

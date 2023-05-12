@@ -10,7 +10,7 @@ namespace Example
 {
     public class MapGenerator : Entity
     {
-        // TODO: [EditorSlider("MapWidth Custom Name", 2, 0, 1024)]
+        // [EditorSlider("MapWidth Custom Name", 2, 0, 1024)]
         public int MapWidth = 128;
         public int MapHeight = 128;
         public int Octaves = 4;
@@ -20,8 +20,11 @@ namespace Example
         public Vector2 Offset = new Vector2(13.4f, 6.26f);
         public float NoiseScale = 0.5f;
 
+        public float Speed = 0.0f;
+
         public void GenerateMap()
         {
+            //float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, noiseScale);
             float[,] noiseMap = Noise.GenerateNoiseMap(MapWidth, MapHeight, Seed, NoiseScale, Octaves, Persistance, Lacunarity, Offset);
 
             uint width = (uint)noiseMap.GetLength(0);
@@ -33,7 +36,7 @@ namespace Example
             {
                 for (int x = 0; x < width; x++)
                 {
-                    colorMap[x+y*width] = Vector4.Lerp(Color.Black, Color.White, noiseMap[x, y]);
+                    colorMap[x + y * width] = Vector4.Lerp(Color.Black, Color.White, noiseMap[x, y]);
                 }
             }
 
@@ -46,10 +49,9 @@ namespace Example
             MeshComponent meshComponent = GetComponent<MeshComponent>();
             if (meshComponent == null)
             {
-                Console.WriteLine("MeshComponent is null");
+                Console.WriteLine("MeshComponent is null!");
                 meshComponent = CreateComponent<MeshComponent>();
             }
-
             meshComponent.Mesh = MeshFactory.CreatePlane(1.0f, 1.0f);
 
             Console.WriteLine("Mesh has {0} materials!", meshComponent.Mesh.GetMaterialCount());
@@ -64,9 +66,19 @@ namespace Example
             GenerateMap();
         }
 
-        void OnUpdate()
+        void OnUpdate(float ts)
         {
-            //Console.WriteLine("MapGenerator.OnUpdate");
+            Matrix4 transform = GetTransform();
+            Vector3 translation = transform.Translation;
+            translation.Y += ts * Speed;
+            if (Input.IsKeyPressed(KeyCode.Space))
+            {
+                translation.Y -= 10.0f;
+            }
+            transform.Translation = translation;
+            SetTransform(transform);
         }
+
+
     }
 }

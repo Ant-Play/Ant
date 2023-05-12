@@ -4,9 +4,6 @@
 #define ANT_RENDER_TRACE(...) ANT_CORE_TRACE(__VA_ARGS__)
 
 namespace Ant {
-	//Scope<RendererAPI> RenderCommandQueue::s_RendererAPI = RendererAPI::Create();
-
-
 	RenderCommandQueue::RenderCommandQueue()
 	{
 		m_CommandBuffer = new uint8_t[10 * 1024 * 1024]; // 10mb buffer
@@ -14,12 +11,10 @@ namespace Ant {
 		memset(m_CommandBuffer, 0, 10 * 1024 * 1024);
 	}
 
-
 	RenderCommandQueue::~RenderCommandQueue()
 	{
 		delete[] m_CommandBuffer;
 	}
-
 
 	void* RenderCommandQueue::Allocate(RenderCommandFn fn, uint32_t size)
 	{
@@ -36,7 +31,6 @@ namespace Ant {
 		m_CommandCount++;
 		return memory;
 	}
-
 
 	void RenderCommandQueue::Execute()
 	{
@@ -58,5 +52,4 @@ namespace Ant {
 		m_CommandBufferPtr = m_CommandBuffer;
 		m_CommandCount = 0;
 	}
-
 }

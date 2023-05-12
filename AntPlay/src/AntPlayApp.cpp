@@ -1,29 +1,24 @@
 
 #include <Ant.h>
-#include "Ant/Core/EntryPoint.h"
+#include <Ant/EntryPoint.h>
 
 #include "EditorLayer.h"
 
-namespace Ant {
-	class AntPlay : public Ant::Application
+class AntPlayApplication : public Ant::Application
+{
+public:
+	AntPlayApplication(const Ant::ApplicationProps& props)
+		: Application(props)
 	{
-	public:
-		AntPlay(const Ant::ApplicationProps& props)
-			: Application(props)
-		{
-			//PushLayer(new ExampleLayer);
-			PushLayer(new EditorLayer());
-			//PushLayer(new GameLayer());
-		}
-
-		virtual void OnInit() override
-		{
-			PushLayer(new Ant::EditorLayer());
-		}
-	};
-
-	Ant::Application* Ant::CreateApplication()
-	{
-		return new AntPlay({ "AntPlay", 1600, 900 });
 	}
+
+	virtual void OnInit() override
+	{
+		PushLayer(new Ant::EditorLayer());
+	}
+};
+
+Ant::Application* Ant::CreateApplication()
+{
+	return new AntPlayApplication({ "AntPlay", 1600, 900 });
 }

@@ -13,7 +13,7 @@ namespace Ant{
 		None = 0, Vertex = 0, Pixel = 1
 	};
 
-	class ShaderUniformDeclaration : public RefCounted
+	class ShaderUniformDeclaration
 	{
 	private:
 		friend class Shader;
@@ -29,10 +29,9 @@ namespace Ant{
 		virtual void SetOffset(uint32_t offset) = 0;
 	};
 
-
 	typedef std::vector<ShaderUniformDeclaration*> ShaderUniformList;
 
-	class ShaderUniformBufferDeclaration
+	class ShaderUniformBufferDeclaration : public RefCounted
 	{
 	public:
 		virtual const std::string& GetName() const = 0;

@@ -1,7 +1,7 @@
 #pragma once
 #include "Ant/Renderer/RenderCommandQueue.h"
-#include "Ant/Renderer/Shader.h"
 #include "Ant/Renderer/RenderPass.h"
+
 #include "Ant/Renderer/Mesh.h"
 
 namespace Ant{
@@ -17,7 +17,7 @@ namespace Ant{
 		// Commands
 		static void Clear();
 		static void Clear(float r, float g, float b, float a = 1.0f);
-		static void SetClearColor(float r, float g, float b, float a = 1.0f);
+		static void SetClearColor(float r, float g, float b, float a);
 
 		static void DrawIndexed(uint32_t count, PrimitiveType type, bool depthTest = true);
 
@@ -27,7 +27,6 @@ namespace Ant{
 		static void ClearMagenta();
 
 		static void Init();
-		static void Shutdown();
 
 		static Ref<ShaderLibrary> GetShaderLibrary();
 
@@ -47,6 +46,10 @@ namespace Ant{
 			new (storageBuffer) FuncT(std::forward<FuncT>(func));
 		}
 
+		/*static void* Submit(RenderCommandFn fn, unsigned int size)
+		{
+			return s_Instance->m_CommandQueue.Allocate(fn, size);
+		}*/
 
 		static void WaitAndRender();
 

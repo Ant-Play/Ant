@@ -7,7 +7,7 @@ namespace Ant{
 	//////////////////////////////////////////////////////////////////////////////////
 	// Material
 	//////////////////////////////////////////////////////////////////////////////////
-	
+
 	Ref<Material> Material::Create(const Ref<Shader>& shader)
 	{
 		return Ref<Material>::Create(shader);
@@ -19,25 +19,24 @@ namespace Ant{
 		m_Shader->AddShaderReloadedCallback(std::bind(&Material::OnShaderReloaded, this));
 		AllocateStorage();
 
-		m_MaterialFlags |= static_cast<uint32_t>(MaterialFlag::DepthTest);
-		m_MaterialFlags |= static_cast<uint32_t>(MaterialFlag::Blend);
+		m_MaterialFlags |= (uint32_t)MaterialFlag::DepthTest;
+		m_MaterialFlags |= (uint32_t)MaterialFlag::Blend;
 	}
 
 	Material::~Material()
 	{
-
 	}
 
 	void Material::AllocateStorage()
 	{
-		if(m_Shader->HasVSMaterialUniformBuffer())
+		if (m_Shader->HasVSMaterialUniformBuffer())
 		{
 			const auto& vsBuffer = m_Shader->GetVSMaterialUniformBuffer();
 			m_VSUniformStorageBuffer.Allocate(vsBuffer.GetSize());
 			m_VSUniformStorageBuffer.ZeroInitialize();
 		}
 
-		if(m_Shader->HasPSMaterialUniformBuffer())
+		if (m_Shader->HasPSMaterialUniformBuffer())
 		{
 			const auto& psBuffer = m_Shader->GetPSMaterialUniformBuffer();
 			m_PSUniformStorageBuffer.Allocate(psBuffer.GetSize());
@@ -56,26 +55,25 @@ namespace Ant{
 
 	ShaderUniformDeclaration* Material::FindUniformDeclaration(const std::string& name)
 	{
-		if(m_VSUniformStorageBuffer)
+		if (m_VSUniformStorageBuffer)
 		{
 			auto& declarations = m_Shader->GetVSMaterialUniformBuffer().GetUniformDeclarations();
-			for(ShaderUniformDeclaration* uniform : declarations)
+			for (ShaderUniformDeclaration* uniform : declarations)
 			{
-				if(uniform->GetName() == name)
+				if (uniform->GetName() == name)
 					return uniform;
 			}
 		}
 
-		if(m_PSUniformStorageBuffer)
+		if (m_PSUniformStorageBuffer)
 		{
 			auto& declarations = m_Shader->GetPSMaterialUniformBuffer().GetUniformDeclarations();
-			for(ShaderUniformDeclaration* uniform : declarations)
+			for (ShaderUniformDeclaration* uniform : declarations)
 			{
-				if(uniform->GetName() == name)
+				if (uniform->GetName() == name)
 					return uniform;
 			}
 		}
-
 		return nullptr;
 	}
 
@@ -90,12 +88,12 @@ namespace Ant{
 		return nullptr;
 	}
 
-	Buffer& Material::GetUniformBufferTarget(const ShaderUniformDeclaration* uniformDeclaration)
+	Buffer& Material::GetUniformBufferTarget(ShaderUniformDeclaration* uniformDeclaration)
 	{
 		switch (uniformDeclaration->GetDomain())
 		{
-			case ShaderDomain::Vertex:    return m_VSUniformStorageBuffer;
-			case ShaderDomain::Pixel:     return m_PSUniformStorageBuffer;
+		case ShaderDomain::Vertex:    return m_VSUniformStorageBuffer;
+		case ShaderDomain::Pixel:     return m_PSUniformStorageBuffer;
 		}
 
 		ANT_CORE_ASSERT(false, "Invalid uniform declaration domain! Material does not support this shader type.");
@@ -114,7 +112,6 @@ namespace Ant{
 
 		BindTextures();
 	}
-
 
 	void Material::BindTextures()
 	{
@@ -147,7 +144,6 @@ namespace Ant{
 		m_Material->m_MaterialInstances.erase(this);
 	}
 
-
 	void MaterialInstance::OnShaderReloaded()
 	{
 		AllocateStorage();
@@ -171,7 +167,7 @@ namespace Ant{
 		}
 	}
 
-	void MaterialInstance::SetFlag(MaterialFlag flag, bool value /*= true*/)
+	void MaterialInstance::SetFlag(MaterialFlag flag, bool value)
 	{
 		if (value)
 		{
@@ -193,12 +189,12 @@ namespace Ant{
 		}
 	}
 
-	Buffer& MaterialInstance::GetUniformBufferTarget(const ShaderUniformDeclaration* uniformDeclaration)
+	Buffer& MaterialInstance::GetUniformBufferTarget(ShaderUniformDeclaration* uniformDeclaration)
 	{
 		switch (uniformDeclaration->GetDomain())
 		{
-			case ShaderDomain::Vertex:    return m_VSUniformStorageBuffer;
-			case ShaderDomain::Pixel:     return m_PSUniformStorageBuffer;
+		case ShaderDomain::Vertex:    return m_VSUniformStorageBuffer;
+		case ShaderDomain::Pixel:     return m_PSUniformStorageBuffer;
 		}
 
 		ANT_CORE_ASSERT(false, "Invalid uniform declaration domain! Material does not support this shader type.");
@@ -223,7 +219,5 @@ namespace Ant{
 				texture->Bind(i);
 		}
 	}
-
-
 
 }

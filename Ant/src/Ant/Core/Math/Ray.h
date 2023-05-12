@@ -1,11 +1,12 @@
 #pragma once
 
+#include "Ant/Core/Math/AABB.h"
 
 #include <glm/glm.hpp>
 
-#include "Ant/Core/Math/AABB.h"
 
 namespace Ant{
+
 	struct Ray
 	{
 		glm::vec3 Origin, Direction;
@@ -18,39 +19,39 @@ namespace Ant{
 
 		static Ray Zero()
 		{
-			return { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
+			return { {0.0f, 0.0f, 0.0f},{0.0f, 0.0f, 0.0f} };
 		}
 
 		bool IntersectsAABB(const AABB& aabb, float& t) const
 		{
-			glm::vec3 dirFrac;
+			glm::vec3 dirfrac;
 			// r.dir is unit direction vector of ray
-			dirFrac.x = 1.0f / Direction.x;
-			dirFrac.y = 1.0f / Direction.y;
-			dirFrac.z = 1.0f / Direction.z;
+			dirfrac.x = 1.0f / Direction.x;
+			dirfrac.y = 1.0f / Direction.y;
+			dirfrac.z = 1.0f / Direction.z;
 			// lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
-		    // r.org is origin of ray
+			// r.org is origin of ray
 			const glm::vec3& lb = aabb.Min;
 			const glm::vec3& rt = aabb.Max;
-			float t1 = (lb.x - Origin.x) * dirFrac.x;
-			float t2 = (rt.x - Origin.x) * dirFrac.x;
-			float t3 = (lb.y - Origin.y) * dirFrac.y;
-			float t4 = (rt.y - Origin.y) * dirFrac.y;
-			float t5 = (lb.z - Origin.z) * dirFrac.z;
-			float t6 = (rt.z - Origin.z) * dirFrac.z;
+			float t1 = (lb.x - Origin.x) * dirfrac.x;
+			float t2 = (rt.x - Origin.x) * dirfrac.x;
+			float t3 = (lb.y - Origin.y) * dirfrac.y;
+			float t4 = (rt.y - Origin.y) * dirfrac.y;
+			float t5 = (lb.z - Origin.z) * dirfrac.z;
+			float t6 = (rt.z - Origin.z) * dirfrac.z;
 
 			float tmin = glm::max(glm::max(glm::min(t1, t2), glm::min(t3, t4)), glm::min(t5, t6));
 			float tmax = glm::min(glm::min(glm::max(t1, t2), glm::max(t3, t4)), glm::max(t5, t6));
 
 			// if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
-			if(tmax < 0)
+			if (tmax < 0)
 			{
 				t = tmax;
 				return false;
 			}
 
 			// if tmin > tmax, ray doesn't intersect AABB
-			if(tmin > tmax)
+			if (tmin > tmax)
 			{
 				t = tmax;
 				return false;
@@ -66,14 +67,14 @@ namespace Ant{
 			glm::vec3 E2 = C - A;
 			glm::vec3 N = cross(E1, E2);
 			float det = -glm::dot(Direction, N);
-			float invdet = 1.0f / det;
+			float invdet = 1.0 / det;
 			glm::vec3 AO = Origin - A;
-			glm::vec3 DAO = cross(AO, Direction);
+			glm::vec3 DAO = glm::cross(AO, Direction);
 			float u = glm::dot(E2, DAO) * invdet;
 			float v = -glm::dot(E1, DAO) * invdet;
 			t = glm::dot(AO, N) * invdet;
 			return (det >= 1e-6 && t >= 0.0 && u >= 0.0 && v >= 0.0 && (u + v) <= 1.0);
-
 		}
+
 	};
 }

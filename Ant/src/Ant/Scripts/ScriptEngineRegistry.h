@@ -5,6 +5,6 @@ namespace Ant{
 	class ScriptEngineRegistry
 	{
 	public:
-		static void RegistryAll();
+		static void RegisterAll();
 	};
 }

@@ -18,7 +18,7 @@ namespace Ant
         {
             get
             {
-                return GetTag_Native(Entity.SceneID, Entity.EntityID);
+                return GetTag_Native(Entity.ID);
             }
             set
             {
@@ -29,7 +29,7 @@ namespace Ant
 
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public static extern string GetTag_Native(uint sceneID, uint entityID);
+        public static extern string GetTag_Native(ulong entityID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void SetTag_Native(string tag);
@@ -42,20 +42,20 @@ namespace Ant
             get
             {
                 Matrix4 result;
-                GetTransform_Native(Entity.SceneID, Entity.EntityID, out result);
+                GetTransform_Native(Entity.ID, out result);
                 return result;
             }
             set
             {
-                SetTransform_Native(Entity.SceneID, Entity.EntityID, ref value);
+                SetTransform_Native(Entity.ID, ref value);
             }
         }
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public static extern void GetTransform_Native(uint sceneID, uint entityID, out Matrix4 result);
+        public static extern void GetTransform_Native(ulong entityID, out Matrix4 result);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public static extern void SetTransform_Native(uint sceneID, uint entityID, ref Matrix4 result);
+        public static extern void SetTransform_Native(ulong entityID, ref Matrix4 result);
 
     }
 
@@ -65,21 +65,21 @@ namespace Ant
         {
             get
             {
-                Mesh result = new Mesh(GetMesh_Native(Entity.SceneID, Entity.EntityID));
+                Mesh result = new Mesh(GetMesh_Native(Entity.ID));
                 return result;
             }
             set
             {
                 IntPtr ptr = value == null ? IntPtr.Zero : value.m_UnmanagedInstance;
-                SetMesh_Native(Entity.SceneID, Entity.EntityID, ptr);
+                SetMesh_Native(Entity.ID, ptr);
             }
         }
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public static extern IntPtr GetMesh_Native(uint sceneID, uint entityID);
+        public static extern IntPtr GetMesh_Native(ulong entityID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public static extern void SetMesh_Native(uint sceneID, uint entityID, IntPtr unmanagedInstance);
+        public static extern void SetMesh_Native(ulong entityID, IntPtr unmanagedInstance);
 
     }
 

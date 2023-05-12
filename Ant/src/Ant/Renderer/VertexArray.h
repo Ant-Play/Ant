@@ -1,10 +1,8 @@
 #pragma once
-#include "Ant/Core/Base.h"
 #include "Ant/Renderer/Buffer.h"
 
 namespace Ant{
 
-	//VAOµÄ³éÏóÀà
 	class VertexArray : public RefCounted
 	{
 	public:
@@ -23,4 +21,5 @@ namespace Ant{
 
 		static Ref<VertexArray> Create();
 	};
+
 }

@@ -26,8 +26,8 @@ namespace Ant {
 		s_Data.m_ShaderLibrary = Ref<ShaderLibrary>::Create();
 		Renderer::Submit([]() { RendererAPI::Init(); });
 
-		Renderer::GetShaderLibrary()->Load("assets/shaders/HazelPBR_Static.glsl");
-		Renderer::GetShaderLibrary()->Load("assets/shaders/HazelPBR_Anim.glsl");
+		Renderer::GetShaderLibrary()->Load("assets/shaders/AntPBR_Static.glsl");
+		Renderer::GetShaderLibrary()->Load("assets/shaders/AntPBR_Anim.glsl");
 
 		SceneRenderer::Init();
 
@@ -182,7 +182,7 @@ namespace Ant {
 		for (Submesh& submesh : mesh->m_Submeshes)
 		{
 			// Material
-			auto material = materials[submesh.MaterialIndex];
+			auto material = overrideMaterial ? overrideMaterial : materials[submesh.MaterialIndex];
 			auto shader = material->GetShader();
 			material->Bind();
 

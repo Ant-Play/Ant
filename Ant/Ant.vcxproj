@@ -152,12 +152,10 @@
     <ClInclude Include="src\Ant\Core\Assert.h" />
     <ClInclude Include="src\Ant\Core\Base.h" />
     <ClInclude Include="src\Ant\Core\Buffer.h" />
-    <ClInclude Include="src\Ant\Core\EntryPoint.h" />
     <ClInclude Include="src\Ant\Core\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Ant\Core\Events\Event.h" />
     <ClInclude Include="src\Ant\Core\Events\KeyEvent.h" />
     <ClInclude Include="src\Ant\Core\Events\MouseEvent.h" />
-    <ClInclude Include="src\Ant\Core\FileSystem.h" />
     <ClInclude Include="src\Ant\Core\Inputs.h" />
     <ClInclude Include="src\Ant\Core\KeyCodes.h" />
     <ClInclude Include="src\Ant\Core\Layer.h" />
@@ -169,12 +167,15 @@
     <ClInclude Include="src\Ant\Core\Math\Ray.h" />
     <ClInclude Include="src\Ant\Core\MouseCodes.h" />
     <ClInclude Include="src\Ant\Core\PlatformDetection.h" />
+    <ClInclude Include="src\Ant\Core\Ref.h" />
     <ClInclude Include="src\Ant\Core\Timer.h" />
     <ClInclude Include="src\Ant\Core\Timestep.h" />
     <ClInclude Include="src\Ant\Core\UUID.h" />
     <ClInclude Include="src\Ant\Core\Window.h" />
     <ClInclude Include="src\Ant\Debug\Instrumentor.h" />
+    <ClInclude Include="src\Ant\Editor\EditorCamera.h" />
     <ClInclude Include="src\Ant\Editor\SceneHierarchyPanel.h" />
+    <ClInclude Include="src\Ant\EntryPoint.h" />
     <ClInclude Include="src\Ant\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Ant\Math\Math.h" />
     <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLBuffer.h" />
@@ -203,12 +204,13 @@
     <ClInclude Include="src\Ant\Scene\Component.h" />
     <ClInclude Include="src\Ant\Scene\Entity.h" />
     <ClInclude Include="src\Ant\Scene\Scene.h" />
-    <ClInclude Include="src\Ant\Scripts\ScriptEngineRegistry.h" />
+    <ClInclude Include="src\Ant\Scene\SceneCamera.h" />
+    <ClInclude Include="src\Ant\Scene\SceneSerializer.h" />
     <ClInclude Include="src\Ant\Scripts\ScriptEngine.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptEngineRegistry.h" />
     <ClInclude Include="src\Ant\Scripts\ScriptWrappers.h" />
     <ClInclude Include="src\Ant\Utils\PlatformUtils.h" />
     <ClInclude Include="src\antpch.h" />
-    <ClInclude Include="src\Ant\Core\Ref.h" />
     <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_features.hpp" />
@@ -631,7 +633,6 @@
   <ItemGroup>
     <ClCompile Include="src\Ant\Core\Application.cpp" />
     <ClCompile Include="src\Ant\Core\Base.cpp" />
-    <ClCompile Include="src\Ant\Core\FileSystem.cpp" />
     <ClCompile Include="src\Ant\Core\Layer.cpp" />
     <ClCompile Include="src\Ant\Core\LayerStack.cpp" />
     <ClCompile Include="src\Ant\Core\Log.cpp" />
@@ -639,6 +640,7 @@
     <ClCompile Include="src\Ant\Core\Math\Noise.cpp" />
     <ClCompile Include="src\Ant\Core\UUID.cpp" />
     <ClCompile Include="src\Ant\Core\Window.cpp" />
+    <ClCompile Include="src\Ant\Editor\EditorCamera.cpp" />
     <ClCompile Include="src\Ant\Editor\SceneHierarchyPanel.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp" />
@@ -670,12 +672,14 @@
     <ClCompile Include="src\Ant\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Ant\Scene\Entity.cpp" />
     <ClCompile Include="src\Ant\Scene\Scene.cpp" />
-    <ClCompile Include="src\Ant\Scripts\ScriptEngineRegistry.cpp" />
+    <ClCompile Include="src\Ant\Scene\SceneCamera.cpp" />
+    <ClCompile Include="src\Ant\Scene\SceneSerializer.cpp" />
     <ClCompile Include="src\Ant\Scripts\ScriptEngine.cpp" />
+    <ClCompile Include="src\Ant\Scripts\ScriptEngineRegistry.cpp" />
+    <ClCompile Include="src\Ant\Scripts\ScriptWrappers.cpp" />
     <ClCompile Include="src\antpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\Ant\Scripts\ScriptWrappers.cpp" />
     <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

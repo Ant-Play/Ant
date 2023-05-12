@@ -9,7 +9,7 @@ namespace Ant
 {
     public static class Noise
     {
-        public static float PerlineNoise(float x, float y)
+        public static float PerlinNoise(float x, float y)
         {
             return PerlinNoise_Native(x, y);
         }

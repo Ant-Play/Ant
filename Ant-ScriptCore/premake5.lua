@@ -3,12 +3,12 @@ project "Ant-ScriptCore"
     language "C#"
     dotnetframework "4.7.2"
     
-    targetdir ("%{wks.location}/AntPlay/Resources/Scripts")
-	objdir ("%{wks.location}/AntPlay/Resources/Scripts/Intermediates")
+    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
     files
     {
-        "Source/**.cs",
+        "src/**.cs",
         "Properties/**.cs",
     }
 

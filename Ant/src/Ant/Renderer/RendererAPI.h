@@ -27,9 +27,10 @@ namespace Ant{
 		int MaxTextureUnits = 0;
 	};
 
-
 	class RendererAPI
 	{
+	private:
+
 	public:
 		static void Init();
 		static void Shutdown();

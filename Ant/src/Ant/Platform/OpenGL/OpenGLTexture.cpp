@@ -1,10 +1,12 @@
 #include "antpch.h"
 #include "Ant/Platform/OpenGL/OpenGLTexture.h"
+
 #include "Ant/Renderer/Renderer.h"
+#include "Ant/Renderer/RendererAPI.h"
 
 #include <stb_image.h>
+#include <glad/glad.h>
 
-#include "glad/glad.h"
 
 namespace Ant {
 
@@ -12,9 +14,9 @@ namespace Ant {
 	{
 		switch (format)
 		{
-			case TextureFormat::RGB:     return GL_RGB;
-			case TextureFormat::RGBA:    return GL_RGBA;
-			case TextureFormat::Float16: return GL_RGBA16F;
+			case Ant::TextureFormat::RGB:     return GL_RGB;
+			case Ant::TextureFormat::RGBA:    return GL_RGBA;
+			case Ant::TextureFormat::Float16: return GL_RGBA16F;
 		}
 		ANT_CORE_ASSERT(false, "Unknown texture format!");
 		return 0;
@@ -51,6 +53,7 @@ namespace Ant {
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path, bool srgb)
 		: m_FilePath(path)
 	{
+		std::filesystem::current_path("D:/career/graphic/workspace/Ant-dev/AntPlay");
 		int width, height, channels;
 		if (stbi_is_hdr(path.c_str()))
 		{
@@ -175,7 +178,6 @@ namespace Ant {
 		m_Format = format;
 
 		uint32_t levels = Texture::CalculateMipMapCount(width, height);
-
 		Ref<OpenGLTextureCube> instance = this;
 		Renderer::Submit([instance, levels]() mutable
 			{

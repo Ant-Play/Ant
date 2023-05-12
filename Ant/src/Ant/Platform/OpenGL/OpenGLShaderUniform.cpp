@@ -22,35 +22,36 @@ namespace Ant{
 
 	void OpenGLShaderUniformDeclaration::SetOffset(uint32_t offset)
 	{
-		if(m_Type == OpenGLShaderUniformDeclaration::Type::STRUCT)
+		if (m_Type == OpenGLShaderUniformDeclaration::Type::STRUCT)
 			m_Struct->SetOffset(offset);
+
 		m_Offset = offset;
 	}
 
 	uint32_t OpenGLShaderUniformDeclaration::SizeOfUniformType(Type type)
 	{
-		switch(type)
+		switch (type)
 		{
-			case OpenGLShaderUniformDeclaration::Type::INT32: 		return 4;
-			case OpenGLShaderUniformDeclaration::Type::FLOAT32: 	return 4;
-			case OpenGLShaderUniformDeclaration::Type::VEC2: 		return 4 * 2;
-			case OpenGLShaderUniformDeclaration::Type::VEC3: 		return 4 * 3;
-			case OpenGLShaderUniformDeclaration::Type::VEC4: 		return 4 * 4;
-			case OpenGLShaderUniformDeclaration::Type::MAT3: 		return 4 * 3 * 3;
-			case OpenGLShaderUniformDeclaration::Type::MAT4: 		return 4 * 4 * 4;
+			case OpenGLShaderUniformDeclaration::Type::INT32:      return 4;
+			case OpenGLShaderUniformDeclaration::Type::FLOAT32:    return 4;
+			case OpenGLShaderUniformDeclaration::Type::VEC2:       return 4 * 2;
+			case OpenGLShaderUniformDeclaration::Type::VEC3:       return 4 * 3;
+			case OpenGLShaderUniformDeclaration::Type::VEC4:       return 4 * 4;
+			case OpenGLShaderUniformDeclaration::Type::MAT3:       return 4 * 3 * 3;
+			case OpenGLShaderUniformDeclaration::Type::MAT4:       return 4 * 4 * 4;
 		}
 		return 0;
 	}
 
 	OpenGLShaderUniformDeclaration::Type OpenGLShaderUniformDeclaration::StringToType(const std::string& type)
 	{
-		if(type == "int")		return OpenGLShaderUniformDeclaration::Type::INT32;
-		if(type == "float")		return OpenGLShaderUniformDeclaration::Type::FLOAT32;
-		if(type == "vec2")		return OpenGLShaderUniformDeclaration::Type::VEC2;
-		if(type == "vec3")		return OpenGLShaderUniformDeclaration::Type::VEC3;
-		if(type == "vec4")		return OpenGLShaderUniformDeclaration::Type::VEC4;
-		if(type == "mat3")		return OpenGLShaderUniformDeclaration::Type::MAT3;
-		if(type == "mat4")		return OpenGLShaderUniformDeclaration::Type::MAT4;
+		if (type == "int")      return Type::INT32;
+		if (type == "float")    return Type::FLOAT32;
+		if (type == "vec2")     return Type::VEC2;
+		if (type == "vec3")     return Type::VEC3;
+		if (type == "vec4")     return Type::VEC4;
+		if (type == "mat3")     return Type::MAT3;
+		if (type == "mat4")     return Type::MAT4;
 
 		return Type::NONE;
 	}
@@ -59,13 +60,13 @@ namespace Ant{
 	{
 		switch (type)
 		{
-			case OpenGLShaderUniformDeclaration::Type::INT32:	return "int32";
-			case OpenGLShaderUniformDeclaration::Type::FLOAT32: return "float";
-			case OpenGLShaderUniformDeclaration::Type::VEC2:	return "vec2";
-			case OpenGLShaderUniformDeclaration::Type::VEC3:	return "vec3";
-			case OpenGLShaderUniformDeclaration::Type::VEC4:	return "vec4";
-			case OpenGLShaderUniformDeclaration::Type::MAT3:	return "mat3";
-			case OpenGLShaderUniformDeclaration::Type::MAT4:	return "mat4";
+			case OpenGLShaderUniformDeclaration::Type::INT32:      return "int32";
+			case OpenGLShaderUniformDeclaration::Type::FLOAT32:    return "float";
+			case OpenGLShaderUniformDeclaration::Type::VEC2:       return "vec2";
+			case OpenGLShaderUniformDeclaration::Type::VEC3:       return "vec3";
+			case OpenGLShaderUniformDeclaration::Type::VEC4:       return "vec4";
+			case OpenGLShaderUniformDeclaration::Type::MAT3:       return "mat3";
+			case OpenGLShaderUniformDeclaration::Type::MAT4:       return "mat4";
 		}
 		return "Invalid Type";
 	}
@@ -78,7 +79,7 @@ namespace Ant{
 	void OpenGLShaderUniformBufferDeclaration::PushUniform(OpenGLShaderUniformDeclaration* uniform)
 	{
 		uint32_t offset = 0;
-		if(m_Uniforms.size())
+		if (m_Uniforms.size())
 		{
 			OpenGLShaderUniformDeclaration* previous = (OpenGLShaderUniformDeclaration*)m_Uniforms.back();
 			offset = previous->m_Offset + previous->m_Size;
@@ -90,9 +91,9 @@ namespace Ant{
 
 	ShaderUniformDeclaration* OpenGLShaderUniformBufferDeclaration::FindUniform(const std::string& name)
 	{
-		for(ShaderUniformDeclaration* uniform : m_Uniforms)
+		for (ShaderUniformDeclaration* uniform : m_Uniforms)
 		{
-			if(uniform->GetName() == name)
+			if (uniform->GetName() == name)
 				return uniform;
 		}
 		return nullptr;
@@ -107,18 +108,19 @@ namespace Ant{
 
 	OpenGLShaderResourceDeclaration::Type OpenGLShaderResourceDeclaration::StringToType(const std::string& type)
 	{
-		if(type == "sampler2D")			return OpenGLShaderResourceDeclaration::Type::TEXTURE2D;
-		if(type == "sampler2DMS")		return OpenGLShaderResourceDeclaration::Type::TEXTURE2D;
-		if(type == "samplerCube")		return OpenGLShaderResourceDeclaration::Type::TEXTURECUBE;
+		if (type == "sampler2D")    return Type::TEXTURE2D;
+		if (type == "sampler2DMS")  return Type::TEXTURE2D;
+		if (type == "samplerCube")  return Type::TEXTURECUBE;
+
 		return Type::NONE;
 	}
 
 	std::string OpenGLShaderResourceDeclaration::TypeToString(Type type)
 	{
-		switch(type)
+		switch (type)
 		{
-			case OpenGLShaderResourceDeclaration::Type::TEXTURE2D:		return "sampler2D";
-			case OpenGLShaderResourceDeclaration::Type::TEXTURECUBE:	return "samplerCube";
+			case Type::TEXTURE2D:	return "sampler2D";
+			case Type::TEXTURECUBE:	return "samplerCube";
 		}
 		return "Invalid Type";
 	}

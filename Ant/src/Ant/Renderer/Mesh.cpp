@@ -73,21 +73,18 @@ namespace Ant{
 	{
 		LogStream::Initialize();
 
-		ANT_CORE_INFO("Load mesh: {0}", filename.c_str());
+		ANT_CORE_INFO("Loading mesh: {0}", filename.c_str());
 
-		m_Importer = CreateScope<Assimp::Importer>();
+		m_Importer = std::make_unique<Assimp::Importer>();
 
 		const aiScene* scene = m_Importer->ReadFile(filename, s_MeshImportFlags);
-		if(!scene || !scene->HasMeshes())
-		{
+		if (!scene || !scene->HasMeshes())
 			ANT_CORE_ERROR("Failed to load mesh file: {0}", filename);
-			return;
-		}
 
 		m_Scene = scene;
 
 		m_IsAnimated = scene->mAnimations != nullptr;
-		m_MeshShader = m_IsAnimated ? Renderer::GetShaderLibrary()->Get("HazelPBR_Anim") : Renderer::GetShaderLibrary()->Get("HazelPBR_Static");
+		m_MeshShader = m_IsAnimated ? Renderer::GetShaderLibrary()->Get("AntPBR_Anim") : Renderer::GetShaderLibrary()->Get("AntPBR_Static");
 		m_BaseMaterial = Ref<Material>::Create(m_MeshShader);
 		// m_MaterialInstance = Ref<MaterialInstance>::Create(m_BaseMaterial);
 		m_InverseTransform = glm::inverse(Mat4FromAssimpMat4(scene->mRootNode->mTransformation));
@@ -96,7 +93,7 @@ namespace Ant{
 		uint32_t indexCount = 0;
 
 		m_Submeshes.reserve(scene->mNumMeshes);
-		for(size_t m = 0; m < scene->mNumMeshes; m++)
+		for (size_t m = 0; m < scene->mNumMeshes; m++)
 		{
 			aiMesh* mesh = scene->mMeshes[m];
 
@@ -113,23 +110,22 @@ namespace Ant{
 			ANT_CORE_ASSERT(mesh->HasPositions(), "Meshes require positions.");
 			ANT_CORE_ASSERT(mesh->HasNormals(), "Meshes require normals.");
 
-
 			// Vertices
 			if (m_IsAnimated)
 			{
-				for(size_t i = 0; i < mesh->mNumVertices;i++)
+				for (size_t i = 0; i < mesh->mNumVertices; i++)
 				{
 					AnimatedVertex vertex;
 					vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
 					vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
 
-					if(mesh->HasTangentsAndBitangents())
+					if (mesh->HasTangentsAndBitangents())
 					{
 						vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
 						vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
 					}
 
-					if(mesh->HasTextureCoords(0))
+					if (mesh->HasTextureCoords(0))
 						vertex.Texcoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
 
 					m_AnimatedVertices.push_back(vertex);
@@ -140,7 +136,7 @@ namespace Ant{
 				auto& aabb = submesh.BoundingBox;
 				aabb.Min = { FLT_MAX, FLT_MAX, FLT_MAX };
 				aabb.Max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
-				for(size_t i = 0; i < mesh->mNumVertices; i++)
+				for (size_t i = 0; i < mesh->mNumVertices; i++)
 				{
 					Vertex vertex;
 					vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
@@ -152,32 +148,32 @@ namespace Ant{
 					aabb.Max.y = glm::max(vertex.Position.y, aabb.Max.y);
 					aabb.Max.z = glm::max(vertex.Position.z, aabb.Max.z);
 
-					if(mesh->HasTangentsAndBitangents())
+					if (mesh->HasTangentsAndBitangents())
 					{
 						vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
 						vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
 					}
 
-					if(mesh->HasTextureCoords(0))
+					if (mesh->HasTextureCoords(0))
 						vertex.Texcoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
-
 
 					m_StaticVertices.push_back(vertex);
 				}
 			}
 
 			// Indices
-			for(size_t i = 0; i < mesh->mNumFaces;i++)
+			for (size_t i = 0; i < mesh->mNumFaces; i++)
 			{
 				ANT_CORE_ASSERT(mesh->mFaces[i].mNumIndices == 3, "Must have 3 indices.");
 				Index index = { mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] };
 				m_Indices.push_back(index);
 
-				if(!m_IsAnimated)
+				if (!m_IsAnimated)
 					m_TriangleCache[m].emplace_back(m_StaticVertices[index.V1 + submesh.BaseVertex], m_StaticVertices[index.V2 + submesh.BaseVertex], m_StaticVertices[index.V3 + submesh.BaseVertex]);
 			}
-		}
 
+
+		}
 
 		TraverseNodes(scene->mRootNode);
 
@@ -258,7 +254,7 @@ namespace Ant{
 				bool hasAlbedoMap = aiMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexPath) == AI_SUCCESS;
 				if (hasAlbedoMap)
 				{
-					// TODO: Temp - this should be handled by Hazel's filesystem
+					// TODO: Temp - this should be handled by Ant's filesystem
 					std::filesystem::path path = filename;
 					auto parentPath = path.parent_path();
 					parentPath /= std::string(aiTexPath.data);
@@ -288,7 +284,7 @@ namespace Ant{
 				mi->Set("u_NormalTexToggle", 0.0f);
 				if (aiMaterial->GetTexture(aiTextureType_NORMALS, 0, &aiTexPath) == AI_SUCCESS)
 				{
-					// TODO: Temp - this should be handled by Hazel's filesystem
+					// TODO: Temp - this should be handled by Ant's filesystem
 					std::filesystem::path path = filename;
 					auto parentPath = path.parent_path();
 					parentPath /= std::string(aiTexPath.data);
@@ -315,7 +311,7 @@ namespace Ant{
 				// mi->Set("u_RoughnessTexToggle", 0.0f);
 				if (aiMaterial->GetTexture(aiTextureType_SHININESS, 0, &aiTexPath) == AI_SUCCESS)
 				{
-					// TODO: Temp - this should be handled by Hazel's filesystem
+					// TODO: Temp - this should be handled by Ant's filesystem
 					std::filesystem::path path = filename;
 					auto parentPath = path.parent_path();
 					parentPath /= std::string(aiTexPath.data);
@@ -342,7 +338,7 @@ namespace Ant{
 				// Metalness map (or is it??)
 				if (aiMaterial->Get("$raw.ReflectionFactor|file", aiPTI_String, 0, aiTexPath) == AI_SUCCESS)
 				{
-					// TODO: Temp - this should be handled by Hazel's filesystem
+					// TODO: Temp - this should be handled by Ant's filesystem
 					std::filesystem::path path = filename;
 					auto parentPath = path.parent_path();
 					parentPath /= std::string(aiTexPath.data);
@@ -434,7 +430,7 @@ namespace Ant{
 						{
 							metalnessTextureFound = true;
 
-							// TODO: Temp - this should be handled by Hazel's filesystem
+							// TODO: Temp - this should be handled by Ant's filesystem
 							std::filesystem::path path = filename;
 							auto parentPath = path.parent_path();
 							parentPath /= str;
@@ -454,7 +450,7 @@ namespace Ant{
 							}
 							break;
 						}
-					}
+				}
 				}
 
 				if (!metalnessTextureFound)
@@ -469,7 +465,7 @@ namespace Ant{
 		}
 
 		m_VertexArray = VertexArray::Create();
-		if(m_IsAnimated)
+		if (m_IsAnimated)
 		{
 			auto vb = VertexBuffer::Create(m_AnimatedVertices.data(), m_AnimatedVertices.size() * sizeof(AnimatedVertex));
 			vb->SetLayout({
@@ -502,7 +498,6 @@ namespace Ant{
 
 	Mesh::~Mesh()
 	{
-
 	}
 
 	void Mesh::OnUpdate(Timestep ts)
@@ -513,9 +508,9 @@ namespace Ant{
 			{
 				m_WorldTime += ts;
 
-				float ticksPerSecond = static_cast<float>(m_Scene->mAnimations[0]->mTicksPerSecond != 0 ? m_Scene->mAnimations[0]->mTicksPerSecond : 25.0f) * m_TimeMultiplier;
+				float ticksPerSecond = (float)(m_Scene->mAnimations[0]->mTicksPerSecond != 0 ? m_Scene->mAnimations[0]->mTicksPerSecond : 25.0f) * m_TimeMultiplier;
 				m_AnimationTime += ts * ticksPerSecond;
-				m_AnimationTime = fmod(m_AnimationTime, static_cast<float>(m_Scene->mAnimations[0]->mDuration));
+				m_AnimationTime = fmod(m_AnimationTime, (float)m_Scene->mAnimations[0]->mDuration);
 			}
 
 			// TODO: We only need to recalc bones if rendering has been requested at the current animation frame
@@ -531,7 +526,7 @@ namespace Ant{
 		return result;
 	}
 
-	void Mesh::TraverseNodes(aiNode* node, const glm::mat4& parentTransform /*= glm::mat4(1.0f)*/, uint32_t level /*= 0*/)
+	void Mesh::TraverseNodes(aiNode* node, const glm::mat4& parentTransform, uint32_t level)
 	{
 		glm::mat4 transform = parentTransform * Mat4FromAssimpMat4(node->mTransformation);
 		for (uint32_t i = 0; i < node->mNumMeshes; i++)
@@ -552,12 +547,13 @@ namespace Ant{
 	{
 		for (uint32_t i = 0; i < pNodeAnim->mNumPositionKeys - 1; i++)
 		{
-			if (AnimationTime < static_cast<float>(pNodeAnim->mPositionKeys[i + 1].mTime))
+			if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime)
 				return i;
 		}
 
 		return 0;
 	}
+
 
 	uint32_t Mesh::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
 	{
@@ -565,12 +561,13 @@ namespace Ant{
 
 		for (uint32_t i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++)
 		{
-			if (AnimationTime < static_cast<float>(pNodeAnim->mRotationKeys[i + 1].mTime))
+			if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime)
 				return i;
 		}
 
 		return 0;
 	}
+
 
 	uint32_t Mesh::FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim)
 	{
@@ -578,12 +575,13 @@ namespace Ant{
 
 		for (uint32_t i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++)
 		{
-			if (AnimationTime < static_cast<float>(pNodeAnim->mScalingKeys[i + 1].mTime))
+			if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime)
 				return i;
 		}
 
 		return 0;
 	}
+
 
 	glm::vec3 Mesh::InterpolateTranslation(float animationTime, const aiNodeAnim* nodeAnim)
 	{
@@ -598,7 +596,7 @@ namespace Ant{
 		uint32_t NextPositionIndex = (PositionIndex + 1);
 		ANT_CORE_ASSERT(NextPositionIndex < nodeAnim->mNumPositionKeys);
 		float DeltaTime = (float)(nodeAnim->mPositionKeys[NextPositionIndex].mTime - nodeAnim->mPositionKeys[PositionIndex].mTime);
-		float Factor = (animationTime - static_cast<float>(nodeAnim->mPositionKeys[PositionIndex].mTime)) / DeltaTime;
+		float Factor = (animationTime - (float)nodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
 		if (Factor < 0.0f)
 			Factor = 0.0f;
 		ANT_CORE_ASSERT(Factor <= 1.0f, "Factor must be below 1.0f");
@@ -608,6 +606,7 @@ namespace Ant{
 		auto aiVec = Start + Factor * Delta;
 		return { aiVec.x, aiVec.y, aiVec.z };
 	}
+
 
 	glm::quat Mesh::InterpolateRotation(float animationTime, const aiNodeAnim* nodeAnim)
 	{
@@ -622,7 +621,7 @@ namespace Ant{
 		uint32_t NextRotationIndex = (RotationIndex + 1);
 		ANT_CORE_ASSERT(NextRotationIndex < nodeAnim->mNumRotationKeys);
 		float DeltaTime = (float)(nodeAnim->mRotationKeys[NextRotationIndex].mTime - nodeAnim->mRotationKeys[RotationIndex].mTime);
-		float Factor = (animationTime - static_cast<float>(nodeAnim->mRotationKeys[RotationIndex].mTime)) / DeltaTime;
+		float Factor = (animationTime - (float)nodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
 		if (Factor < 0.0f)
 			Factor = 0.0f;
 		ANT_CORE_ASSERT(Factor <= 1.0f, "Factor must be below 1.0f");
@@ -633,6 +632,7 @@ namespace Ant{
 		q = q.Normalize();
 		return glm::quat(q.w, q.x, q.y, q.z);
 	}
+
 
 	glm::vec3 Mesh::InterpolateScale(float animationTime, const aiNodeAnim* nodeAnim)
 	{
@@ -647,7 +647,7 @@ namespace Ant{
 		uint32_t nextIndex = (index + 1);
 		ANT_CORE_ASSERT(nextIndex < nodeAnim->mNumScalingKeys);
 		float deltaTime = (float)(nodeAnim->mScalingKeys[nextIndex].mTime - nodeAnim->mScalingKeys[index].mTime);
-		float factor = (animationTime - static_cast<float>(nodeAnim->mScalingKeys[index].mTime)) / deltaTime;
+		float factor = (animationTime - (float)nodeAnim->mScalingKeys[index].mTime) / deltaTime;
 		if (factor < 0.0f)
 			factor = 0.0f;
 		ANT_CORE_ASSERT(factor <= 1.0f, "Factor must be below 1.0f");
@@ -690,7 +690,6 @@ namespace Ant{
 		for (uint32_t i = 0; i < pNode->mNumChildren; i++)
 			ReadNodeHierarchy(AnimationTime, pNode->mChildren[i], transform);
 	}
-
 
 	const aiNodeAnim* Mesh::FindNodeAnim(const aiAnimation* animation, const std::string& nodeName)
 	{
@@ -747,8 +746,4 @@ namespace Ant{
 		}
 		ANT_MESH_LOG("------------------------------------------------------");
 	}
-
-
-
-
 }

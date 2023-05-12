@@ -28,7 +28,7 @@ namespace Ant {
 	{
 		ApplicationSpecification spec;
 		spec.Name = "Sandbox";
-		spec.WorkingDirectory = "../Hazelnut";
+		spec.WorkingDirectory = "../AntPlay";
 		spec.CommandLineArgs = args;
 
 		return new Sandbox(spec);

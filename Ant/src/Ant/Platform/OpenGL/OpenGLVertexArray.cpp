@@ -11,21 +11,21 @@ namespace Ant {
 	{
 		switch (type)
 		{
-			case Ant::ShaderDataType::Float:		return GL_FLOAT;
-			case Ant::ShaderDataType::Float2:		return GL_FLOAT;
-			case Ant::ShaderDataType::Float3:		return GL_FLOAT;
-			case Ant::ShaderDataType::Float4:		return GL_FLOAT;
-			case Ant::ShaderDataType::Mat3:			return GL_FLOAT;
-			case Ant::ShaderDataType::Mat4:			return GL_FLOAT;
-			case Ant::ShaderDataType::Int:			return GL_INT;
-			case Ant::ShaderDataType::Int2:			return GL_INT;
-			case Ant::ShaderDataType::Int3:			return GL_INT;
-			case Ant::ShaderDataType::Int4:			return GL_INT;
-			case Ant::ShaderDataType::Bool:			return GL_BOOL;
+			case Ant::ShaderDataType::Float:    return GL_FLOAT;
+			case Ant::ShaderDataType::Float2:   return GL_FLOAT;
+			case Ant::ShaderDataType::Float3:   return GL_FLOAT;
+			case Ant::ShaderDataType::Float4:   return GL_FLOAT;
+			case Ant::ShaderDataType::Mat3:     return GL_FLOAT;
+			case Ant::ShaderDataType::Mat4:     return GL_FLOAT;
+			case Ant::ShaderDataType::Int:      return GL_INT;
+			case Ant::ShaderDataType::Int2:     return GL_INT;
+			case Ant::ShaderDataType::Int3:     return GL_INT;
+			case Ant::ShaderDataType::Int4:     return GL_INT;
+			case Ant::ShaderDataType::Bool:     return GL_BOOL;
 		}
 
 		ANT_CORE_ASSERT(false, "Unknown ShaderDataType!");
-		return GL_FLOAT;
+		return 0;
 	}
 
 	OpenGLVertexArray::OpenGLVertexArray()
@@ -37,8 +37,9 @@ namespace Ant {
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
-		Renderer::Submit([this]() {
-			glDeleteVertexArrays(1, &m_RendererID);
+		GLuint rendererID = m_RendererID;
+		Renderer::Submit([rendererID]() {
+			glDeleteVertexArrays(1, &rendererID);
 			});
 	}
 

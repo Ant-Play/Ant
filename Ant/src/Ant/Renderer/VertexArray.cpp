@@ -5,7 +5,6 @@
 
 namespace Ant {
 
-
 	Ref<VertexArray> VertexArray::Create()
 	{
 		switch (RendererAPI::Current())
@@ -17,5 +16,6 @@ namespace Ant {
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;
 	}
+
 
 }

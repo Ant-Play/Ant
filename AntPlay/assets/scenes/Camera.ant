@@ -1,0 +1,33 @@
+Scene: Scene Name
+Environment:
+  AssetPath: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\env\birchwood_4k.hdr
+  Light:
+    Direction: [0, 0, 0]
+    Radiance: [0, 0, 0]
+    Multiplier: 1
+Entities:
+  - Entity: 14760245400331082124
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ModuleName: Example.BasicController
+      StoredFields:
+        - Name: Speed
+          Type: 1
+          Data: 3.79999995
+    CameraComponent:
+      Camera: some camera data...
+      Primary: true
+  - Entity: 16003973292568776966
+    TagComponent:
+      Tag: Gun
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetPath: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\CerberusMaterials.fbx

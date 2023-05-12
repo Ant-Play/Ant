@@ -17,30 +17,12 @@ namespace Ant{
 		glm::vec2 TexCoord;
 		float TexIndex;
 		float TilingFactor;
-
-		// Editor-only
-		int EntityID;
-	};
-	
-	struct CircleVertex
-	{
-		glm::vec3 WorldPosition;
-		glm::vec3 LocalPosition;
-		glm::vec4 Color;
-		float Thickness;
-		float Fade;
-
-		// Editor-only
-		int EntityID;
 	};
 
 	struct LineVertex
 	{
 		glm::vec3 Position;
 		glm::vec4 Color;
-
-		// Editor-only
-		int EntityID;
 	};
 
 	struct Renderer2DData
@@ -83,7 +65,7 @@ namespace Ant{
 		Renderer2D::Statistics Stats;
 	};
 
-	struct Renderer2DData s_Data;
+	static Renderer2DData s_Data;
 
 	void Renderer2D::Init()
 	{
@@ -270,8 +252,7 @@ namespace Ant{
 		s_Data.Stats.QuadCount++;
 	}
 
-
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -429,7 +410,6 @@ namespace Ant{
 		s_Data.Stats.QuadCount++;
 	}
 
-
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
@@ -573,5 +553,6 @@ namespace Ant{
 	{
 		return s_Data.Stats;
 	}
+
 
 }

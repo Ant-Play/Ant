@@ -1,6 +1,5 @@
 #include "antpch.h"
 #include "Ant/Renderer/Framebuffer.h"
-#include "Ant/Renderer/Renderer.h"
 
 #include "Ant/Platform/OpenGL/OpenGLFramebuffer.h"
 
@@ -14,8 +13,8 @@ namespace Ant {
 
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::None:		return nullptr;
-			case RendererAPIType::OpenGL:	result = Ref<OpenGLFramebuffer>::Create(spec);
+		case RendererAPIType::None:		return nullptr;
+		case RendererAPIType::OpenGL:	result = Ref<OpenGLFramebuffer>::Create(spec);
 		}
 		FramebufferPool::GetGlobal()->Add(result);
 		return result;
@@ -23,26 +22,23 @@ namespace Ant {
 
 	FramebufferPool* FramebufferPool::s_Instance = new FramebufferPool;
 
-	FramebufferPool::FramebufferPool(uint32_t maxFBs /*= 32*/)
+	FramebufferPool::FramebufferPool(uint32_t maxFBs /* = 32 */)
 	{
 
 	}
-
 
 	FramebufferPool::~FramebufferPool()
 	{
 
 	}
 
-
-	std::weak_ptr<Ant::Framebuffer> FramebufferPool::AllocateBuffers()
+	std::weak_ptr<Framebuffer> FramebufferPool::AllocateBuffer()
 	{
-		//return std::weak_ptr<Framebuffer>();
-		return {};
+		// m_Pool.push_back();
+		return std::weak_ptr<Framebuffer>();
 	}
 
-
-	void FramebufferPool::Add(const Ref<Framebuffer> framebuffer)
+	void FramebufferPool::Add(const Ref<Framebuffer>& framebuffer)
 	{
 		m_Pool.push_back(framebuffer);
 	}

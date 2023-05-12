@@ -1,10 +1,11 @@
 #pragma once
-#include "Ant/Core/UUID.h"
+
 #include "Ant/Renderer/Mesh.h"
 #include "Ant/Scene/Scene.h"
 #include "Ant/Scene/Component.h"
 
-#include <entt.hpp>
+#include <glm/glm.hpp>
+
 namespace Ant{
 
 	class Entity
@@ -14,7 +15,7 @@ namespace Ant{
 		Entity(entt::entity handle, Scene* scene)
 			: m_EntityHandle(handle), m_Scene(scene) {}
 
-		~Entity() = default;
+		~Entity() {}
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)
@@ -25,7 +26,6 @@ namespace Ant{
 		template<typename T>
 		T& GetComponent()
 		{
-			ANT_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
 		}
 
@@ -38,7 +38,8 @@ namespace Ant{
 		glm::mat4& Transform() { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
 		const glm::mat4& Transform() const { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
 
-		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
+		operator uint32_t () const { return (uint32_t)m_EntityHandle; }
+		operator entt::entity() const { return m_EntityHandle; }
 		operator bool() const { return (uint32_t)m_EntityHandle && m_Scene; }
 
 		bool operator==(const Entity& other) const
@@ -50,6 +51,9 @@ namespace Ant{
 		{
 			return !(*this == other);
 		}
+
+		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
+		UUID GetSceneUUID() { return m_Scene->GetUUID(); }
 	private:
 		Entity(const std::string& name);
 	private:
@@ -57,6 +61,7 @@ namespace Ant{
 		Scene* m_Scene = nullptr;
 
 		friend class Scene;
+		friend class SceneSerializer;
 		friend class ScriptEngine;
 	};
 }

@@ -10,11 +10,14 @@ project "AntPlay"
 	files
 	{
 		"src/**.h",
+		"src/**.c",
+		"src/**.hpp",
 		"src/**.cpp"
 	}
 
 	includedirs
 	{
+		"/src",
 		"%{wks.location}/Ant/vendor/spdlog/include",
 		"%{wks.location}/Ant/src",
 		"%{wks.location}/Ant/vendor",
@@ -31,7 +34,7 @@ project "AntPlay"
 
     postbuildcommands 
 	{
-		'{COPY} "../AntPlay/assets" "%{cfg.targetdir}/assets"'
+		-- '{COPY} "%{wks.location}/AntPlay/assets" "%{cfg.targetdir}/assets"'
 	}
 
 	filter "system:windows"
@@ -44,7 +47,6 @@ project "AntPlay"
     
     filter "configurations:Debug"
         defines "ANT_DEBUG"
-        runtime "Debug"
         symbols "on"
 
         links
@@ -59,7 +61,6 @@ project "AntPlay"
     
     filter "configurations:Release"
         defines "ANT_RELEASE"
-        runtime "Release"
         optimize "on"
 
         links
@@ -74,7 +75,6 @@ project "AntPlay"
     
     filter "configurations:Dist"
         defines "ANT_DIST"
-        runtime "Release"
         optimize "on"
 
         links

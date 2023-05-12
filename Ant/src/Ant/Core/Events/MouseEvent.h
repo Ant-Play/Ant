@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Ant/Core/Events/Event.h"
+
+#include <sstream>
+
 #include "Ant/Core/MouseCodes.h"
 
 namespace Ant {
@@ -8,8 +11,8 @@ namespace Ant {
 	class MouseMovedEvent : public Event
 	{
 	public:
-		MouseMovedEvent(const float x, const float y)
-			:m_MouseX(x), m_MouseY(y) {}
+		MouseMovedEvent(float x, float y)
+			: m_MouseX(x), m_MouseY(y) {}
 
 		inline float GetX() const { return m_MouseX; }
 		inline float GetY() const { return m_MouseY; }
@@ -17,13 +20,12 @@ namespace Ant {
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseMovedEvent: " << m_MouseX << "," << m_MouseY;
+			ss << "MouseMovedEvent: " << m_MouseX << ", " << m_MouseY;
 			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(MouseMoved)
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
-
+			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	private:
 		float m_MouseX, m_MouseY;
 	};
@@ -31,21 +33,21 @@ namespace Ant {
 	class MouseScrolledEvent : public Event
 	{
 	public:
-		MouseScrolledEvent(const float xOffset, const float yOffset)
+		MouseScrolledEvent(float xOffset, float yOffset)
 			: m_XOffset(xOffset), m_YOffset(yOffset) {}
 
-		float GetXOffset() const { return m_XOffset; }
-		float GetYOffset() const { return m_YOffset; }
+		inline float GetXOffset() const { return m_XOffset; }
+		inline float GetYOffset() const { return m_YOffset; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseScrolledEvent: " << m_XOffset << "," << m_YOffset;
+			ss << "MouseScrolledEvent: " << GetXOffset() << ", " << GetYOffset();
 			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(MouseScrolled)
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput | EventCategoryMouseButton)
+			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	private:
 		float m_XOffset, m_YOffset;
 	};
@@ -57,7 +59,7 @@ namespace Ant {
 
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	protected:
-		MouseButtonEvent(const MouseCode button)
+		MouseButtonEvent(MouseCode button)
 			: m_Button(button) {}
 
 		MouseCode m_Button;
@@ -66,7 +68,7 @@ namespace Ant {
 	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(const MouseCode button)
+		MouseButtonPressedEvent(MouseCode button)
 			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override
@@ -82,7 +84,7 @@ namespace Ant {
 	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(const MouseCode button)
+		MouseButtonReleasedEvent(MouseCode button)
 			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override

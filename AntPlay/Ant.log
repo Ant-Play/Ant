@@ -1,125 +1,28 @@
-[22:02:45] [info] Ant: Initialized Core Log
-[22:02:45] [trace] Ant: Ant Engine: v0.1a
-[22:02:45] [trace] Ant: Initializing...
-[22:02:45] [info] Ant: Creating window AntPlay (1600, 900)
-[22:02:45] [info] Ant: Successfully loaded assembly: assets/scripts/Ant-ScriptCore.dll
-[22:02:45] [info] Ant: Successfully loaded assembly: assets/scripts/ExampleApp.dll
-[22:02:45] [info] Ant: Loading texture assets/textures/BRDF_LUT.tga, srgb=false
-[22:02:45] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
-[22:02:45] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
-[22:02:45] [info] Ant: Loading HDR texture assets/env/birchwood_4k.hdr, srgb=false
-[22:02:46] [info] Ant: Load mesh: assets/meshes/TestScene.fbx
-[22:02:46] [trace] Ant: ---- Materials - assets/meshes/TestScene.fbx ----
-[22:02:46] [trace] Ant:   Wall (Index = 0)
-[22:02:46] [trace] Ant:     TextureCount = 0
-[22:02:46] [trace] Ant:     COLOR = 0.4256456, 0.4256456, 0.4256456
-[22:02:46] [trace] Ant:     ROUGHNESS = 0.75
-[22:02:46] [trace] Ant:     No albedo map
-[22:02:46] [trace] Ant:     No normal map
-[22:02:46] [trace] Ant:     No roughness map
-[22:02:46] [trace] Ant:     No metalness map
-[22:02:46] [trace] Ant:   Sphere (Index = 1)
-[22:02:46] [trace] Ant:     TextureCount = 0
-[22:02:46] [trace] Ant:     COLOR = 0.8000001, 0.046761245, 0.021217817
-[22:02:46] [trace] Ant:     ROUGHNESS = 0.100000024
-[22:02:46] [trace] Ant:     No albedo map
-[22:02:46] [trace] Ant:     No normal map
-[22:02:46] [trace] Ant:     No roughness map
-[22:02:46] [trace] Ant:     No metalness map
-[22:02:46] [trace] Ant:   Cone (Index = 2)
-[22:02:46] [trace] Ant:     TextureCount = 0
-[22:02:46] [trace] Ant:     COLOR = 0.011804402, 0.34609163, 0.8000001
-[22:02:46] [trace] Ant:     ROUGHNESS = 0.19999999
-[22:02:46] [trace] Ant:     No albedo map
-[22:02:46] [trace] Ant:     No normal map
-[22:02:46] [trace] Ant:     No roughness map
-[22:02:46] [trace] Ant:     No metalness map
-[22:02:46] [trace] Ant:   Cube (Index = 3)
-[22:02:46] [trace] Ant:     TextureCount = 0
-[22:02:46] [trace] Ant:     COLOR = 0.025761034, 0.8000001, 0
-[22:02:46] [trace] Ant:     ROUGHNESS = 0.5
-[22:02:46] [trace] Ant:     No albedo map
-[22:02:46] [trace] Ant:     No normal map
-[22:02:46] [trace] Ant:     No roughness map
-[22:02:46] [trace] Ant:     No metalness map
-[22:02:46] [trace] Ant:   Ground (Index = 4)
-[22:02:46] [trace] Ant:     TextureCount = 0
-[22:02:46] [trace] Ant:     COLOR = 0.022522327, 0.014681508, 0.014681508
-[22:02:46] [trace] Ant:     ROUGHNESS = 1
-[22:02:46] [trace] Ant:     No albedo map
-[22:02:46] [trace] Ant:     No normal map
-[22:02:46] [trace] Ant:     No roughness map
-[22:02:46] [trace] Ant:     No metalness map
-[22:02:46] [trace] Ant: ------------------------
-[22:02:46] [error] Ant: ScriptsEngine::GetMethod::Failed to get method: Example.MapGenerator:OnUpdate(single)
-[22:02:46] [info] Ant: Load mesh: assets/models/Plane1m.obj
-[22:02:46] [error] Ant: Assimp error: Error, T24712: OBJ: Unable to locate material file Plane1m.mtl
+[15:51:06] [info] Ant: Initialized Core Log
+[15:51:06] [trace] Ant: Ant Engine: v0.1a
+[15:51:06] [trace] Ant: Initializing...
+[15:51:06] [info] Ant: Creating window AntPlay (1600, 900)
+[15:51:07] [info] Ant: Loading texture assets/textures/BRDF_LUT.tga, srgb=false
+[15:51:07] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
+[15:51:07] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
+[15:51:07] [info] Ant: Loading texture assets/editor/Checkerboard.tga, srgb=false
+[15:51:07] [info] Ant: Loading texture assets/editor/PlayButton.png, srgb=false
+[15:51:26] [info] Ant: Loading HDR texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\env\birchwood_4k.hdr, srgb=false
+[15:51:44] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\CerberusMaterials.fbx
+[15:51:45] [error] Ant: Assimp error: Warn,  T21952: Validation warning: A specular shading model is specified but the value of the AI_MATKEY_SHININESS_STRENGTH key is 0.0
 
-[22:02:46] [error] Ant: Assimp error: Error, T24712: OBJ: Unable to locate fallback material file assets/models/Plane1m.mtl
-
-[22:02:46] [error] Ant: Assimp error: Error, T24712: OBJ: failed to locate material None, creating new material
-
-[22:02:46] [trace] Ant: ---- Materials - assets/models/Plane1m.obj ----
-[22:02:46] [trace] Ant:   DefaultMaterial (Index = 0)
-[22:02:46] [trace] Ant:     TextureCount = 0
-[22:02:46] [trace] Ant:     COLOR = 0.6, 0.6, 0.6
-[22:02:46] [trace] Ant:     ROUGHNESS = 1
-[22:02:46] [trace] Ant:     No albedo map
-[22:02:46] [trace] Ant:     No normal map
-[22:02:46] [trace] Ant:     No roughness map
-[22:02:46] [trace] Ant:     No metalness map
-[22:02:46] [trace] Ant:   None (Index = 1)
-[22:02:46] [trace] Ant:     TextureCount = 0
-[22:02:46] [trace] Ant:     COLOR = 0.6, 0.6, 0.6
-[22:02:46] [trace] Ant:     ROUGHNESS = 1
-[22:02:46] [trace] Ant:     No albedo map
-[22:02:46] [trace] Ant:     No normal map
-[22:02:46] [trace] Ant:     No roughness map
-[22:02:46] [trace] Ant:     No metalness map
-[22:02:46] [trace] Ant: ------------------------
-[22:02:46] [info] Ant: Load mesh: assets/models/Sphere1m.fbx
-[22:02:46] [error] Ant: Assimp error: Error, T24712: FBX: no material assigned to mesh, setting default material
-
-[22:02:46] [trace] Ant: ---- Materials - assets/models/Sphere1m.fbx ----
-[22:02:46] [trace] Ant:   DefaultMaterial (Index = 0)
-[22:02:46] [trace] Ant:     TextureCount = 0
-[22:02:46] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
-[22:02:46] [trace] Ant:     ROUGHNESS = -nan
-[22:02:46] [trace] Ant:     No albedo map
-[22:02:46] [trace] Ant:     No normal map
-[22:02:46] [trace] Ant:     No roughness map
-[22:02:46] [trace] Ant:     No metalness map
-[22:02:46] [trace] Ant: ------------------------
-[22:02:46] [info] Ant: Loading texture assets/editor/Checkerboard.tga, srgb=false
-[22:04:06] [info] Ant: Load mesh: assets/models/Plane1m.obj
-[22:04:06] [error] Ant: Assimp error: Error, T24712: OBJ: Unable to locate material file Plane1m.mtl
-
-[22:04:06] [error] Ant: Assimp error: Error, T24712: OBJ: Unable to locate fallback material file assets/models/Plane1m.mtl
-
-[22:04:06] [error] Ant: Assimp error: Error, T24712: OBJ: failed to locate material None, creating new material
-
-[22:04:06] [trace] Ant: ---- Materials - assets/models/Plane1m.obj ----
-[22:04:06] [trace] Ant:   DefaultMaterial (Index = 0)
-[22:04:06] [trace] Ant:     TextureCount = 0
-[22:04:06] [trace] Ant:     COLOR = 0.6, 0.6, 0.6
-[22:04:06] [trace] Ant:     ROUGHNESS = 1
-[22:04:06] [trace] Ant:     No albedo map
-[22:04:06] [trace] Ant:     No normal map
-[22:04:06] [trace] Ant:     No roughness map
-[22:04:06] [trace] Ant:     No metalness map
-[22:04:06] [trace] Ant:   None (Index = 1)
-[22:04:06] [trace] Ant:     TextureCount = 0
-[22:04:06] [trace] Ant:     COLOR = 0.6, 0.6, 0.6
-[22:04:06] [trace] Ant:     ROUGHNESS = 1
-[22:04:06] [trace] Ant:     No albedo map
-[22:04:06] [trace] Ant:     No normal map
-[22:04:06] [trace] Ant:     No roughness map
-[22:04:06] [trace] Ant:     No metalness map
-[22:04:06] [trace] Ant: ------------------------
-[22:04:28] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
-[22:04:28] [warning] Ant: [OpenGL Debug MEDIUM] Program/shader state performance warning: Vertex shader in program 1 is being recompiled based on GL state.
-[22:04:32] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
-[22:05:56] [info] Ant: Loading HDR texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\env\birchwood_4k.hdr, srgb=false
-[22:06:05] [info] Ant: Loading HDR texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\env\rooitou_park_4k.hdr, srgb=false
-[22:06:19] [info] Ant: Loading HDR texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\env\venice_dawn_1_4k.hdr, srgb=false
-[22:06:25] [trace] Ant: Shutting down...
+[15:51:45] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\CerberusMaterials.fbx ----
+[15:51:45] [trace] Ant:   08 - Default.001 (Index = 0)
+[15:51:45] [trace] Ant:     TextureCount = 1
+[15:51:45] [trace] Ant:     COLOR = 0.5882353, 0.5882353, 0.5882353
+[15:51:45] [trace] Ant:     ROUGHNESS = 0.8585786
+[15:51:45] [trace] Ant:     Albedo map path = D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\Textures\Cerberus_A.png
+[15:51:45] [info] Ant: Loading texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\Textures\Cerberus_A.png, srgb=true
+[15:51:46] [trace] Ant:     Normal map path = D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\Textures\Cerberus_N.png
+[15:51:46] [info] Ant: Loading texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\Textures\Cerberus_N.png, srgb=false
+[15:51:48] [trace] Ant:     Roughness map path = D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\Textures\Cerberus_R.png
+[15:51:48] [info] Ant: Loading texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\Textures\Cerberus_R.png, srgb=false
+[15:51:48] [trace] Ant:     Metalness map path = D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\Textures\Cerberus_M.png
+[15:51:48] [info] Ant: Loading texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\cerberus\Textures\Cerberus_M.png, srgb=false
+[15:51:49] [trace] Ant: ------------------------
+[15:52:59] [trace] Ant: Shutting down...

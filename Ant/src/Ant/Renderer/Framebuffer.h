@@ -1,55 +1,24 @@
 #pragma once
 
-#include "Ant/Core/Base.h"
-#include "Ant/Core/Ref.h"
 #include "Ant/Renderer/RendererAPI.h"
+
+#include <glm/glm.hpp>
 
 namespace Ant{
 
-	enum class FramebufferTextureFormat
+	enum class FramebufferFormat
 	{
 		None = 0,
-
-		// Color
-		RGBA8,
-		RED_INTEGER,
-		RGBA16F,
-
-		// Depth/stencil
-		DEPTH24STENCIL8,
-
-		// Defaults
-		Depth = DEPTH24STENCIL8
+		RGBA8 = 1,
+		RGBA16F = 2
 	};
-
-	struct FramebufferTextureSpecification
-	{
-		FramebufferTextureSpecification() = default;
-		FramebufferTextureSpecification(FramebufferTextureFormat format)
-			: TextureFormat(format) {}
-
-
-		FramebufferTextureFormat TextureFormat = FramebufferTextureFormat::None;
-
-		// TODO: filter/wrap
-	};
-
-	struct FramebufferAttachmentSpecification
-	{
-		FramebufferAttachmentSpecification() = default;
-		FramebufferAttachmentSpecification(std::initializer_list<FramebufferTextureSpecification> attachments)
-			: Attachments(attachments) {}
-
-		std::vector<FramebufferTextureSpecification> Attachments;
-	};
-
 
 	struct FramebufferSpecification
 	{
 		uint32_t Width = 1280;
 		uint32_t Height = 720;
 		glm::vec4 ClearColor;
-		FramebufferTextureFormat Format;
+		FramebufferFormat Format;
 		uint32_t Samples = 1; // multisampling
 
 		// SwapChainTarget = screen buffer (i.e. no framebuffer)
@@ -74,8 +43,6 @@ namespace Ant{
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
 
 		static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
-	private:
-
 	};
 
 	class FramebufferPool final
@@ -84,8 +51,8 @@ namespace Ant{
 		FramebufferPool(uint32_t maxFBs = 32);
 		~FramebufferPool();
 
-		std::weak_ptr<Framebuffer> AllocateBuffers();
-		void Add(const Ref<Framebuffer> framebuffer);
+		std::weak_ptr<Framebuffer> AllocateBuffer();
+		void Add(const Ref<Framebuffer>& framebuffer);
 
 		std::vector<Ref<Framebuffer>>& GetAll() { return m_Pool; }
 		const std::vector<Ref<Framebuffer>>& GetAll() const { return m_Pool; }
