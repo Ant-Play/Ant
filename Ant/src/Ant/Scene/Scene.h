@@ -79,6 +79,8 @@ namespace Ant {
 			return m_Registry.view<T>();
 		}
 
+		Entity FindEntityByTag(const std::string& tag);
+
 		const EntityMap& GetEntityMap() const { return m_EntityIDMap; }
 		void CopyTo(Ref<Scene>& target);
 
@@ -110,6 +112,8 @@ namespace Ant {
 
 		entt::entity m_SelectedEntity;
 
+		Entity* m_PhysicsBodyEntityBuffer = nullptr;
+
 		float m_SkyboxLod = 1.0f;
 		bool m_IsPlaying = false;
 
@@ -119,5 +123,6 @@ namespace Ant {
 		friend class SceneHierarchyPanel;
 
 		friend void OnScriptComponentConstruct(entt::registry& registry, entt::entity entity);
+		friend void OnScriptComponentDestroy(entt::registry& registry, entt::entity entity);
 	};
 }

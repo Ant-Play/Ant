@@ -25,11 +25,14 @@ namespace Ant{ namespace Script{
 	void Ant_Entity_SetTransform(uint64_t entityID, glm::mat4* inTransform);
 	void Ant_Entity_CreateComponent(uint64_t entityID, void* type);
 	bool Ant_Entity_HasComponent(uint64_t entityID, void* type);
+	uint64_t Ant_Entity_FindEntityByTag(MonoString* tag);
 
 	void* Ant_MeshComponent_GetMesh(uint64_t entityID);
 	void Ant_MeshComponent_SetMesh(uint64_t entityID, Ref<Mesh>* inMesh);
 
 	void Ant_RigidBody2DComponent_ApplyLinearImpulse(uint64_t entityID, glm::vec2* impulse, glm::vec2* offset, bool wake);
+	void Ant_RigidBody2DComponent_GetLinearVelocity(uint64_t entityID, glm::vec2* outVelocity);
+	void Ant_RigidBody2DComponent_SetLinearVelocity(uint64_t entityID, glm::vec2* velocity);
 
 	// Renderer
 	// Texture2D

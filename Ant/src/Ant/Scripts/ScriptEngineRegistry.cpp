@@ -54,11 +54,14 @@ namespace Ant {
 		mono_add_internal_call("Ant.Entity::CreateComponent_Native", Ant::Script::Ant_Entity_CreateComponent);
 		mono_add_internal_call("Ant.Entity::HasComponent_Native", Ant::Script::Ant_Entity_HasComponent);
 
+		mono_add_internal_call("Ant.Entity::FindEntityByTag_Native", Ant::Script::Ant_Entity_FindEntityByTag);
+
 		mono_add_internal_call("Ant.MeshComponent::GetMesh_Native", Ant::Script::Ant_MeshComponent_GetMesh);
 		mono_add_internal_call("Ant.MeshComponent::SetMesh_Native", Ant::Script::Ant_MeshComponent_SetMesh);
 
 		mono_add_internal_call("Ant.RigidBody2DComponent::ApplyLinearImpulse_Native", Ant::Script::Ant_RigidBody2DComponent_ApplyLinearImpulse);
-
+		mono_add_internal_call("Ant.RigidBody2DComponent::GetLinearVelocity_Native", Ant::Script::Ant_RigidBody2DComponent_GetLinearVelocity);
+		mono_add_internal_call("Ant.RigidBody2DComponent::SetLinearVelocity_Native", Ant::Script::Ant_RigidBody2DComponent_SetLinearVelocity);
 
 		mono_add_internal_call("Ant.Input::IsKeyPressed_Native", Ant::Script::Ant_Input_IsKeyPressed);
 

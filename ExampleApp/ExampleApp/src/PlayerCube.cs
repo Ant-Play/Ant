@@ -11,10 +11,16 @@ namespace Example
     public class PlayerCube : Entity
     {
         public float HorizontalForce = 10.0f;
-        public float VerticalSpeedForce = 10.0f;
+        public float JumpForce = 10.0f;
 
         private RigidBody2DComponent m_PhysicsBody;
         private MaterialInstance m_MeshMaterial;
+
+        int m_CollisionCounter = 0;
+
+        public Vector2 MaxSpeed = new Vector2();
+
+        private bool Colliding => m_CollisionCounter > 0;
 
         void OnCreate()
         {
@@ -23,23 +29,43 @@ namespace Example
             MeshComponent meshComponent = GetComponent<MeshComponent>();
             m_MeshMaterial = meshComponent.Mesh.GetMaterial(0);
             m_MeshMaterial.Set("u_Metalness", 0.0f);
+
+            AddCollision2DBeginCallback(OnPlayerCollisionBegin);
+            AddCollision2DEndCallback(OnPlayerCollisionEnd);
+        }
+
+        void OnPlayerCollisionBegin(float value)
+        {
+            m_CollisionCounter++;
+        }
+
+        void OnPlayerCollisionEnd(float value)
+        {
+            m_CollisionCounter--;
         }
 
         void OnUpdate(float ts)
         {
-            if(Input.IsKeyPressed(KeyCode.D))
-                m_PhysicsBody.ApplyLinearImpulse(new Vector2(HorizontalForce, 0), new Vector2(), true);
+            float movementForce = HorizontalForce;
+
+            if (!Colliding)
+            {
+                movementForce *= 0.4f;
+            }
+
+            if (Input.IsKeyPressed(KeyCode.D))
+                m_PhysicsBody.ApplyLinearImpulse(new Vector2(movementForce, 0), new Vector2(), true);
             else if(Input.IsKeyPressed(KeyCode.A))
-                m_PhysicsBody.ApplyLinearImpulse(new Vector2(-HorizontalForce, 0), new Vector2(), true);
+                m_PhysicsBody.ApplyLinearImpulse(new Vector2(-movementForce, 0), new Vector2(), true);
 
-            if(Input.IsKeyPressed(KeyCode.Space))
-                m_PhysicsBody.ApplyLinearImpulse(new Vector2(0, VerticalSpeedForce), new Vector2(0, -10), true);
+            if (m_CollisionCounter > 0)
+                m_MeshMaterial.Set("u_AlbedoColor", new Vector3(1.0f, 0.0f, 0.0f));
+            else
+                m_MeshMaterial.Set("u_AlbedoColor", new Vector3(0.8f, 0.8f, 0.8f));
 
-            Vector3 color = new Vector3(0.8f, 0.8f, 0.8f);
-            if (Input.IsKeyPressed(KeyCode.Q))
-                color = new Vector3(0.0f, 1.0f, 0.0f);
-
-            m_MeshMaterial.Set("u_AlbedoColor", color);
+            Vector2 linearVelocity = m_PhysicsBody.GetLinearVelocity();
+            linearVelocity.Clamp(new Vector2(-MaxSpeed.X, -1000), MaxSpeed);
+            m_PhysicsBody.SetLinearVelocity(linearVelocity);
 
             if (Input.IsKeyPressed(KeyCode.R))
             {

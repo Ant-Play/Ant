@@ -1,123 +1,133 @@
-[20:04:27] [info] Ant: Initialized Core Log
-[20:04:27] [trace] Ant: Ant Engine: v0.1a
-[20:04:27] [trace] Ant: Initializing...
-[20:04:27] [info] Ant: Creating window AntPlay (1600, 900)
-[20:04:27] [error] Ant: No C# component class found for BoxCollider2DComponent!
-[20:04:27] [info] Ant: Loading texture assets/textures/BRDF_LUT.tga, srgb=false
-[20:04:27] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
-[20:04:27] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
-[20:04:27] [info] Ant: Loading texture assets/editor/Checkerboard.tga, srgb=false
-[20:04:27] [info] Ant: Loading texture assets/editor/PlayButton.png, srgb=false
-[20:04:33] [info] Ant: Deserializing scene 'Scene Name'
-[20:04:33] [info] Ant: Loading HDR texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\env\birchwood_4k.hdr, srgb=false
-[20:04:34] [info] Ant: Deserialized entity with ID = 15001249233138082604, name = Box
-[20:04:34] [info] Ant:   Entity Transform:
-[20:04:34] [info] Ant:     Translation: 0, 5.5, 0
-[20:04:34] [info] Ant:     Rotation: 1, 0, 0, 0
-[20:04:34] [info] Ant:     Scale: 1, 1, 1
-[20:04:34] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [error] Ant: Assimp error: Error, T32732: FBX: no material assigned to mesh, setting default material
+[22:08:13] [info] Ant: Initialized Core Log
+[22:08:13] [trace] Ant: Ant Engine: v0.1a
+[22:08:13] [trace] Ant: Initializing...
+[22:08:13] [info] Ant: Creating window AntPlay (1600, 900)
+[22:08:14] [info] Ant: Loading texture assets/textures/BRDF_LUT.tga, srgb=false
+[22:08:14] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
+[22:08:14] [warning] Ant: Could not find uniform 'u_RadiancePrefilter' in shader
+[22:08:14] [info] Ant: Loading texture assets/editor/Checkerboard.tga, srgb=false
+[22:08:14] [info] Ant: Loading texture assets/editor/PlayButton.png, srgb=false
+[22:08:14] [info] Ant: Deserializing scene 'Scene Name'
+[22:08:14] [info] Ant: Loading HDR texture D:\career\graphic\workspace\Ant-dev\AntPlay\assets\env\birchwood_4k.hdr, srgb=false
+[22:08:15] [info] Ant: Deserialized entity with ID = 2217710330194331187, name = Camera
+[22:08:15] [info] Ant:   Entity Transform:
+[22:08:15] [info] Ant:     Translation: 0, 3, 18.262041
+[22:08:15] [info] Ant:     Rotation: 1, 0, 0, 0
+[22:08:15] [info] Ant:     Scale: 1, 1, 1
+[22:08:15] [info] Ant:   Script Module: Example.BasicController
+[22:08:15] [info] Ant:   Primary Camera: true
+[22:08:15] [info] Ant: Deserialized entity with ID = 1947545168593204283, name = Box
+[22:08:15] [info] Ant:   Entity Transform:
+[22:08:15] [info] Ant:     Translation: -2.25, 5.5, 0
+[22:08:15] [info] Ant:     Rotation: 1, 0, 0, 0
+[22:08:15] [info] Ant:     Scale: 1, 1, 1
+[22:08:15] [info] Ant:   Script Module: Example.PlayerCube
+[22:08:15] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [error] Ant: Assimp error: Error, T35496: FBX: no material assigned to mesh, setting default material
 
-[20:04:34] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
-[20:04:34] [trace] Ant:   DefaultMaterial (Index = 0)
-[20:04:34] [trace] Ant:     TextureCount = 0
-[20:04:34] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
-[20:04:34] [trace] Ant:     ROUGHNESS = -nan
-[20:04:34] [trace] Ant:     No albedo map
-[20:04:34] [trace] Ant:     No normal map
-[20:04:34] [trace] Ant:     No roughness map
-[20:04:34] [trace] Ant:     No metalness map
-[20:04:34] [trace] Ant: ------------------------
-[20:04:34] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [info] Ant:   BoxCollider2DComponent present.
-[20:04:34] [info] Ant: Deserialized entity with ID = 8685757945490200978, name = Box
-[20:04:34] [info] Ant:   Entity Transform:
-[20:04:34] [info] Ant:     Translation: 0, -0.25, 0
-[20:04:34] [info] Ant:     Rotation: 1, 0, 0, 0
-[20:04:34] [info] Ant:     Scale: 20, 1, 18.75
-[20:04:34] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [error] Ant: Assimp error: Error, T32732: FBX: no material assigned to mesh, setting default material
+[22:08:15] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
+[22:08:15] [trace] Ant:   DefaultMaterial (Index = 0)
+[22:08:15] [trace] Ant:     TextureCount = 0
+[22:08:15] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
+[22:08:15] [trace] Ant:     ROUGHNESS = 0.10557282
+[22:08:15] [trace] Ant:     No albedo map
+[22:08:15] [trace] Ant:     No normal map
+[22:08:15] [trace] Ant:     No roughness map
+[22:08:15] [trace] Ant:     No metalness map
+[22:08:15] [trace] Ant: ------------------------
+[22:08:15] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [info] Ant:   BoxCollider2DComponent present.
+[22:08:15] [info] Ant: Deserialized entity with ID = 14977980498382047128, name = Box
+[22:08:15] [info] Ant:   Entity Transform:
+[22:08:15] [info] Ant:     Translation: -0.75, 2, 3.7252903e-09
+[22:08:15] [info] Ant:     Rotation: 1, 0, 0, 0
+[22:08:15] [info] Ant:     Scale: 1, 1, 1
+[22:08:15] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [error] Ant: Assimp error: Error, T35496: FBX: no material assigned to mesh, setting default material
 
-[20:04:34] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
-[20:04:34] [trace] Ant:   DefaultMaterial (Index = 0)
-[20:04:34] [trace] Ant:     TextureCount = 0
-[20:04:34] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
-[20:04:34] [trace] Ant:     ROUGHNESS = -nan
-[20:04:34] [trace] Ant:     No albedo map
-[20:04:34] [trace] Ant:     No normal map
-[20:04:34] [trace] Ant:     No roughness map
-[20:04:34] [trace] Ant:     No metalness map
-[20:04:34] [trace] Ant: ------------------------
-[20:04:34] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [info] Ant:   BoxCollider2DComponent present.
-[20:04:34] [info] Ant: Deserialized entity with ID = 10963896307574570644, name = Box
-[20:04:34] [info] Ant:   Entity Transform:
-[20:04:34] [info] Ant:     Translation: 0, 3.5, 0
-[20:04:34] [info] Ant:     Rotation: 1, 0, 0, 0
-[20:04:34] [info] Ant:     Scale: 1, 1, 1
-[20:04:34] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [error] Ant: Assimp error: Error, T32732: FBX: no material assigned to mesh, setting default material
+[22:08:15] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
+[22:08:15] [trace] Ant:   DefaultMaterial (Index = 0)
+[22:08:15] [trace] Ant:     TextureCount = 0
+[22:08:15] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
+[22:08:15] [trace] Ant:     ROUGHNESS = 0.10557282
+[22:08:15] [trace] Ant:     No albedo map
+[22:08:15] [trace] Ant:     No normal map
+[22:08:15] [trace] Ant:     No roughness map
+[22:08:15] [trace] Ant:     No metalness map
+[22:08:15] [trace] Ant: ------------------------
+[22:08:15] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [info] Ant:   BoxCollider2DComponent present.
+[22:08:15] [info] Ant: Deserialized entity with ID = 10963896307574570644, name = Box
+[22:08:15] [info] Ant:   Entity Transform:
+[22:08:15] [info] Ant:     Translation: -1.4901161e-08, 3.5, 0
+[22:08:15] [info] Ant:     Rotation: 1, 0, 0, 0
+[22:08:15] [info] Ant:     Scale: 1, 1, 1
+[22:08:15] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [error] Ant: Assimp error: Error, T35496: FBX: no material assigned to mesh, setting default material
 
-[20:04:34] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
-[20:04:34] [trace] Ant:   DefaultMaterial (Index = 0)
-[20:04:34] [trace] Ant:     TextureCount = 0
-[20:04:34] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
-[20:04:34] [trace] Ant:     ROUGHNESS = -nan
-[20:04:34] [trace] Ant:     No albedo map
-[20:04:34] [trace] Ant:     No normal map
-[20:04:34] [trace] Ant:     No roughness map
-[20:04:34] [trace] Ant:     No metalness map
-[20:04:34] [trace] Ant: ------------------------
-[20:04:34] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [info] Ant:   BoxCollider2DComponent present.
-[20:04:34] [info] Ant: Deserialized entity with ID = 14977980498382047128, name = Box
-[20:04:34] [info] Ant:   Entity Transform:
-[20:04:34] [info] Ant:     Translation: -0.75, 2, 0
-[20:04:34] [info] Ant:     Rotation: 1, 0, 0, 0
-[20:04:34] [info] Ant:     Scale: 1, 1, 1
-[20:04:34] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [error] Ant: Assimp error: Error, T32732: FBX: no material assigned to mesh, setting default material
+[22:08:15] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
+[22:08:15] [trace] Ant:   DefaultMaterial (Index = 0)
+[22:08:15] [trace] Ant:     TextureCount = 0
+[22:08:15] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
+[22:08:15] [trace] Ant:     ROUGHNESS = 0.10557282
+[22:08:15] [trace] Ant:     No albedo map
+[22:08:15] [trace] Ant:     No normal map
+[22:08:15] [trace] Ant:     No roughness map
+[22:08:15] [trace] Ant:     No metalness map
+[22:08:15] [trace] Ant: ------------------------
+[22:08:15] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [info] Ant:   BoxCollider2DComponent present.
+[22:08:15] [info] Ant: Deserialized entity with ID = 8685757945490200978, name = Box
+[22:08:15] [info] Ant:   Entity Transform:
+[22:08:15] [info] Ant:     Translation: 0, -0.25, 0
+[22:08:15] [info] Ant:     Rotation: 1, 0, 0, 0
+[22:08:15] [info] Ant:     Scale: 20, 1, 18.75
+[22:08:15] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [error] Ant: Assimp error: Error, T35496: FBX: no material assigned to mesh, setting default material
 
-[20:04:34] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
-[20:04:34] [trace] Ant:   DefaultMaterial (Index = 0)
-[20:04:34] [trace] Ant:     TextureCount = 0
-[20:04:34] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
-[20:04:34] [trace] Ant:     ROUGHNESS = -nan
-[20:04:34] [trace] Ant:     No albedo map
-[20:04:34] [trace] Ant:     No normal map
-[20:04:34] [trace] Ant:     No roughness map
-[20:04:34] [trace] Ant:     No metalness map
-[20:04:34] [trace] Ant: ------------------------
-[20:04:34] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [info] Ant:   BoxCollider2DComponent present.
-[20:04:34] [info] Ant: Deserialized entity with ID = 1947545168593204283, name = Box
-[20:04:34] [info] Ant:   Entity Transform:
-[20:04:34] [info] Ant:     Translation: -2.25, 5.5, 0
-[20:04:34] [info] Ant:     Rotation: 1, 0, 0, 0
-[20:04:34] [info] Ant:     Scale: 1, 1, 1
-[20:04:34] [info] Ant:   Script Module: Example.PlayerCube
-[20:04:34] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [error] Ant: Assimp error: Error, T32732: FBX: no material assigned to mesh, setting default material
+[22:08:15] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
+[22:08:15] [trace] Ant:   DefaultMaterial (Index = 0)
+[22:08:15] [trace] Ant:     TextureCount = 0
+[22:08:15] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
+[22:08:15] [trace] Ant:     ROUGHNESS = 0.10557282
+[22:08:15] [trace] Ant:     No albedo map
+[22:08:15] [trace] Ant:     No normal map
+[22:08:15] [trace] Ant:     No roughness map
+[22:08:15] [trace] Ant:     No metalness map
+[22:08:15] [trace] Ant: ------------------------
+[22:08:15] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [info] Ant:   BoxCollider2DComponent present.
+[22:08:15] [info] Ant: Deserialized entity with ID = 15001249233138082604, name = Box
+[22:08:15] [info] Ant:   Entity Transform:
+[22:08:15] [info] Ant:     Translation: 0, 5.5, 0
+[22:08:15] [info] Ant:     Rotation: 1, 0, 0, 0
+[22:08:15] [info] Ant:     Scale: 1, 1, 1
+[22:08:15] [info] Ant: Loading mesh: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [error] Ant: Assimp error: Error, T35496: FBX: no material assigned to mesh, setting default material
 
-[20:04:34] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
-[20:04:34] [trace] Ant:   DefaultMaterial (Index = 0)
-[20:04:34] [trace] Ant:     TextureCount = 0
-[20:04:34] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
-[20:04:34] [trace] Ant:     ROUGHNESS = -nan
-[20:04:34] [trace] Ant:     No albedo map
-[20:04:34] [trace] Ant:     No normal map
-[20:04:34] [trace] Ant:     No roughness map
-[20:04:34] [trace] Ant:     No metalness map
-[20:04:34] [trace] Ant: ------------------------
-[20:04:34] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
-[20:04:34] [info] Ant:   BoxCollider2DComponent present.
-[20:04:34] [info] Ant: Deserialized entity with ID = 2217710330194331187, name = Camera
-[20:04:34] [info] Ant:   Entity Transform:
-[20:04:34] [info] Ant:     Translation: 0, 3, 13
-[20:04:34] [info] Ant:     Rotation: 1, 0, 0, 0
-[20:04:34] [info] Ant:     Scale: 1, 1, 1
-[20:04:34] [info] Ant:   Script Module: Example.BasicController
-[20:04:34] [info] Ant:   Primary Camera: true
-[20:05:49] [warning] APP: INTERSECTION: Cube, t=15.3750925
-[20:06:00] [warning] APP: INTERSECTION: Cube, t=15.3750925
-[20:06:00] [trace] Ant: Shutting down...
+[22:08:15] [trace] Ant: ---- Materials - D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx ----
+[22:08:15] [trace] Ant:   DefaultMaterial (Index = 0)
+[22:08:15] [trace] Ant:     TextureCount = 0
+[22:08:15] [trace] Ant:     COLOR = 0.8, 0.8, 0.8
+[22:08:15] [trace] Ant:     ROUGHNESS = 0.10557282
+[22:08:15] [trace] Ant:     No albedo map
+[22:08:15] [trace] Ant:     No normal map
+[22:08:15] [trace] Ant:     No roughness map
+[22:08:15] [trace] Ant:     No metalness map
+[22:08:15] [trace] Ant: ------------------------
+[22:08:15] [info] Ant:   Mesh Asset Path: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
+[22:08:15] [info] Ant:   BoxCollider2DComponent present.
+[22:08:17] [warning] APP: INTERSECTION: Cube, t=18.676485
+[22:08:20] [warning] APP: INTERSECTION: Cube, t=18.604282
+[22:08:22] [warning] APP: INTERSECTION: Cube, t=15.18739
+[22:08:23] [warning] APP: INTERSECTION: Cube, t=27.62377
+[22:08:23] [warning] APP: INTERSECTION: Cube, t=19.6907
+[22:08:23] [warning] APP: INTERSECTION: Cube, t=19.155102
+[22:08:24] [warning] APP: INTERSECTION: Cube, t=18.67374
+[22:08:25] [warning] APP: INTERSECTION: Cube, t=18.633091
+[22:08:26] [warning] APP: INTERSECTION: Cube, t=18.617884
+[22:08:30] [warning] APP: INTERSECTION: Cube, t=15.924921
+[22:08:34] [warning] APP: INTERSECTION: Cube, t=19.809319
+[22:08:39] [warning] APP: INTERSECTION: Cube, t=19.246826
+[22:08:44] [warning] APP: INTERSECTION: Cube, t=18.642004
+[22:08:45] [warning] APP: INTERSECTION: Cube, t=18.588696

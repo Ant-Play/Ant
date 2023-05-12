@@ -241,13 +241,12 @@ namespace Ant{
 				aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor);
 
 				float shininess, metalness;
-				aiMaterial->Get(AI_MATKEY_SHININESS, shininess);
-				aiMaterial->Get(AI_MATKEY_REFLECTIVITY, metalness);
+				if (aiMaterial->Get(AI_MATKEY_SHININESS, shininess) != aiReturn_SUCCESS)
+					shininess = 80.0f;
 
-				metalness = 0.0f;
+				if (aiMaterial->Get(AI_MATKEY_REFLECTIVITY, metalness) != aiReturn_SUCCESS)
+					metalness = 0.0f;
 
-				// float roughness = 1.0f - shininess * 0.01f;
-				// roughness *= roughness;
 				float roughness = 1.0f - glm::sqrt(shininess / 100.0f);
 				ANT_MESH_LOG("    COLOR = {0}, {1}, {2}", aiColor.r, aiColor.g, aiColor.b);
 				ANT_MESH_LOG("    ROUGHNESS = {0}", roughness);

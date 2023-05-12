@@ -108,6 +108,9 @@ namespace Ant {
 		m_SceneHierarchyPanel->SetEntityDeletedCallback(std::bind(&EditorLayer::OnEntityDeleted, this, std::placeholders::_1));
 		// SceneSerializer serializer(m_ActiveScene);
 		// serializer.Deserialize("Scene.yaml");
+
+		SceneSerializer serializer(m_EditorScene);
+		serializer.Deserialize("assets/scenes/Physics.ant");
 	}
 
 	void EditorLayer::OnDetach()
@@ -147,6 +150,17 @@ namespace Ant {
 		m_SelectionContext.clear();
 		ScriptEngine::SetSceneContext(m_EditorScene);
 		m_SceneHierarchyPanel->SetContext(m_EditorScene);
+	}
+
+	float EditorLayer::GetSnapValue()
+	{
+		switch (m_GizmoType)
+		{
+			case  ImGuizmo::OPERATION::TRANSLATE: return 0.5f;
+			case  ImGuizmo::OPERATION::ROTATE: return 45.0f;
+			case  ImGuizmo::OPERATION::SCALE: return 0.5f;
+		}
+		return 0.0f;
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
@@ -356,6 +370,49 @@ namespace Ant {
 		m_EditorScene->SetSelectedEntity(entity);
 	}
 
+	void EditorLayer::OpenScene()
+	{
+		auto& app = Application::Get();
+		std::string filepath = app.OpenFile("Ant Scene (*.ant)\0*.ant\0");
+		if (!filepath.empty())
+		{
+			Ref<Scene> newScene = Ref<Scene>::Create();
+			SceneSerializer serializer(newScene);
+			serializer.Deserialize(filepath);
+			m_EditorScene = newScene;
+			std::filesystem::path path = filepath;
+			UpdateWindowTitle(path.filename().string());
+			m_SceneHierarchyPanel->SetContext(m_EditorScene);
+			ScriptEngine::SetSceneContext(m_EditorScene);
+
+			m_EditorScene->SetSelectedEntity({});
+			m_SelectionContext.clear();
+
+			m_SceneFilePath = filepath;
+		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		SceneSerializer serializer(m_EditorScene);
+		serializer.Serialize(m_SceneFilePath);
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		auto& app = Application::Get();
+		std::string filepath = app.SaveFile("Ant Scene (*.ant)\0*.ant\0");
+		if (!filepath.empty())
+		{
+			SceneSerializer serializer(m_EditorScene);
+			serializer.Serialize(filepath);
+
+			std::filesystem::path path = filepath;
+			UpdateWindowTitle(path.filename().string());
+			m_SceneFilePath = filepath;
+		}
+	}
+
 	void EditorLayer::OnImGuiRender()
 	{
 		static bool p_open = true;
@@ -478,138 +535,6 @@ namespace Ant {
 		}
 		ImGui::Separator();
 
-		// Textures ------------------------------------------------------------------------------
-		{
-			// Albedo
-			if (ImGui::CollapsingHeader("Albedo", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-				ImGui::Image(m_AlbedoInput.TextureMap ? (void*)m_AlbedoInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
-				ImGui::PopStyleVar();
-				if (ImGui::IsItemHovered())
-				{
-					if (m_AlbedoInput.TextureMap)
-					{
-						ImGui::BeginTooltip();
-						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-						ImGui::TextUnformatted(m_AlbedoInput.TextureMap->GetPath().c_str());
-						ImGui::PopTextWrapPos();
-						ImGui::Image((void*)m_AlbedoInput.TextureMap->GetRendererID(), ImVec2(384, 384));
-						ImGui::EndTooltip();
-					}
-					if (ImGui::IsItemClicked())
-					{
-						std::string filename = Application::Get().OpenFile("");
-						if (filename != "")
-							m_AlbedoInput.TextureMap = Texture2D::Create(filename, m_AlbedoInput.SRGB);
-					}
-				}
-				ImGui::SameLine();
-				ImGui::BeginGroup();
-				ImGui::Checkbox("Use##AlbedoMap", &m_AlbedoInput.UseTexture);
-				if (ImGui::Checkbox("sRGB##AlbedoMap", &m_AlbedoInput.SRGB))
-				{
-					if (m_AlbedoInput.TextureMap)
-						m_AlbedoInput.TextureMap = Texture2D::Create(m_AlbedoInput.TextureMap->GetPath(), m_AlbedoInput.SRGB);
-				}
-				ImGui::EndGroup();
-				ImGui::SameLine();
-				ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(m_AlbedoInput.Color), ImGuiColorEditFlags_NoInputs);
-			}
-		}
-		{
-			// Normals
-			if (ImGui::CollapsingHeader("Normals", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-				ImGui::Image(m_NormalInput.TextureMap ? (void*)m_NormalInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
-				ImGui::PopStyleVar();
-				if (ImGui::IsItemHovered())
-				{
-					if (m_NormalInput.TextureMap)
-					{
-						ImGui::BeginTooltip();
-						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-						ImGui::TextUnformatted(m_NormalInput.TextureMap->GetPath().c_str());
-						ImGui::PopTextWrapPos();
-						ImGui::Image((void*)m_NormalInput.TextureMap->GetRendererID(), ImVec2(384, 384));
-						ImGui::EndTooltip();
-					}
-					if (ImGui::IsItemClicked())
-					{
-						std::string filename = Application::Get().OpenFile("");
-						if (filename != "")
-							m_NormalInput.TextureMap = Texture2D::Create(filename);
-					}
-				}
-				ImGui::SameLine();
-				ImGui::Checkbox("Use##NormalMap", &m_NormalInput.UseTexture);
-			}
-		}
-		{
-			// Metalness
-			if (ImGui::CollapsingHeader("Metalness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-				ImGui::Image(m_MetalnessInput.TextureMap ? (void*)m_MetalnessInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
-				ImGui::PopStyleVar();
-				if (ImGui::IsItemHovered())
-				{
-					if (m_MetalnessInput.TextureMap)
-					{
-						ImGui::BeginTooltip();
-						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-						ImGui::TextUnformatted(m_MetalnessInput.TextureMap->GetPath().c_str());
-						ImGui::PopTextWrapPos();
-						ImGui::Image((void*)m_MetalnessInput.TextureMap->GetRendererID(), ImVec2(384, 384));
-						ImGui::EndTooltip();
-					}
-					if (ImGui::IsItemClicked())
-					{
-						std::string filename = Application::Get().OpenFile("");
-						if (filename != "")
-							m_MetalnessInput.TextureMap = Texture2D::Create(filename);
-					}
-				}
-				ImGui::SameLine();
-				ImGui::Checkbox("Use##MetalnessMap", &m_MetalnessInput.UseTexture);
-				ImGui::SameLine();
-				ImGui::SliderFloat("Value##MetalnessInput", &m_MetalnessInput.Value, 0.0f, 1.0f);
-			}
-		}
-		{
-			// Roughness
-			if (ImGui::CollapsingHeader("Roughness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-				ImGui::Image(m_RoughnessInput.TextureMap ? (void*)m_RoughnessInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
-				ImGui::PopStyleVar();
-				if (ImGui::IsItemHovered())
-				{
-					if (m_RoughnessInput.TextureMap)
-					{
-						ImGui::BeginTooltip();
-						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-						ImGui::TextUnformatted(m_RoughnessInput.TextureMap->GetPath().c_str());
-						ImGui::PopTextWrapPos();
-						ImGui::Image((void*)m_RoughnessInput.TextureMap->GetRendererID(), ImVec2(384, 384));
-						ImGui::EndTooltip();
-					}
-					if (ImGui::IsItemClicked())
-					{
-						std::string filename = Application::Get().OpenFile("");
-						if (filename != "")
-							m_RoughnessInput.TextureMap = Texture2D::Create(filename);
-					}
-				}
-				ImGui::SameLine();
-				ImGui::Checkbox("Use##RoughnessMap", &m_RoughnessInput.UseTexture);
-				ImGui::SameLine();
-				ImGui::SliderFloat("Value##RoughnessInput", &m_RoughnessInput.Value, 0.0f, 1.0f);
-			}
-		}
-
-		ImGui::Separator();
 
 		if (ImGui::TreeNode("Shaders"))
 		{
@@ -706,7 +631,8 @@ namespace Ant {
 			bool snap = Input::IsKeyPressed(ANT_KEY_LEFT_CONTROL);
 
 			auto& entityTransform = selection.Entity.Transform();
-			float snapValue[3] = { m_SnapValue, m_SnapValue, m_SnapValue };
+			float snapValue = GetSnapValue();
+			float snapValues[3] = { snapValue, snapValue, snapValue };
 			if (m_SelectionMode == SelectionMode::Entity)
 			{
 				ImGuizmo::Manipulate(glm::value_ptr(m_EditorCamera.GetViewMatrix()),
@@ -715,7 +641,7 @@ namespace Ant {
 					ImGuizmo::LOCAL,
 					glm::value_ptr(entityTransform),
 					nullptr,
-					snap ? snapValue : nullptr);
+					snap ? snapValues : nullptr);
 			}
 			else
 			{
@@ -726,7 +652,7 @@ namespace Ant {
 					ImGuizmo::LOCAL,
 					glm::value_ptr(transformBase),
 					nullptr,
-					snap ? snapValue : nullptr);
+					snap ? snapValues : nullptr);
 
 				selection.Mesh->Transform = glm::inverse(entityTransform) * transformBase;
 			}
@@ -739,40 +665,18 @@ namespace Ant {
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("New Scene"))
+				if (ImGui::MenuItem("New Scene", "Ctrl-N"))
 				{
-
+					// TODO:
 				}
-				if (ImGui::MenuItem("Open Scene..."))
-				{
-					auto& app = Application::Get();
-					std::string filepath = app.OpenFile("Ant Scene (*.ant)\0*.ant\0");
-					if (!filepath.empty())
-					{
-						Ref<Scene> newScene = Ref<Scene>::Create();
-						SceneSerializer serializer(newScene);
-						serializer.Deserialize(filepath);
-						m_EditorScene = newScene;
-						std::filesystem::path path = filepath;
-						UpdateWindowTitle(path.filename().string());
-						m_SceneHierarchyPanel->SetContext(m_EditorScene);
-						ScriptEngine::SetSceneContext(m_EditorScene);
-
-						m_EditorScene->SetSelectedEntity({});
-						m_SelectionContext.clear();
-					}
-				}
-				if (ImGui::MenuItem("Save Scene..."))
-				{
-					auto& app = Application::Get();
-					std::string filepath = app.SaveFile("Ant Scene (*.ant)\0*.ant\0");
-					SceneSerializer serializer(m_EditorScene);
-					serializer.Serialize(filepath);
-
-					std::filesystem::path path = filepath;
-					UpdateWindowTitle(path.filename().string());
-				}
+				if (ImGui::MenuItem("Open Scene...", "Ctrl+O"))
+					OpenScene();
 				ImGui::Separator();
+
+				if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
+					SaveScene();
+				if (ImGui::MenuItem("Save Scene As...", "Ctrl+Shift+S"))
+					SaveSceneAs();
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Exit"))
@@ -825,7 +729,167 @@ namespace Ant {
 
 					if (selectedMaterialIndex < materials.size())
 					{
-						ImGui::Text("Shader: %s", materials[selectedMaterialIndex]->GetShader()->GetName().c_str());
+						auto& materialInstance = materials[selectedMaterialIndex];
+						ImGui::Text("Shader: %s", materialInstance->GetShader()->GetName().c_str());
+						// Textures ------------------------------------------------------------------------------
+						{
+							// Albedo
+							if (ImGui::CollapsingHeader("Albedo", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+							{
+								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+
+								auto& albedoColor = materialInstance->Get<glm::vec3>("u_AlbedoColor");
+								bool useAlbedoMap = materialInstance->Get<float>("u_AlbedoTexToggle");
+								Ref<Texture2D> albedoMap = materialInstance->TryGetResource<Texture2D>("u_AlbedoTexture");
+								ImGui::Image(albedoMap ? (void*)albedoMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+								ImGui::PopStyleVar();
+								if (ImGui::IsItemHovered())
+								{
+									if (albedoMap)
+									{
+										ImGui::BeginTooltip();
+										ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+										ImGui::TextUnformatted(albedoMap->GetPath().c_str());
+										ImGui::PopTextWrapPos();
+										ImGui::Image((void*)albedoMap->GetRendererID(), ImVec2(384, 384));
+										ImGui::EndTooltip();
+									}
+									if (ImGui::IsItemClicked())
+									{
+										std::string filename = Application::Get().OpenFile("");
+										if (filename != "")
+										{
+											albedoMap = Texture2D::Create(filename, true/*m_AlbedoInput.SRGB*/);
+											materialInstance->Set("u_AlbedoTexture", albedoMap);
+										}
+									}
+								}
+								ImGui::SameLine();
+								ImGui::BeginGroup();
+								if (ImGui::Checkbox("Use##AlbedoMap", &useAlbedoMap))
+									materialInstance->Set<float>("u_AlbedoTexToggle", useAlbedoMap ? 1.0f : 0.0f);
+
+								/*if (ImGui::Checkbox("sRGB##AlbedoMap", &m_AlbedoInput.SRGB))
+								{
+									if (m_AlbedoInput.TextureMap)
+										m_AlbedoInput.TextureMap = Texture2D::Create(m_AlbedoInput.TextureMap->GetPath(), m_AlbedoInput.SRGB);
+								}*/
+								ImGui::EndGroup();
+								ImGui::SameLine();
+								ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(albedoColor), ImGuiColorEditFlags_NoInputs);
+							}
+						}
+						{
+							// Normals
+							if (ImGui::CollapsingHeader("Normals", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+							{
+								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+								bool useNormalMap = materialInstance->Get<float>("u_NormalTexToggle");
+								Ref<Texture2D> normalMap = materialInstance->TryGetResource<Texture2D>("u_NormalTexture");
+								ImGui::Image(normalMap ? (void*)normalMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+								ImGui::PopStyleVar();
+								if (ImGui::IsItemHovered())
+								{
+									if (normalMap)
+									{
+										ImGui::BeginTooltip();
+										ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+										ImGui::TextUnformatted(normalMap->GetPath().c_str());
+										ImGui::PopTextWrapPos();
+										ImGui::Image((void*)normalMap->GetRendererID(), ImVec2(384, 384));
+										ImGui::EndTooltip();
+									}
+									if (ImGui::IsItemClicked())
+									{
+										std::string filename = Application::Get().OpenFile("");
+										if (filename != "")
+										{
+											normalMap = Texture2D::Create(filename);
+											materialInstance->Set("u_NormalTexture", normalMap);
+										}
+									}
+								}
+								ImGui::SameLine();
+								if (ImGui::Checkbox("Use##NormalMap", &useNormalMap))
+									materialInstance->Set<float>("u_NormalTexToggle", useNormalMap ? 1.0f : 0.0f);
+							}
+						}
+						{
+							// Metalness
+							if (ImGui::CollapsingHeader("Metalness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+							{
+								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+								float& metalnessValue = materialInstance->Get<float>("u_Metalness");
+								bool useMetalnessMap = materialInstance->Get<float>("u_MetalnessTexToggle");
+								Ref<Texture2D> metalnessMap = materialInstance->TryGetResource<Texture2D>("u_MetalnessTexture");
+								ImGui::Image(metalnessMap ? (void*)metalnessMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+								ImGui::PopStyleVar();
+								if (ImGui::IsItemHovered())
+								{
+									if (metalnessMap)
+									{
+										ImGui::BeginTooltip();
+										ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+										ImGui::TextUnformatted(metalnessMap->GetPath().c_str());
+										ImGui::PopTextWrapPos();
+										ImGui::Image((void*)metalnessMap->GetRendererID(), ImVec2(384, 384));
+										ImGui::EndTooltip();
+									}
+									if (ImGui::IsItemClicked())
+									{
+										std::string filename = Application::Get().OpenFile("");
+										if (filename != "")
+										{
+											metalnessMap = Texture2D::Create(filename);
+											materialInstance->Set("u_MetalnessTexture", metalnessMap);
+										}
+									}
+								}
+								ImGui::SameLine();
+								if (ImGui::Checkbox("Use##MetalnessMap", &useMetalnessMap))
+									materialInstance->Set<float>("u_MetalnessTexToggle", useMetalnessMap ? 1.0f : 0.0f);
+								ImGui::SameLine();
+								ImGui::SliderFloat("Value##MetalnessInput", &metalnessValue, 0.0f, 1.0f);
+							}
+						}
+						{
+							// Roughness
+							if (ImGui::CollapsingHeader("Roughness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+							{
+								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+								float& roughnessValue = materialInstance->Get<float>("u_Roughness");
+								bool useRoughnessMap = materialInstance->Get<float>("u_RoughnessTexToggle");
+								Ref<Texture2D> roughnessMap = materialInstance->TryGetResource<Texture2D>("u_RoughnessTexture");
+								ImGui::Image(roughnessMap ? (void*)roughnessMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+								ImGui::PopStyleVar();
+								if (ImGui::IsItemHovered())
+								{
+									if (roughnessMap)
+									{
+										ImGui::BeginTooltip();
+										ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+										ImGui::TextUnformatted(roughnessMap->GetPath().c_str());
+										ImGui::PopTextWrapPos();
+										ImGui::Image((void*)roughnessMap->GetRendererID(), ImVec2(384, 384));
+										ImGui::EndTooltip();
+									}
+									if (ImGui::IsItemClicked())
+									{
+										std::string filename = Application::Get().OpenFile("");
+										if (filename != "")
+										{
+											roughnessMap = Texture2D::Create(filename);
+											materialInstance->Set("u_RoughnessTexture", roughnessMap);
+										}
+									}
+								}
+								ImGui::SameLine();
+								if (ImGui::Checkbox("Use##RoughnessMap", &useRoughnessMap))
+									materialInstance->Set<float>("u_RoughnessTexToggle", useRoughnessMap ? 1.0f : 0.0f);
+								ImGui::SameLine();
+								ImGui::SliderFloat("Value##RoughnessInput", &roughnessValue, 0.0f, 1.0f);
+							}
+						}
 					}
 				}
 			}
@@ -893,22 +957,37 @@ namespace Ant {
 		{
 			switch (e.GetKeyCode())
 			{
-			case KeyCode::G:
-				// Toggle grid
-				SceneRenderer::GetOptions().ShowGrid = !SceneRenderer::GetOptions().ShowGrid;
-				break;
-			case KeyCode::B:
-				// Toggle bounding boxes 
-				m_UIShowBoundingBoxes = !m_UIShowBoundingBoxes;
-				ShowBoundingBoxes(m_UIShowBoundingBoxes, m_UIShowBoundingBoxesOnTop);
-				break;
-			case KeyCode::D:
-				if (m_SelectionContext.size())
+				case KeyCode::B:
+					// Toggle bounding boxes 
+					m_UIShowBoundingBoxes = !m_UIShowBoundingBoxes;
+					ShowBoundingBoxes(m_UIShowBoundingBoxes, m_UIShowBoundingBoxesOnTop);
+					break;
+				case KeyCode::D:
+					if (m_SelectionContext.size())
+					{
+						Entity selectedEntity = m_SelectionContext[0].Entity;
+						m_EditorScene->DuplicateEntity(selectedEntity);
+					}
+					break;
+				case KeyCode::G:
+					// Toggle grid
+					SceneRenderer::GetOptions().ShowGrid = !SceneRenderer::GetOptions().ShowGrid;
+					break;
+				case KeyCode::O:
+					OpenScene();
+					break;
+				case KeyCode::S:
+					SaveScene();
+					break;
+			}
+			if (Input::IsKeyPressed(ANT_KEY_LEFT_SHIFT))
+			{
+				switch (e.GetKeyCode())
 				{
-					Entity selectedEntity = m_SelectionContext[0].Entity;
-					m_EditorScene->DuplicateEntity(selectedEntity);
+					case KeyCode::S:
+						SaveSceneAs();
+						break;
 				}
-				break;
 			}
 		}
 

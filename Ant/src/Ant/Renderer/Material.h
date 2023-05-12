@@ -60,6 +60,24 @@ namespace Ant{
 		{
 			Set(name, (const Ref<Texture>&)texture);
 		}
+
+		template<typename T>
+		T& Get(const std::string& name)
+		{
+			auto decl = FindUniformDeclaration(name);
+			ANT_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
+			auto& buffer = GetUniformBufferTarget(decl);
+			return buffer.Read<T>(decl->GetOffset());
+		}
+
+		template<typename T>
+		Ref<T> GetResouce(const std::string& name)
+		{
+			auto decl = FindResourceDeclaration(name);
+			uint32_t slot = decl->GetRegister();
+			ANT_CORE_ASSERT(slot < m_Textures.size(), "Texture slot is invalid");
+			return m_Textures[slot];
+		}
 	public:
 		static Ref<Material> Create(const Ref<Shader>& shader);
 	private:
@@ -121,6 +139,39 @@ namespace Ant{
 		void Set(const std::string& name, const Ref<TextureCube>& texture)
 		{
 			Set(name, (const Ref<Texture>&)texture);
+		}
+
+		template<typename T>
+		T& Get(const std::string& name)
+		{
+			auto decl = m_Material->FindUniformDeclaration(name);
+			ANT_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
+			auto& buffer = GetUniformBufferTarget(decl);
+			return buffer.Read<T>(decl->GetOffset());
+		}
+
+		template<typename T>
+		Ref<T> GetResource(const std::string& name)
+		{
+			auto decl = m_Material->FindResourceDeclaration(name);
+			ANT_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
+			uint32_t slot = decl->GetRegister();
+			ANT_CORE_ASSERT(slot < m_Textures.size(), "Texture slot is invalid!");
+			return Ref<T>(m_Textures[slot]);
+		}
+
+		template<typename T>
+		Ref<T> TryGetResource(const std::string& name)
+		{
+			auto decl = m_Material->FindResourceDeclaration(name);
+			if (!decl)
+				return nullptr;
+
+			uint32_t slot = decl->GetRegister();
+			if (slot >= m_Textures.size())
+				return nullptr;
+
+			return Ref<T>(m_Textures[slot]);
 		}
 
 		void Bind();

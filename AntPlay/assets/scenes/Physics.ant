@@ -17,10 +17,12 @@ Entities:
       AssetPath: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
     RigidBody2DComponent:
       BodyType: 1
-      Mass: 1
+      FixedRotation: false
     BoxCollider2DComponent:
       Offset: [1.89999998, 0]
       Size: [0.600000024, 0.600000024]
+      Density: 1
+      Friction: 1
   - Entity: 8685757945490200978
     TagComponent:
       Tag: Box
@@ -32,40 +34,46 @@ Entities:
       AssetPath: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
     RigidBody2DComponent:
       BodyType: 0
-      Mass: 1
+      FixedRotation: false
     BoxCollider2DComponent:
       Offset: [1.89999998, 0]
       Size: [10.8000002, 0.400000006]
+      Density: 1
+      Friction: 1
   - Entity: 10963896307574570644
     TagComponent:
       Tag: Box
     TransformComponent:
-      Position: [0, 3.5, 0]
+      Position: [-1.49011612e-08, 3.5, 0]
       Rotation: [1, 0, 0, 0]
       Scale: [1, 1, 1]
     MeshComponent:
       AssetPath: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
     RigidBody2DComponent:
       BodyType: 1
-      Mass: 1
+      FixedRotation: false
     BoxCollider2DComponent:
       Offset: [1.89999998, 0]
       Size: [0.600000024, 0.600000024]
+      Density: 1
+      Friction: 1
   - Entity: 14977980498382047128
     TagComponent:
       Tag: Box
     TransformComponent:
-      Position: [-0.75, 2, 0]
+      Position: [-0.75, 2, 3.7252903e-09]
       Rotation: [1, 0, 0, 0]
       Scale: [1, 1, 1]
     MeshComponent:
       AssetPath: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
     RigidBody2DComponent:
       BodyType: 1
-      Mass: 1
+      FixedRotation: false
     BoxCollider2DComponent:
       Offset: [1.89999998, 0]
       Size: [0.600000024, 0.600000024]
+      Density: 1
+      Friction: 1
   - Entity: 1947545168593204283
     TagComponent:
       Tag: Box
@@ -79,22 +87,30 @@ Entities:
         - Name: HorizontalForce
           Type: 1
           Data: 1
+        - Name: MaxSpeed
+          Type: 5
+          Data: [0, 0]
+        - Name: JumpForce
+          Type: 1
+          Data: 0
         - Name: VerticalSpeedForce
           Type: 1
           Data: 1
     MeshComponent:
       AssetPath: D:\career\graphic\workspace\Ant-dev\AntPlay\assets\meshes\Cube1m.fbx
     RigidBody2DComponent:
-      BodyType: 1
-      Mass: 1
+      BodyType: 2
+      FixedRotation: false
     BoxCollider2DComponent:
       Offset: [1.89999998, 0]
       Size: [0.600000024, 0.600000024]
+      Density: 1
+      Friction: 1
   - Entity: 2217710330194331187
     TagComponent:
       Tag: Camera
     TransformComponent:
-      Position: [0, 3, 13]
+      Position: [0, 3, 18.2620411]
       Rotation: [1, 0, 0, 0]
       Scale: [1, 1, 1]
     ScriptComponent:

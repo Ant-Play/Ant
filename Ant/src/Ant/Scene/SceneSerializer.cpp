@@ -287,9 +287,9 @@ namespace Ant{
 			out << YAML::Key << "RigidBody2DComponent";
 			out << YAML::BeginMap; // RigidBody2DComponent
 
-			auto& rigidBody2DComponent = entity.GetComponent<RigidBody2DComponent>();
-			out << YAML::Key << "BodyType" << YAML::Value << (uint32_t)rigidBody2DComponent.BodyType;
-			out << YAML::Key << "Mass" << YAML::Value << rigidBody2DComponent.Mass;
+			auto& rigidbody2DComponent = entity.GetComponent<RigidBody2DComponent>();
+			out << YAML::Key << "BodyType" << YAML::Value << (uint32_t)rigidbody2DComponent.BodyType;
+			out << YAML::Key << "FixedRotation" << YAML::Value << rigidbody2DComponent.FixedRotation;
 
 			out << YAML::EndMap; // RigidBody2DComponent
 		}
@@ -302,6 +302,8 @@ namespace Ant{
 			auto& boxCollider2DComponent = entity.GetComponent<BoxCollider2DComponent>();
 			out << YAML::Key << "Offset" << YAML::Value << boxCollider2DComponent.Offset;
 			out << YAML::Key << "Size" << YAML::Value << boxCollider2DComponent.Size;
+			out << YAML::Key << "Density" << YAML::Value << boxCollider2DComponent.Density;
+			out << YAML::Key << "Friction" << YAML::Value << boxCollider2DComponent.Friction;
 
 			out << YAML::EndMap; // BoxCollider2DComponent
 		}
@@ -314,6 +316,8 @@ namespace Ant{
 			auto& circleCollider2DComponent = entity.GetComponent<CircleCollider2DComponent>();
 			out << YAML::Key << "Offset" << YAML::Value << circleCollider2DComponent.Offset;
 			out << YAML::Key << "Radius" << YAML::Value << circleCollider2DComponent.Radius;
+			out << YAML::Key << "Density" << YAML::Value << circleCollider2DComponent.Density;
+			out << YAML::Key << "Friction" << YAML::Value << circleCollider2DComponent.Friction;
 
 			out << YAML::EndMap; // CircleCollider2DComponent
 		}
@@ -531,12 +535,12 @@ namespace Ant{
 					ANT_CORE_INFO("  SpriteRendererComponent present.");
 				}
 
-				auto rigidbody2DComponent = entity["Rigidbody2DComponent"];
-				if(rigidbody2DComponent)
+				auto rigidBody2DComponent = entity["Rigidbody2DComponent"];
+				if(rigidBody2DComponent)
 				{
 					auto& component = deserializedEntity.AddComponent<RigidBody2DComponent>();
-					component.BodyType = (RigidBody2DComponent::Type)rigidbody2DComponent["Type"].as<int>();
-					component.Mass = rigidbody2DComponent["Mass"].as<float>();
+					component.BodyType = (RigidBody2DComponent::Type)rigidBody2DComponent["BodyType"].as<int>();
+					component.FixedRotation = rigidBody2DComponent["FixedRotation"] ? rigidBody2DComponent["FixedRotation"].as<bool>() : false;
 
 					ANT_CORE_INFO("  Rigidbody2DComponent present.");
 				}
@@ -547,6 +551,8 @@ namespace Ant{
 					auto& component = deserializedEntity.AddComponent<BoxCollider2DComponent>();
 					component.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
 					component.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
+					component.Density = boxCollider2DComponent["Density"] ? boxCollider2DComponent["Density"].as<float>() : 1.0f;
+					component.Friction = boxCollider2DComponent["Friction"] ? boxCollider2DComponent["Friction"].as<float>() : 1.0f;
 
 					ANT_CORE_INFO("  BoxCollider2DComponent present.");
 				}
@@ -557,6 +563,8 @@ namespace Ant{
 					auto& component = deserializedEntity.AddComponent<CircleCollider2DComponent>();
 					component.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
 					component.Radius = circleCollider2DComponent["Radius"].as<float>();
+					component.Density = circleCollider2DComponent["Density"] ? circleCollider2DComponent["Density"].as<float>() : 1.0f;
+					component.Friction = circleCollider2DComponent["Friction"] ? circleCollider2DComponent["Friction"].as<float>() : 1.0f;
 
 					ANT_CORE_INFO("  CircleCollider2DComponent present.");
 				}

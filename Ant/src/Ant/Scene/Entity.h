@@ -20,24 +20,27 @@ namespace Ant{
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)
 		{
+			ANT_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
 			return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
 		}
 
 		template<typename T>
 		T& GetComponent()
 		{
+			//ANT_CORE_ASSERT(HasComponent<T>(), "Entity doesn't have component!");
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
 		}
 
-		template<typename T>
+		template<typename... T>
 		bool HasComponent()
 		{
-			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
+			return m_Scene->m_Registry.has<T...>(m_EntityHandle);
 		}
 
 		template<typename T>
 		void RemoveComponent()
 		{
+			ANT_CORE_ASSERT(HasComponent<T>(), "Entity doesn't have component!");
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
@@ -63,7 +66,7 @@ namespace Ant{
 	private:
 		Entity(const std::string& name);
 	private:
-		entt::entity m_EntityHandle;
+		entt::entity m_EntityHandle{ entt::null };
 		Scene* m_Scene = nullptr;
 
 		friend class Scene;
