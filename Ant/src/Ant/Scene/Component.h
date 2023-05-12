@@ -89,4 +89,44 @@ namespace Ant{
 		SpriteRendererComponent(const SpriteRendererComponent& other)
 			: Color(other.Color), Texture(other.Texture), TilingFactor(other.TilingFactor) {}
 	};
+
+	struct RigidBody2DComponent
+	{
+		enum  class Type { Static, Dynamic, Kinematic };
+		Type BodyType;
+		float Mass = 1.0f;
+
+		// Storage for runtime
+		void* RuntimeBody = nullptr;
+
+		RigidBody2DComponent() = default;
+		RigidBody2DComponent(const RigidBody2DComponent& other)
+					: BodyType(other.BodyType), Mass(other.Mass) {}
+	};
+
+	struct BoxCollider2DComponent
+	{
+		glm::vec2 Offset = { 0.0f, 0.0f };
+		glm::vec2 Size = { 1.0f, 1.0f };
+
+		// Storage for runtime
+		void* RuntimeFixture = nullptr;
+
+		BoxCollider2DComponent() = default;
+		BoxCollider2DComponent(const BoxCollider2DComponent& other)
+			: Offset(other.Offset), Size(other.Size) {}
+	};
+
+	struct CircleCollider2DComponent
+	{
+		glm::vec2 Offset = { 0.0f, 0.0f };
+		float Radius = 1.0f;
+
+		// Storage for runtime
+		void* RuntimeFixture = nullptr;
+
+		CircleCollider2DComponent() = default;
+		CircleCollider2DComponent(const CircleCollider2DComponent& other)
+			: Offset(other.Offset), Radius(other.Radius) {}
+	};
 }

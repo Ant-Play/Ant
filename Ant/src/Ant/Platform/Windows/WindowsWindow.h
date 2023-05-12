@@ -23,6 +23,9 @@ namespace Ant {
 		void SetVSync(bool enabled);
 		bool IsVSync() const;
 
+		virtual const std::string& GetTitle() const override { return m_Data.Title; }
+		virtual void SetTitle(const std::string& title) override;
+
 		inline void* GetNativeWindow() const { return m_Window; }
 	private:
 		virtual void Init(const WindowProps& props);

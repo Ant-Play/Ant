@@ -35,6 +35,12 @@ namespace Ant{
 			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
 		}
 
+		template<typename T>
+		void RemoveComponent()
+		{
+			m_Scene->m_Registry.remove<T>(m_EntityHandle);
+		}
+
 		glm::mat4& Transform() { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
 		const glm::mat4& Transform() const { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
 

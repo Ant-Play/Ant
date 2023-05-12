@@ -187,4 +187,26 @@ namespace Ant {
 		return (float)glfwGetTime();
 	}
 
+	const char* Application::GetConfigurationName()
+	{
+#if defined(ANT_DEBUG)
+		return "Debug";
+#elif defined(ANT_RELEASE)
+		return "Release";
+#elif defined(ANT_DIST)
+		return "Dist";
+#else
+	#error Unknown configuration!
+#endif
+	}
+
+	const char* Application::GetPlatformName()
+	{
+#if defined(ANT_PLATFORM_WINDOWS)
+		return "Windows x64";
+#else
+	#error Unknown platform!
+#endif
+	}
+
 }

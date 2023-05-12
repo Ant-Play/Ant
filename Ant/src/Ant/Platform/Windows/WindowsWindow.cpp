@@ -1,8 +1,9 @@
 #include "antpch.h"
+#include "Ant/Platform/Windows/WindowsWindow.h"
+
 #include "Ant/Core/Events/ApplicationEvent.h"
 #include "Ant/Core/Events/KeyEvent.h"
 #include "Ant/Core/Events/MouseEvent.h"
-#include "Ant/Platform/Windows/WindowsWindow.h"
 #include "Ant/Renderer/Renderer.h"
 
 #include "imgui.h"
@@ -206,4 +207,12 @@ namespace Ant {
 	{
 		return m_Data.VSync;
 	}
+
+	void WindowsWindow::SetTitle(const std::string& title)
+	{
+		m_Data.Title = title;
+		glfwSetWindowTitle(m_Window, title.c_str());
+
+	}
+
 }
