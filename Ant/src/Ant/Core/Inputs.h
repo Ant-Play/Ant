@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Ant/Core/KeyCodes.h"
-#include "Ant/Core/MouseCodes.h"
+#include "KeyCodes.h"
+#include "MouseCodes.h"
 
 namespace Ant {
 
@@ -15,5 +15,8 @@ namespace Ant {
 		static float GetMouseX();
 		static float GetMouseY();
 		static std::pair<float, float> GetMousePosition();
+
+		static void SetCursorMode(CursorMode mode);
+		static CursorMode GetCursorMode();
 	};
 }

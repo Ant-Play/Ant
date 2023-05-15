@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ant/Core/Events/Event.h"
+#include "Event.h"
 
 #include <sstream>
 namespace Ant {

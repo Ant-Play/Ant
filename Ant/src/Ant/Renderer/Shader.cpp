@@ -1,22 +1,29 @@
 #include "antpch.h"
-#include "Ant/Renderer/Shader.h"
+#include "Shader.h"
 
-#include "Ant/Renderer/Renderer.h"
+#include "Renderer.h"
 #include "Ant/Platform/OpenGL/OpenGLShader.h"
+#include "Ant/Platform/Vulkan/VulkanShader.h"
 
+#include "RendererAPI.h"
 
 namespace Ant {
 
 	std::vector<Ref<Shader>> Shader::s_AllShaders;
 
-	Ref<Shader> Shader::Create(const std::string& filepath)
+	Ref<Shader> Shader::Create(const std::string& filepath, bool forceCompile)
 	{
 		Ref<Shader> result = nullptr;
 
 		switch (RendererAPI::Current())
 		{
-		case RendererAPIType::None: return nullptr;
-		case RendererAPIType::OpenGL: result = Ref<OpenGLShader>::Create(filepath);
+			case RendererAPIType::None: return nullptr;
+			case RendererAPIType::OpenGL:
+				result = Ref<OpenGLShader>::Create(filepath, forceCompile);
+				break;
+			case RendererAPIType::Vulkan:
+				result = Ref<VulkanShader>::Create(filepath, forceCompile);
+				break;
 		}
 		s_AllShaders.push_back(result);
 		return result;
@@ -28,8 +35,8 @@ namespace Ant {
 
 		switch (RendererAPI::Current())
 		{
-		case RendererAPIType::None: return nullptr;
-		case RendererAPIType::OpenGL: result = OpenGLShader::CreateFromString(source);
+			case RendererAPIType::None: return nullptr;
+			case RendererAPIType::OpenGL: result = OpenGLShader::CreateFromString(source);
 		}
 		s_AllShaders.push_back(result);
 		return result;
@@ -50,9 +57,9 @@ namespace Ant {
 		m_Shaders[name] = shader;
 	}
 
-	void ShaderLibrary::Load(const std::string& path)
+	void ShaderLibrary::Load(const std::string& path, bool forceCompile)
 	{
-		auto shader = Ref<Shader>(Shader::Create(path));
+		auto shader = Shader::Create(path, forceCompile);
 		auto& name = shader->GetName();
 		ANT_CORE_ASSERT(m_Shaders.find(name) == m_Shaders.end());
 		m_Shaders[name] = shader;
@@ -61,12 +68,35 @@ namespace Ant {
 	void ShaderLibrary::Load(const std::string& name, const std::string& path)
 	{
 		ANT_CORE_ASSERT(m_Shaders.find(name) == m_Shaders.end());
-		m_Shaders[name] = Ref<Shader>(Shader::Create(path));
+		m_Shaders[name] = Shader::Create(path);
 	}
 
 	const Ref<Shader>& ShaderLibrary::Get(const std::string& name) const
 	{
 		ANT_CORE_ASSERT(m_Shaders.find(name) != m_Shaders.end());
 		return m_Shaders.at(name);
+	}
+
+	ShaderUniform::ShaderUniform(const std::string& name, ShaderUniformType type, uint32_t size, uint32_t offset)
+		: m_Name(name), m_Type(type), m_Size(size), m_Offset(offset)
+	{
+	}
+
+	const std::string& ShaderUniform::UniformTypeToString(ShaderUniformType type)
+	{
+		if (type == ShaderUniformType::Bool)
+		{
+			return "Boolean";
+		}
+		else if (type == ShaderUniformType::Int)
+		{
+			return "Int";
+		}
+		else if (type == ShaderUniformType::Float)
+		{
+			return "Float";
+		}
+
+		return "None";
 	}
 }

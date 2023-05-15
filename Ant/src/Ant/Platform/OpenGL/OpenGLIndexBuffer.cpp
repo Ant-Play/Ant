@@ -1,5 +1,5 @@
 ﻿#include "antpch.h"
-#include "Ant/Platform/OpenGL/OpenGLIndexBuffer.h"
+#include "OpenGLIndexBuffer.h"
 
 #include "Ant/Renderer/Renderer.h"
 

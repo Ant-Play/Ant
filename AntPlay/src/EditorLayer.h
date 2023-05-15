@@ -1,10 +1,9 @@
 #pragma once
 #include "Ant.h"
 
+
 #include "Ant/ImGui/ImGuiLayer.h"
 #include "Ant/Editor/EditorCamera.h"
-#include "Ant/Editor/SceneHierarchyPanel.h"
-
 #include "imgui/imgui_internal.h"
 
 #include <glm/glm.hpp>
@@ -14,6 +13,10 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <string>
+
+#include "Ant/Editor/SceneHierarchyPanel.h"
+#include "Ant/Editor/ContentBrowserPanel.h"
+#include "Ant/Editor/ObjectsPanel.h"
 
 
 namespace Ant {
@@ -39,20 +42,12 @@ namespace Ant {
 		bool OnKeyPressedEvent(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
-		// ImGui UI helpers
-		bool Property(const std::string& name, bool& value);
-		bool Property(const std::string& name, float& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
-		bool Property(const std::string& name, glm::vec2& value, PropertyFlag flags);
-		bool Property(const std::string& name, glm::vec2& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
-		bool Property(const std::string& name, glm::vec3& value, PropertyFlag flags);
-		bool Property(const std::string& name, glm::vec3& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
-		bool Property(const std::string& name, glm::vec4& value, PropertyFlag flags);
-		bool Property(const std::string& name, glm::vec4& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
-
 		void ShowBoundingBoxes(bool show, bool onTop = false);
 		void SelectEntity(Entity entity);
 
+		void NewScene();
 		void OpenScene();
+		void OpenScene(const std::string& filepath);
 		void SaveScene();
 		void SaveSceneAs();
 	private:
@@ -78,21 +73,17 @@ namespace Ant {
 		float GetSnapValue();
 	private:
 		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
+		Scope<ContentBrowserPanel> m_ContentBrowserPanel;
+		Scope<ObjectsPanel> m_ObjectsPanel;
 
-		Ref<Scene> m_ActiveScene;
-		Ref<Scene> m_RuntimeScene, m_EditorScene;
+		Ref<Scene> m_RuntimeScene, m_EditorScene, m_CurrentScene;
 		std::string m_SceneFilePath;
 		bool m_ReloadScriptOnPlay = true;
-
 
 		EditorCamera m_EditorCamera;
 
 		Ref<Shader> m_BrushShader;
 		Ref<Material> m_SphereBaseMaterial;
-
-		Ref<Material> m_MeshMaterial;
-		std::vector<Ref<MaterialInstance>> m_MetalSphereMaterialInstances;
-		std::vector<Ref<MaterialInstance>> m_DielectricSphereMaterialInstances;
 
 		struct AlbedoInput
 		{
@@ -139,7 +130,7 @@ namespace Ant {
 
 		// Editor resources
 		Ref<Texture2D> m_CheckerboardTex;
-		Ref<Texture2D> m_PlayButtonTex;
+		Ref<Texture2D> m_PlayButtonTex, m_StopButtonTex, m_PauseButtonTex;
 
 		glm::vec2 m_ViewportBounds[2];
 		int m_GizmoType = -1; // -1 = no gizmo
@@ -153,6 +144,10 @@ namespace Ant {
 
 		bool m_ViewportPanelMouseOver = false;
 		bool m_ViewportPanelFocused = false;
+
+		bool m_ShowPhysicsSettings = false;
+
+		bool m_ShowWelcomePopup = true;
 
 		enum class SceneState
 		{
@@ -170,5 +165,5 @@ namespace Ant {
 		glm::mat4* m_RelativeTransform = nullptr;
 		glm::mat4* m_CurrentlySelectedTransform = nullptr;
 	};
-}
 
+}

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ant-ScriptCore", "Ant-ScriptCore\Ant-ScriptCore.csproj", "{73DB3803-5FA9-2C09-483D-9D2F34AA086E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleApp", "ExampleApp\ExampleApp.csproj", "{921F763F-7ED7-B78C-E7DE-90E8D3B5527D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Dist|x64 = Dist|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{73DB3803-5FA9-2C09-483D-9D2F34AA086E}.Debug|x64.ActiveCfg = Debug|x64
+		{73DB3803-5FA9-2C09-483D-9D2F34AA086E}.Debug|x64.Build.0 = Debug|x64
+		{73DB3803-5FA9-2C09-483D-9D2F34AA086E}.Dist|x64.ActiveCfg = Dist|x64
+		{73DB3803-5FA9-2C09-483D-9D2F34AA086E}.Dist|x64.Build.0 = Dist|x64
+		{73DB3803-5FA9-2C09-483D-9D2F34AA086E}.Release|x64.ActiveCfg = Release|x64
+		{73DB3803-5FA9-2C09-483D-9D2F34AA086E}.Release|x64.Build.0 = Release|x64
+		{921F763F-7ED7-B78C-E7DE-90E8D3B5527D}.Debug|x64.ActiveCfg = Debug|x64
+		{921F763F-7ED7-B78C-E7DE-90E8D3B5527D}.Debug|x64.Build.0 = Debug|x64
+		{921F763F-7ED7-B78C-E7DE-90E8D3B5527D}.Dist|x64.ActiveCfg = Dist|x64
+		{921F763F-7ED7-B78C-E7DE-90E8D3B5527D}.Dist|x64.Build.0 = Dist|x64
+		{921F763F-7ED7-B78C-E7DE-90E8D3B5527D}.Release|x64.ActiveCfg = Release|x64
+		{921F763F-7ED7-B78C-E7DE-90E8D3B5527D}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

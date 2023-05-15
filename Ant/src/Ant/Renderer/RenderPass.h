@@ -1,12 +1,17 @@
 #pragma once
+
 #include "Ant/Core/Base.h"
-#include "Ant/Renderer/Framebuffer.h"
+
+#include "Framebuffer.h"
 
 namespace Ant{
+
+	class Framebuffer;
 
 	struct RenderPassSpecification
 	{
 		Ref<Framebuffer> TargetFramebuffer;
+		std::string DebugName;
 	};
 
 	class RenderPass : public RefCounted
@@ -17,6 +22,6 @@ namespace Ant{
 		virtual RenderPassSpecification& GetSpecification() = 0;
 		virtual const RenderPassSpecification& GetSpecification() const = 0;
 
-		static Ref<RenderPass> Create(const RenderPassSpecification& spec);
+		static Ant::Ref<Ant::RenderPass> Create(const RenderPassSpecification& spec);
 	};
 }

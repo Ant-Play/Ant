@@ -6,25 +6,14 @@
 #include "Ant/Renderer/Camera.h"
 #include "Ant/Renderer/Texture.h"
 #include "Ant/Renderer/Material.h"
-
-#include "Ant/Scene/SceneCamera.h"
-#include "Ant/Editor/EditorCamera.h"
+#include "Ant/Renderer/SceneEnvironment.h"
 
 #include "entt.hpp"
 
-class b2World;
+#include "SceneCamera.h"
+#include "Ant/Editor/EditorCamera.h"
 
 namespace Ant {
-
-
-	struct Environment
-	{
-		std::string FilePath;
-		Ref<TextureCube> RadianceMap;
-		Ref<TextureCube> IrradianceMap;
-
-		static Environment Load(const std::string& filepath);
-	};
 
 	struct Light
 	{
@@ -34,13 +23,28 @@ namespace Ant {
 		float Multiplier = 1.0f;
 	};
 
+	struct DirectionalLight
+	{
+		glm::vec3 Direction = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Radiance = { 0.0f, 0.0f, 0.0f };
+		float Multiplier = 0.0f;
+
+		// C++ only
+		bool CastShadows = true;
+	};
+
+	struct LightEnvironment
+	{
+		DirectionalLight DirectionalLights[4];
+	};
+
 	class Entity;
 	using EntityMap = std::unordered_map<UUID, Entity>;
 
 	class Scene : public RefCounted
 	{
 	public:
-		Scene(const std::string& debugName = "Scene");
+		Scene(const std::string& debugName = "Scene", bool isEditorScene = false);
 		~Scene();
 
 		void Init();
@@ -56,8 +60,7 @@ namespace Ant {
 
 		void SetViewportSize(uint32_t width, uint32_t height);
 
-		void SetEnvironment(const Environment& environment);
-		const Environment& GetEnvironment() const { return m_Environment; }
+		const Ref<Environment>& GetEnvironment() const { return m_Environment; }
 		void SetSkybox(const Ref<TextureCube>& skybox);
 
 		Light& GetLight() { return m_Light; }
@@ -66,6 +69,7 @@ namespace Ant {
 		Entity GetMainCameraEntity();
 
 		float& GetSkyboxLod() { return m_SkyboxLod; }
+		float GetSkyboxLod() const { return m_SkyboxLod; }
 
 		Entity CreateEntity(const std::string& name = "");
 		Entity CreateEntityWithID(UUID uuid, const std::string& name = "", bool runtimeMap = false);
@@ -80,6 +84,9 @@ namespace Ant {
 		}
 
 		Entity FindEntityByTag(const std::string& tag);
+		Entity FindEntityByUUID(UUID id);
+
+		glm::mat4 GetTransformRelativeToParent(Entity entity);
 
 		const EntityMap& GetEntityMap() const { return m_EntityIDMap; }
 		void CopyTo(Ref<Scene>& target);
@@ -106,13 +113,17 @@ namespace Ant {
 		Light m_Light;
 		float m_LightMultiplier = 0.3f;
 
-		Environment m_Environment;
+		LightEnvironment m_LightEnvironment;
+
+
+		Ref<Environment> m_Environment;
+		float m_EnvironmentIntensity = 1.0f;
 		Ref<TextureCube> m_SkyboxTexture;
-		Ref<MaterialInstance> m_SkyboxMaterial;
+		Ref<Material> m_SkyboxMaterial;
 
 		entt::entity m_SelectedEntity;
 
-		Entity* m_PhysicsBodyEntityBuffer = nullptr;
+		Entity* m_Physics2DBodyEntityBuffer = nullptr;
 
 		float m_SkyboxLod = 1.0f;
 		bool m_IsPlaying = false;

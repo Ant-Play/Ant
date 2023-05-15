@@ -12,8 +12,11 @@ project "Ant"
 
     files
     {
-        "src/**.h",
-        "src/**.cpp",
+        "src/**.h", 
+		"src/**.c", 
+		"src/**.hpp", 
+		"src/**.cpp",
+
         "vendor/stb_image/**.h",
         "vendor/stb_image/**.cpp",
         "vendor/glm/glm/**.hpp",
@@ -21,36 +24,36 @@ project "Ant"
 
         "vendor/ImGuizmo/ImGuizmo.h",
         "vendor/ImGuizmo/ImGuizmo.cpp",
-        "/vendor/assimp/include",
+        "vendor/assimp/include",
 
-        "/vendor/FastNoise/Cpp/**.h"
-    }
+        "vendor/FastNoise/Cpp/**.h",
 
-    defines
-    {
-        "_CRT_SECURE_NO_WARNINGS",
-        "GLFW_INCLUDE_NONE"
+        "vendor/VulkanMemoryAllocator/**.h",
+		"vendor/VulkanMemoryAllocator/**.cpp"
     }
 
     includedirs
     {
-        "src",
-        "vendor/spdlog/include",
-        "vendor/assimp/include",
+        "%{wks.location}/Ant/src",
+        "%{wks.location}/Ant/vendor",
+        
+        "%{IncludeDir.Assimp}",
         "%{IncludeDir.Box2D}",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
-        "%{IncludeDir.entt}",
-        "%{IncludeDir.FastNoise}",
-        "%{IncludeDir.mono}",
         "%{IncludeDir.yaml_cpp}",
+        "%{IncludeDir.entt}",
+        "%{IncludeDir.mono}",
+        "%{IncludeDir.FastNoise}",
+        "%{IncludeDir.PhysX}",
+        "%{IncludeDir.PhysX}/PhysX",
         "%{IncludeDir.ImGuizmo}",
-        "%{IncludeDir.VulkanSDK}"
+        "%{IncludeDir.VulkanSDK}",
     }
-
+    
     links
     {
         "Box2D",
@@ -59,8 +62,23 @@ project "Ant"
         "ImGui",
         "yaml-cpp",
         "opengl32.lib",
-
-        "%{Library.mono}"
+        
+        "%{Library.Vulkan}",
+		"%{Library.VulkanUtils}",
+        
+        "%{Library.mono}",
+        "%{Library.PhysX}",
+		"%{Library.PhysXCharacterKinematic}",
+		"%{Library.PhysXCommon}",
+		"%{Library.PhysXCooking}",
+		"%{Library.PhysXExtensions}",
+		"%{Library.PhysXFoundation}",
+		"%{Library.PhysXPvd}",
+    }
+    
+    defines
+    {
+        "PX_PHYSX_STATIC_LIB", "GLM_FORCE_DEPTH_ZERO_TO_ONE"
     }
 
     filter "files:vendor/ImGuizmo/**.cpp"
@@ -84,35 +102,78 @@ project "Ant"
 
     filter "configurations:Debug"
         defines "ANT_DEBUG"
-        runtime "Debug"
-        symbols "on"
+        symbols "On"
 
         links
 		{
+            "%{Library.NvidiaAftermath}",
+
 			"%{Library.ShaderC_Debug}",
+            "%{Library.ShaderC_Utils_Debug}",
 			"%{Library.SPIRV_Cross_Debug}",
-			"%{Library.SPIRV_Cross_GLSL_Debug}"
+			"%{Library.SPIRV_Cross_GLSL_Debug}",
+            "%{Library.SPIRV_Tools_Debug}",
+		}
+
+        includedirs
+        {
+            "%{IncludeDir.NvidiaAftermath}",
+            "%{IncludeDir.shaderc_util}",
+			"%{IncludeDir.shaderc_glslc}"
+        }
+
+        defines 
+		{
+			"ANT_DEBUG",
+			"ANT_TRACK_MEMORY"
 		}
 
     filter "configurations:Release"
         defines "ANT_RELEASE"
-        runtime "Release"
-        optimize "on"
+        optimize "On"
+
+        includedirs
+        {
+            "%{IncludeDir.NvidiaAftermath}",
+            "%{IncludeDir.shaderc_util}",
+			"%{IncludeDir.shaderc_glslc}"
+        }
 
         links
 		{
+            "%{Library.NvidiaAftermath}",
 			"%{Library.ShaderC_Release}",
+            "%{Library.ShaderC_Utils_Release}",
 			"%{Library.SPIRV_Cross_Release}",
 			"%{Library.SPIRV_Cross_GLSL_Release}"
 		}
 
+        defines
+		{
+			"ANT_RELEASE",
+			"ANT_TRACK_MEMORY",
+			"NDEBUG" -- PhysX Requires This
+		}
+
     filter "configurations:Dist"
         defines "ANT_DIST"
-        runtime "Release"
-        optimize "on"
+        optimize "On"
+
+        includedirs
+        {
+            "%{IncludeDir.NvidiaAftermath}",
+        }
+
+        defines
+		{
+			"ANT_DIST",
+			"NDEBUG" -- PhysX Requires This
+		}
 
         links
 		{
+
+            "%{Library.NvidiaAftermath}",
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
 			"%{Library.SPIRV_Cross_GLSL_Release}"

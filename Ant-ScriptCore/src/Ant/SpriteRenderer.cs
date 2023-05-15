@@ -6,8 +6,30 @@ using System.Threading.Tasks;
 
 namespace Ant
 {
-    public class SpriteRenderer
+    public class SpriteRenderer : Component
     {
+        /* public Texture2D Texture
+        {
+            get
+            {
+                Texture2D tex;
+                GetTexture_Native(Entity.EntityID, Entity.SceneID, out tex);
+                return tex;
+            }
+            set { }
+        }
 
+
+        public Vec4 Color
+        {
+            get;
+            set;
+        }
+
+        public float TilingFactor
+        {
+            get;
+            set;
+        }*/
     }
 }

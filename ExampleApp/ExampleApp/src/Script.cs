@@ -20,21 +20,21 @@ namespace Example
 
         public void OnUpdate(float ts)
         {
-            Rotation += ts;
+            //Rotation += ts;
 
-            Matrix4 transform = GetTransform();
-            Vector3 translation = transform.Translation;
+            //Matrix4 transform = GetTransform();
+            //Vector3 translation = transform.Translation;
 
-            float speed = Speed * ts;
+            //float speed = Speed * ts;
 
-            translation.X += Velocity.X * ts;
-            translation.Y += Velocity.Y * ts;
-            translation.Z += Velocity.Z * ts;
+            //translation.X += Velocity.X * ts;
+            //translation.Y += Velocity.Y * ts;
+            //translation.Z += Velocity.Z * ts;
 
-            translation.Y -= SinkRate * ts;
+            //translation.Y -= SinkRate * ts;
 
-            transform.Translation = translation;
-            SetTransform(transform);
+            //transform.Translation = translation;
+            //SetTransform(transform);
         }
     }
 }

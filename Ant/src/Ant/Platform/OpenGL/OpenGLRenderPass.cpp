@@ -1,5 +1,5 @@
 #include "antpch.h"
-#include "Ant/Platform/OpenGL/OpenGLRenderPass.h"
+#include "OpenGLRenderPass.h"
 
 namespace Ant{
 

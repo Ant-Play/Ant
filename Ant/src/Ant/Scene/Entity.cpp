@@ -1,5 +1,5 @@
 #include "antpch.h"
-#include "Ant/Scene/Entity.h"
+#include "Entity.h"
 
 
 namespace Ant {

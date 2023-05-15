@@ -1,17 +1,30 @@
 #include "antpch.h"
-#include "Ant/Editor/SceneHierarchyPanel.h"
+#include "SceneHierarchyPanel.h"
+
+#include <imgui.h>
+#include <imgui/imgui_internal.h>
 
 #include "Ant/Core/Application.h"
+#include "Ant/Math/Math.h"
 #include "Ant/Renderer/Mesh.h"
 #include "Ant/Scripts/ScriptEngine.h"
+#include "Ant/Physics/Physics.h"
+#include "Ant/Physics/PhysicsActor.h"
+#include "Ant/Physics/PhysicsLayer.h"
+#include "Ant/Physics/PXPhysicsWrappers.h"
+#include "Ant/Renderer/MeshFactory.h"
 
+#include "Ant/Asset/AssetManager.h"
 
 #include <assimp/scene.h>
-#include <imgui.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "Ant/ImGui/ImGui.h"
+#include "Ant/Renderer/Renderer.h"
 
 
 // TODO:
@@ -44,26 +57,156 @@ namespace Ant{
 	void SceneHierarchyPanel::SetSelected(Entity entity)
 	{
 		m_SelectionContext = entity;
+
+		if (m_SelectionChangedCallback)
+			m_SelectionChangedCallback(m_SelectionContext);
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Scene Hierarchy");
+		ImRect windowRect = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
 		if (m_Context)
 		{
 			uint32_t entityCount = 0, meshCount = 0;
 			m_Context->m_Registry.each([&](auto entity)
 				{
 					Entity e(entity, m_Context.Raw());
-					if (e.HasComponent<IDComponent>())
+					if (e.HasComponent<IDComponent>() && e.GetParentUUID() == 0)
 						DrawEntityNode(e);
 				});
 
+			if (ImGui::BeginDragDropTargetCustom(windowRect, ImGui::GetCurrentWindow()->ID))
+			{
+				const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("scene_entity_hierarchy", ImGuiDragDropFlags_AcceptNoDrawDefaultRect);
+
+				if (payload)
+				{
+					UUID droppedHandle = *((UUID*)payload->Data);
+					Entity e = m_Context->FindEntityByUUID(droppedHandle);
+					Entity previousParent = m_Context->FindEntityByUUID(e.GetParentUUID());
+
+					if (previousParent)
+					{
+						auto& children = previousParent.Children();
+						children.erase(std::remove(children.begin(), children.end(), droppedHandle), children.end());
+
+						glm::mat4 parentTransform = m_Context->GetTransformRelativeToParent(previousParent);
+						glm::vec3 parentTranslation, parentRotation, parentScale;
+						Math::DecomposeTransform(parentTransform, parentTranslation, parentRotation, parentScale);
+
+						e.Transform().Translation = e.Transform().Translation + parentTranslation;
+					}
+
+					e.SetParentUUID(0);
+				}
+
+				ImGui::EndDragDropTarget();
+			}
+
 			if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
 			{
-				if (ImGui::MenuItem("Create Empty Entity"))
+				if (ImGui::BeginMenu("Create"))
 				{
-					m_Context->CreateEntity("Empty Entity");
+					if (ImGui::MenuItem("Empty Entity"))
+					{
+						auto newEntity = m_Context->CreateEntity("Empty Entity");
+						SetSelected(newEntity);
+					}
+					if (ImGui::MenuItem("Camera"))
+					{
+						auto newEntity = m_Context->CreateEntity("Camera");
+						newEntity.AddComponent<CameraComponent>();
+						SetSelected(newEntity);
+					}
+					if (ImGui::BeginMenu("Mesh"))
+					{
+						if (ImGui::MenuItem("Empty Mesh"))
+						{
+							auto newEntity = m_Context->CreateEntity("Empty Mesh");
+							newEntity.AddComponent<MeshComponent>();
+							SetSelected(newEntity);
+						}
+						if (ImGui::MenuItem("Cube"))
+						{
+							auto newEntity = m_Context->CreateEntity("Cube");
+							newEntity.AddComponent<MeshComponent>(AssetManager::GetAsset<Mesh>("assets/meshes/Default/Cube.fbx"));
+							SetSelected(newEntity);
+						}
+						if (ImGui::MenuItem("Sphere"))
+						{
+							auto newEntity = m_Context->CreateEntity("Sphere");
+							newEntity.AddComponent<MeshComponent>(AssetManager::GetAsset<Mesh>("assets/meshes/Default/Sphere.fbx"));
+							SetSelected(newEntity);
+						}
+						if (ImGui::MenuItem("Capsule"))
+						{
+							auto newEntity = m_Context->CreateEntity("Capsule");
+							newEntity.AddComponent<MeshComponent>(AssetManager::GetAsset<Mesh>("assets/meshes/Default/Capsule.fbx"));
+							SetSelected(newEntity);
+						}
+						if (ImGui::MenuItem("Plane"))
+						{
+							auto newEntity = m_Context->CreateEntity("Plane");
+							newEntity.AddComponent<MeshComponent>(AssetManager::GetAsset<Mesh>("assets/meshes/Default/Plane.fbx"));
+							SetSelected(newEntity);
+						}
+						ImGui::EndMenu();
+					}
+					if (ImGui::BeginMenu("Physics"))
+					{
+						if (ImGui::MenuItem("Rigidbody"))
+						{
+							auto newEntity = m_Context->CreateEntity("Rigidbody");
+							newEntity.AddComponent<RigidBodyComponent>();
+							SetSelected(newEntity);
+						}
+						if (ImGui::MenuItem("Box"))
+						{
+							auto newEntity = m_Context->CreateEntity("Cube");
+							newEntity.AddComponent<MeshComponent>(AssetManager::GetAsset<Mesh>("assets/meshes/Default/Cube.fbx"));
+							newEntity.AddComponent<BoxColliderComponent>();
+							SetSelected(newEntity);
+						}
+						if (ImGui::MenuItem("Sphere"))
+						{
+							auto newEntity = m_Context->CreateEntity("Sphere");
+							newEntity.AddComponent<MeshComponent>(AssetManager::GetAsset<Mesh>("assets/meshes/Default/Sphere.fbx"));
+							newEntity.AddComponent<SphereColliderComponent>();
+							SetSelected(newEntity);
+						}
+						if (ImGui::MenuItem("Capsule"))
+						{
+							auto newEntity = m_Context->CreateEntity("Capsule");
+							newEntity.AddComponent<MeshComponent>(AssetManager::GetAsset<Mesh>("assets/meshes/Default/Capsule.fbx"));
+							newEntity.AddComponent<CapsuleColliderComponent>();
+							SetSelected(newEntity);
+						}
+
+						if (ImGui::MenuItem("Mesh"))
+						{
+							auto newEntity = m_Context->CreateEntity("Capsule");
+							newEntity.AddComponent<MeshComponent>();
+							newEntity.AddComponent<MeshColliderComponent>();
+							SetSelected(newEntity);
+						}
+						ImGui::EndMenu();
+					}
+					ImGui::Separator();
+					if (ImGui::MenuItem("Directional Light"))
+					{
+						auto newEntity = m_Context->CreateEntity("Directional Light");
+						newEntity.AddComponent<DirectionalLightComponent>();
+						newEntity.GetComponent<TransformComponent>().Rotation = glm::radians(glm::vec3{ 80.0f, 10.0f, 0.0f });
+						SetSelected(newEntity);
+					}
+					if (ImGui::MenuItem("Sky Light"))
+					{
+						auto newEntity = m_Context->CreateEntity("Sky Light");
+						newEntity.AddComponent<SkyLightComponent>();
+						SetSelected(newEntity);
+					}
+					ImGui::EndMenu();
 				}
 				ImGui::EndPopup();
 			}
@@ -73,73 +216,7 @@ namespace Ant{
 			ImGui::Begin("Properties");
 
 			if (m_SelectionContext)
-			{
 				DrawComponents(m_SelectionContext);
-
-				if (ImGui::Button("Add Component"))
-					ImGui::OpenPopup("AddComponentPanel");
-
-				if (ImGui::BeginPopup("AddComponentPanel"))
-				{
-					if (!m_SelectionContext.HasComponent<CameraComponent>())
-					{
-						if (ImGui::Button("Camera"))
-						{
-							m_SelectionContext.AddComponent<CameraComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-					}
-					if (!m_SelectionContext.HasComponent<MeshComponent>())
-					{
-						if (ImGui::Button("Mesh"))
-						{
-							m_SelectionContext.AddComponent<MeshComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-					}
-					if (!m_SelectionContext.HasComponent<ScriptComponent>())
-					{
-						if (ImGui::Button("Script"))
-						{
-							m_SelectionContext.AddComponent<ScriptComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-					}
-					if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
-					{
-						if (ImGui::Button("Sprite Renderer"))
-						{
-							m_SelectionContext.AddComponent<SpriteRendererComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-					}
-					if (!m_SelectionContext.HasComponent<RigidBody2DComponent>())
-					{
-						if (ImGui::Button("Rigidbody 2D"))
-						{
-							m_SelectionContext.AddComponent<RigidBody2DComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-					}
-					if (!m_SelectionContext.HasComponent<BoxCollider2DComponent>())
-					{
-						if (ImGui::Button("Box Collider 2D"))
-						{
-							m_SelectionContext.AddComponent<BoxCollider2DComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-					}
-					if (!m_SelectionContext.HasComponent<CircleCollider2DComponent>())
-					{
-						if (ImGui::Button("Circle Collider 2D"))
-						{
-							m_SelectionContext.AddComponent<CircleCollider2DComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-					}
-					ImGui::EndPopup();
-				}
-			}
 		}
 		ImGui::End();
 
@@ -169,14 +246,25 @@ namespace Ant{
 		if (entity.HasComponent<TagComponent>())
 			name = entity.GetComponent<TagComponent>().Tag.c_str();
 
-		ImGuiTreeNodeFlags node_flags = (entity == m_SelectionContext ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-		bool opened = ImGui::TreeNodeEx((void*)(uint32_t)entity, node_flags, name);
+		ImGuiTreeNodeFlags flags = (entity == m_SelectionContext ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+		if (entity.Children().empty())
+			flags |= ImGuiTreeNodeFlags_Leaf;
+
+		// TODO: This should probably be a function that checks that the entities components are valid
+		bool missingMesh = entity.HasComponent<MeshComponent>() && (entity.GetComponent<MeshComponent>().Mesh && entity.GetComponent<MeshComponent>().Mesh->Type == AssetType::Missing);
+		if (missingMesh)
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.4f, 0.3f, 1.0f));
+		bool opened = ImGui::TreeNodeEx((void*)(uint32_t)entity, flags, name);
 		if (ImGui::IsItemClicked())
 		{
 			m_SelectionContext = entity;
 			if (m_SelectionChangedCallback)
 				m_SelectionChangedCallback(m_SelectionContext);
 		}
+
+		if (missingMesh)
+			ImGui::PopStyleColor();
 
 		bool entityDeleted = false;
 		if (ImGui::BeginPopupContextItem())
@@ -186,13 +274,55 @@ namespace Ant{
 
 			ImGui::EndPopup();
 		}
+
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+		{
+			UUID entityId = entity.GetUUID();
+			ImGui::Text(entity.GetComponent<TagComponent>().Tag.c_str());
+			ImGui::SetDragDropPayload("scene_entity_hierarchy", &entityId, sizeof(UUID));
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("scene_entity_hierarchy", ImGuiDragDropFlags_AcceptNoDrawDefaultRect);
+
+			if (payload)
+			{
+				UUID droppedHandle = *((UUID*)payload->Data);
+				Entity e = m_Context->FindEntityByUUID(droppedHandle);
+
+				if (!entity.IsDescendantOf(e))
+				{
+					// Remove from previous parent
+					Entity previousParent = m_Context->FindEntityByUUID(e.GetParentUUID());
+					if (previousParent)
+					{
+						auto& parentChildren = previousParent.Children();
+						parentChildren.erase(std::remove(parentChildren.begin(), parentChildren.end(), droppedHandle), parentChildren.end());
+					}
+
+					glm::mat4 parentTransform = m_Context->GetTransformRelativeToParent(entity);
+					glm::vec3 parentTranslation, parentRotation, parentScale;
+					Math::DecomposeTransform(parentTransform, parentTranslation, parentRotation, parentScale);
+
+					e.Transform().Translation = e.Transform().Translation - parentTranslation;
+					e.SetParentUUID(entity.GetUUID());
+					entity.Children().push_back(droppedHandle);
+				}
+
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+
 		if (opened)
 		{
-			if (entity.HasComponent<MeshComponent>())
+			for (auto child : entity.Children())
 			{
-				auto mesh = entity.GetComponent<MeshComponent>().Mesh;
-				// if (mesh)
-				// 	DrawMeshNode(mesh);
+				Entity e = m_Context->FindEntityByUUID(child);
+				if (e)
+					DrawEntityNode(e);
 			}
 
 			ImGui::TreePop();
@@ -262,231 +392,47 @@ namespace Ant{
 
 	}
 
-	static int s_UIContextID = 0;
-	static uint32_t s_Counter = 0;
-	static char s_IDBuffer[16];
-
-	static void PushID()
-	{
-		ImGui::PushID(s_UIContextID++);
-		s_Counter = 0;
-	}
-
-	static void PopID()
-	{
-		ImGui::PopID();
-		s_UIContextID--;
-	}
-
-	static void BeginPropertyGrid()
-	{
-		PushID();
-		ImGui::Columns(2);
-	}
-
-	static bool Property(const char* label, std::string& value, bool error = false)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		char buffer[256];
-		strcpy(buffer, value.c_str());
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-
-		if (error)
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.2f, 0.2f, 1.0f));
-		if (ImGui::InputText(s_IDBuffer, buffer, 256))
-		{
-			value = buffer;
-			modified = true;
-		}
-		if (error)
-			ImGui::PopStyleColor();
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static void Property(const char* label, const char* value)
-	{
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		ImGui::InputText(s_IDBuffer, (char*)value, 256, ImGuiInputTextFlags_ReadOnly);
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-	}
-
-	static bool Property(const char* label, bool& value)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::Checkbox(s_IDBuffer, &value))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static bool Property(const char* label, int& value)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragInt(s_IDBuffer, &value))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static bool Property(const char* label, float& value, float delta = 0.1f)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat(s_IDBuffer, &value, delta))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static bool Property(const char* label, glm::vec2& value, float delta = 0.1f)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat2(s_IDBuffer, glm::value_ptr(value), delta))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static bool Property(const char* label, glm::vec3& value, float delta = 0.1f)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat3(s_IDBuffer, glm::value_ptr(value), delta))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static bool Property(const char* label, glm::vec4& value, float delta = 0.1f)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat4(s_IDBuffer, glm::value_ptr(value), delta))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static void EndPropertyGrid()
-	{
-		ImGui::Columns(1);
-		PopID();
-	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
+	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction, bool canBeRemoved = true)
 	{
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 		if(entity.HasComponent<T>())
 		{
-			bool removeComponent = false;
+			// NOTE(Peter):
+			//	This fixes an issue where the first "+" button would display the "Remove" buttons for ALL components on an Entity.
+			//	This is due to ImGui::TreeNodeEx only pushing the id for it's children if it's actually open
+			ImGui::PushID((void*)typeid(T).hash_code());
 
 			auto& component = entity.GetComponent<T>();
-			bool open = ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(T).hash_code()), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap, name.c_str());
-			ImGui::SameLine();
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
-			if(ImGui::Button("+"))
-			{
-				ImGui::OpenPopup("ComponentSetting");
-			}
+			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
-			ImGui::PopStyleColor();
-			ImGui::PopStyleColor();
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			ImGui::Separator();
+			bool open = ImGui::TreeNodeEx("##dummy_id", treeNodeFlags, name.c_str());
+			bool right_clicked = ImGui::IsItemClicked(ImGuiMouseButton_Right);
+			ImGui::PopStyleVar();
+
+			bool resetValues = false;
+			bool removeComponent = false;
+
+			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }) || right_clicked)
+			{
+				ImGui::OpenPopup("ComponentSettings");
+			}
 
 			if(ImGui::BeginPopup("ComponentSettings"))
 			{
-				if (ImGui::MenuItem("Remove component"))
-					removeComponent = true;
+				if (ImGui::MenuItem("Reset"))
+					resetValues = true;
+
+				if (canBeRemoved)
+				{
+					if (ImGui::MenuItem("Remove component"))
+						removeComponent = true;
+				}
 
 				ImGui::EndPopup();
 			}
@@ -494,15 +440,104 @@ namespace Ant{
 			if(open)
 			{
 				uiFunction(component);
-				ImGui::NextColumn();
-				ImGui::Columns(1);
 				ImGui::TreePop();
 			}
-			ImGui::Separator();
 
-			if (removeComponent)
+			if (removeComponent || resetValues)
 				entity.RemoveComponent<T>();
+
+			if (resetValues)
+				entity.AddComponent<T>();
+
+			ImGui::PopID();
 		}
+	}
+
+	static bool DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	{
+		bool modified = false;
+
+		const ImGuiIO& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, columnWidth);
+		ImGui::Text(label.c_str());
+		ImGui::NextColumn();
+
+		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+		// X
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if(ImGui::Button("X", buttonSize))
+		{
+			values.x = resetValue;
+			modified = true;
+		}
+
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		modified |= ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+
+		// Y
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("Y", buttonSize))
+		{
+			values.y = resetValue;
+			modified = true;
+		}
+
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		modified |= ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+
+		// Z
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("Z", buttonSize))
+		{
+			values.z = resetValue;
+			modified = true;
+		}
+
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		modified |= ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+
+		ImGui::PopStyleVar();
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+
+		return modified;
 	}
 
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
@@ -511,145 +546,205 @@ namespace Ant{
 
 		auto id = entity.GetComponent<IDComponent>().ID;
 
+		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
 			char buffer[256];
 			memset(buffer, 0, 256);
 			memcpy(buffer, tag.c_str(), tag.length());
+			ImGui::PushItemWidth(contentRegionAvailable.x * 0.5f);
 			if (ImGui::InputText("##Tag", buffer, 256))
 			{
 				tag = std::string(buffer);
 			}
+			ImGui::PopItemWidth();
 		}
-
+		
 		// ID
 		ImGui::SameLine();
 		ImGui::TextDisabled("%llx", id);
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 textSize = ImGui::CalcTextSize("Add Component");
+		ImGui::SameLine(contentRegionAvailable.x - (textSize.x + GImGui->Style.FramePadding.y));
+		if (ImGui::Button("Add Component"))
+			ImGui::OpenPopup("AddComponentPanel");
 
-		ImGui::Separator();
-
-		if (entity.HasComponent<TransformComponent>())
+		if(ImGui::BeginPopup("AddComponentPanel"))
 		{
-			auto& tc = entity.GetComponent<TransformComponent>();
-			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(TransformComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
+			if(!m_SelectionContext.HasComponent<CameraComponent>())
 			{
-				auto [translation, rotationQuat, scale] = GetTransformDecomposition(tc);
-				glm::vec3 rotation = glm::degrees(glm::eulerAngles(rotationQuat));
-
-				ImGui::Columns(2);
-				ImGui::Text("Translation");
-				ImGui::NextColumn();
-				ImGui::PushItemWidth(-1);
-
-				bool updateTransform = false;
-
-				if (ImGui::DragFloat3("##translation", glm::value_ptr(translation), 0.25f))
+				if(ImGui::Button("Camera"))
 				{
-					//tc.Transform[3] = glm::vec4(translation, 1.0f);
-					updateTransform = true;
+					m_SelectionContext.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
 				}
-
-				ImGui::PopItemWidth();
-				ImGui::NextColumn();
-
-				ImGui::Text("Rotation");
-				ImGui::NextColumn();
-				ImGui::PushItemWidth(-1);
-
-				if (ImGui::DragFloat3("##rotation", glm::value_ptr(rotation), 0.25f))
+			}
+			if (!m_SelectionContext.HasComponent<MeshComponent>())
+			{
+				if (ImGui::Button("Mesh"))
 				{
-					updateTransform = true;
-					// tc.Transform[3] = glm::vec4(translation, 1.0f);
+					MeshComponent& component = m_SelectionContext.AddComponent<MeshComponent>();
+					ImGui::CloseCurrentPopup();
 				}
-
-				ImGui::PopItemWidth();
-				ImGui::NextColumn();
-
-				ImGui::Text("Scale");
-				ImGui::NextColumn();
-				ImGui::PushItemWidth(-1);
-
-				if (ImGui::DragFloat3("##scale", glm::value_ptr(scale), 0.25f))
+			}
+			if (!m_SelectionContext.HasComponent<DirectionalLightComponent>())
+			{
+				if (ImGui::Button("Directional Light"))
 				{
-					updateTransform = true;
+					m_SelectionContext.AddComponent<DirectionalLightComponent>();
+					ImGui::CloseCurrentPopup();
 				}
-
-				ImGui::PopItemWidth();
-				ImGui::NextColumn();
-
-				ImGui::Columns(1);
-
-				if (updateTransform)
+			}
+			if (!m_SelectionContext.HasComponent<SkyLightComponent>())
+			{
+				if (ImGui::Button("Sky Light"))
 				{
-					tc.Transform = glm::translate(glm::mat4(1.0f), translation) *
-						glm::toMat4(glm::quat(glm::radians(rotation))) *
-						glm::scale(glm::mat4(1.0f), scale);
+					m_SelectionContext.AddComponent<SkyLightComponent>();
+					ImGui::CloseCurrentPopup();
 				}
-
-				ImGui::TreePop();
+			}
+			if (!m_SelectionContext.HasComponent<ScriptComponent>())
+			{
+				if (ImGui::Button("Script"))
+				{
+					m_SelectionContext.AddComponent<ScriptComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
+			{
+				if (ImGui::Button("Sprite Renderer"))
+				{
+					m_SelectionContext.AddComponent<SpriteRendererComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectionContext.HasComponent<RigidBody2DComponent>())
+			{
+				if (ImGui::Button("RigidBody 2D"))
+				{
+					m_SelectionContext.AddComponent<RigidBody2DComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectionContext.HasComponent<BoxCollider2DComponent>())
+			{
+				if (ImGui::Button("Box Collider 2D"))
+				{
+					m_SelectionContext.AddComponent<BoxCollider2DComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectionContext.HasComponent<CircleCollider2DComponent>())
+			{
+				if (ImGui::Button("Circle Collider 2D"))
+				{
+					m_SelectionContext.AddComponent<CircleCollider2DComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectionContext.HasComponent<RigidBodyComponent>())
+			{
+				if (ImGui::Button("Rigidbody"))
+				{
+					m_SelectionContext.AddComponent<RigidBodyComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectionContext.HasComponent<BoxColliderComponent>())
+			{
+				if (ImGui::Button("Box Collider"))
+				{
+					m_SelectionContext.AddComponent<BoxColliderComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectionContext.HasComponent<SphereColliderComponent>())
+			{
+				if (ImGui::Button("Sphere Collider"))
+				{
+					m_SelectionContext.AddComponent<SphereColliderComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectionContext.HasComponent<CapsuleColliderComponent>())
+			{
+				if (ImGui::Button("Capsule Collider"))
+				{
+					m_SelectionContext.AddComponent<CapsuleColliderComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectionContext.HasComponent<MeshColliderComponent>())
+			{
+				if (ImGui::Button("Mesh Collider"))
+				{
+					MeshColliderComponent& component = m_SelectionContext.AddComponent<MeshColliderComponent>();
+					if (m_SelectionContext.HasComponent<MeshComponent>())
+					{
+						component.CollisionMesh = m_SelectionContext.GetComponent<MeshComponent>().Mesh;
+						PXPhysicsWrappers::CreateTriangleMesh(component);
+					}
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			ImGui::EndPopup();
 		}
-			ImGui::Separator();
-	}
 
-		DrawComponent<MeshComponent>("Mesh", entity, [](MeshComponent& mc)
+		DrawComponent<TransformComponent>("Transform", entity, [](TransformComponent& component)
 			{
-				ImGui::Columns(3);
-				ImGui::SetColumnWidth(0, 100);
-				ImGui::SetColumnWidth(1, 300);
-				ImGui::SetColumnWidth(2, 40);
-				ImGui::Text("File Path");
-				ImGui::NextColumn();
-				ImGui::PushItemWidth(-1);
-				if (mc.Mesh)
-					ImGui::InputText("##meshfilepath", (char*)mc.Mesh->GetFilePath().c_str(), 256, ImGuiInputTextFlags_ReadOnly);
-				else
-					ImGui::InputText("##meshfilepath", (char*)"Null", 256, ImGuiInputTextFlags_ReadOnly);
-				ImGui::PopItemWidth();
-				ImGui::NextColumn();
-				if (ImGui::Button("...##openmesh"))
+				DrawVec3Control("Translation", component.Translation);
+				glm::vec3 rotation = glm::degrees(component.Rotation);
+				DrawVec3Control("Rotation", rotation);
+
+				component.Rotation = glm::radians(rotation);
+				DrawVec3Control("Scale", component.Scale, 1.0f);
+			}, false);
+
+		DrawComponent<MeshComponent>("Mesh", entity, [&](MeshComponent& mc)
+			{
+				UI::BeginPropertyGrid();
+				if (UI::PropertyAssetReference("Mesh", mc.Mesh, AssetType::Mesh))
 				{
-					std::string file = Application::Get().OpenFile();
-					if (!file.empty())
-						mc.Mesh = Ref<Mesh>::Create(file);
+					if (entity.HasComponent<MeshColliderComponent>())
+					{
+						auto& mcc = entity.GetComponent<MeshColliderComponent>();
+						mcc.CollisionMesh = mc.Mesh;
+						if (mcc.IsConvex)
+							PXPhysicsWrappers::CreateConvexMesh(mcc, entity.Transform().Scale, true);
+						else
+							PXPhysicsWrappers::CreateTriangleMesh(mcc, entity.Transform().Scale, true);
+					}
 				}
+				UI::EndPropertyGrid();
 			});
 
 		DrawComponent<CameraComponent>("Camera", entity, [](CameraComponent& cc)
 			{
+				UI::BeginPropertyGrid();
+
 				// Projection Type
 				const char* projTypeStrings[] = { "Perspective", "Orthographic" };
-				const char* currentProj = projTypeStrings[(int)cc.Camera.GetProjectionType()];
-				if (ImGui::BeginCombo("Projection", currentProj))
+				int currentProj = (int)cc.Camera.GetProjectionType();
+				if (UI::PropertyDropdown("Projection", projTypeStrings, 2, &currentProj))
 				{
-					for (int type = 0; type < 2; type++)
-					{
-						bool is_selected = (currentProj == projTypeStrings[type]);
-						if (ImGui::Selectable(projTypeStrings[type], is_selected))
-						{
-							currentProj = projTypeStrings[type];
-							cc.Camera.SetProjectionType((SceneCamera::ProjectionType)type);
-						}
-						if (is_selected)
-							ImGui::SetItemDefaultFocus();
-					}
-					ImGui::EndCombo();
+					cc.Camera.SetProjectionType((SceneCamera::ProjectionType)currentProj);
 				}
-
-				BeginPropertyGrid();
 				// Perspective parameters
 				if (cc.Camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 				{
 					float verticalFOV = cc.Camera.GetPerspectiveVerticalFOV();
-					if (Property("Vertical FOV", verticalFOV))
+					if (UI::Property("Vertical FOV", verticalFOV))
 						cc.Camera.SetPerspectiveVerticalFOV(verticalFOV);
 
 					float nearClip = cc.Camera.GetPerspectiveNearClip();
-					if (Property("Near Clip", nearClip))
+					if (UI::Property("Near Clip", nearClip))
 						cc.Camera.SetPerspectiveNearClip(nearClip);
 					ImGui::SameLine();
 					float farClip = cc.Camera.GetPerspectiveFarClip();
-					if (Property("Far Clip", farClip))
+					if (UI::Property("Far Clip", farClip))
 						cc.Camera.SetPerspectiveFarClip(farClip);
 				}
 
@@ -657,30 +752,62 @@ namespace Ant{
 				else if (cc.Camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 				{
 					float orthoSize = cc.Camera.GetOrthographicSize();
-					if (Property("Size", orthoSize))
+					if (UI::Property("Size", orthoSize))
 						cc.Camera.SetOrthographicSize(orthoSize);
 
 					float nearClip = cc.Camera.GetOrthographicNearClip();
-					if (Property("Near Clip", nearClip))
+					if (UI::Property("Near Clip", nearClip))
 						cc.Camera.SetOrthographicNearClip(nearClip);
 					ImGui::SameLine();
 					float farClip = cc.Camera.GetOrthographicFarClip();
-					if (Property("Far Clip", farClip))
+					if (UI::Property("Far Clip", farClip))
 						cc.Camera.SetOrthographicFarClip(farClip);
 				}
 
-				EndPropertyGrid();
+				UI::EndPropertyGrid();
 			});
 
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](SpriteRendererComponent& mc)
 			{
 			});
 
+		DrawComponent<DirectionalLightComponent>("Directional Light", entity, [](DirectionalLightComponent& dlc)
+			{
+				UI::BeginPropertyGrid();
+				UI::PropertyColor("Radiance", dlc.Radiance);
+				UI::Property("Intensity", dlc.Intensity);
+				UI::Property("Cast Shadows", dlc.CastShadows);
+				UI::Property("Soft Shadows", dlc.SoftShadows);
+				UI::Property("Source Size", dlc.LightSize);
+				UI::EndPropertyGrid();
+			});
+
+		DrawComponent<SkyLightComponent>("Sky Light", entity, [](SkyLightComponent& slc)
+			{
+				UI::BeginPropertyGrid();
+				UI::PropertyAssetReference("Environment Map", slc.SceneEnvironment, AssetType::EnvMap);
+				UI::Property("Intensity", slc.Intensity, 0.01f, 0.0f, 5.0f);
+				ImGui::Separator();
+				UI::Property("Dynamic Sky", slc.DynamicSky);
+				if (slc.DynamicSky)
+				{
+					bool changed = UI::Property("Turbidity", slc.TurbidityAzimuthInclination.x, 0.01f);
+					changed |= UI::Property("Azimuth", slc.TurbidityAzimuthInclination.y, 0.01f);
+					changed |= UI::Property("Inclination", slc.TurbidityAzimuthInclination.z, 0.01f);
+					if (changed)
+					{
+						Ref<TextureCube> preethamEnv = Renderer::CreatePreethamSky(slc.TurbidityAzimuthInclination.x, slc.TurbidityAzimuthInclination.y, slc.TurbidityAzimuthInclination.z);
+						slc.SceneEnvironment = Ref<Environment>::Create(preethamEnv, preethamEnv);
+					}
+				}
+				UI::EndPropertyGrid();
+			});
+
 		DrawComponent<ScriptComponent>("Script", entity, [=](ScriptComponent& sc) mutable
 			{
-				BeginPropertyGrid();
+				UI::BeginPropertyGrid();
 				std::string oldName = sc.ModuleName;
-				if (Property("Module Name", sc.ModuleName, !ScriptEngine::ModuleExists(sc.ModuleName))) // TODO: no live edit
+				if (UI::Property("Module Name", sc.ModuleName, !ScriptEngine::ModuleExists(sc.ModuleName))) // TODO: no live edit
 				{
 					// Shutdown old script
 					if (ScriptEngine::ModuleExists(oldName))
@@ -706,7 +833,7 @@ namespace Ant{
 							case FieldType::Int:
 							{
 								int value = isRuntime ? field.GetRuntimeValue<int>() : field.GetStoredValue<int>();
-								if (Property(field.Name.c_str(), value))
+								if (UI::Property(field.Name.c_str(), value))
 								{
 									if (isRuntime)
 										field.SetRuntimeValue(value);
@@ -718,7 +845,7 @@ namespace Ant{
 							case FieldType::Float:
 							{
 								float value = isRuntime ? field.GetRuntimeValue<float>() : field.GetStoredValue<float>();
-								if (Property(field.Name.c_str(), value, 0.2f))
+								if (UI::Property(field.Name.c_str(), value, 0.2f))
 								{
 									if (isRuntime)
 										field.SetRuntimeValue(value);
@@ -730,7 +857,7 @@ namespace Ant{
 							case FieldType::Vec2:
 							{
 								glm::vec2 value = isRuntime ? field.GetRuntimeValue<glm::vec2>() : field.GetStoredValue<glm::vec2>();
-								if (Property(field.Name.c_str(), value, 0.2f))
+								if (UI::Property(field.Name.c_str(), value, 0.2f))
 								{
 									if (isRuntime)
 										field.SetRuntimeValue(value);
@@ -742,7 +869,7 @@ namespace Ant{
 							case FieldType::Vec3:
 							{
 								glm::vec3 value = isRuntime ? field.GetRuntimeValue<glm::vec3>() : field.GetStoredValue<glm::vec3>();
-								if (Property(field.Name.c_str(), value, 0.2f))
+								if (UI::Property(field.Name.c_str(), value, 0.2f))
 								{
 									if (isRuntime)
 										field.SetRuntimeValue(value);
@@ -754,7 +881,7 @@ namespace Ant{
 							case FieldType::Vec4:
 							{
 								glm::vec4 value = isRuntime ? field.GetRuntimeValue<glm::vec4>() : field.GetStoredValue<glm::vec4>();
-								if (Property(field.Name.c_str(), value, 0.2f))
+								if (UI::Property(field.Name.c_str(), value, 0.2f))
 								{
 									if (isRuntime)
 										field.SetRuntimeValue(value);
@@ -763,12 +890,29 @@ namespace Ant{
 								}
 								break;
 							}
+							/*case FieldType::ClassReference:
+							{
+								Ref<Asset>* asset = (Ref<Asset>*)(isRuntime ? field.GetRuntimeValueRaw() : field.GetStoredValueRaw());
+								std::string label = field.Name + "(" + field.TypeName + ")";
+
+								if (!AssetManager::IsAssetHandleValid((*asset)->Handle))
+									break;
+
+								if (UI::PropertyAssetReference(label.c_str(), *asset))
+								{
+									if (isRuntime)
+										field.SetRuntimeValueRaw(asset);
+									else
+										field.SetStoredValueRaw(asset);
+								}
+								break;
+							}*/
 							}
 						}
 					}
 				}
 
-				EndPropertyGrid();
+				UI::EndPropertyGrid();
 #if TODO
 				if (ImGui::Button("Run Script"))
 				{
@@ -779,57 +923,190 @@ namespace Ant{
 
 		DrawComponent<RigidBody2DComponent>("Rigidbody 2D", entity, [](RigidBody2DComponent& rb2dc)
 			{
+				UI::BeginPropertyGrid();
+
 				// Rigidbody2D Type
 				const char* rb2dTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
-				const char* currentType = rb2dTypeStrings[(int)rb2dc.BodyType];
-				if (ImGui::BeginCombo("Type", currentType))
-				{
-					for (int type = 0; type < 3; type++)
-					{
-						bool is_selected = (currentType == rb2dTypeStrings[type]);
-						if (ImGui::Selectable(rb2dTypeStrings[type], is_selected))
-						{
-							currentType = rb2dTypeStrings[type];
-							rb2dc.BodyType = (RigidBody2DComponent::Type)type;
-						}
-						if (is_selected)
-							ImGui::SetItemDefaultFocus();
-					}
-					ImGui::EndCombo();
-				}
+				UI::PropertyDropdown("Type", rb2dTypeStrings, 3, (int*)&rb2dc.BodyType);
 
 				if (rb2dc.BodyType == RigidBody2DComponent::Type::Dynamic)
 				{
-					BeginPropertyGrid();
-					Property("Fixed Rotation", rb2dc.FixedRotation);
-					EndPropertyGrid();
+					UI::BeginPropertyGrid();
+					UI::Property("Fixed Rotation", rb2dc.FixedRotation);
+					UI::EndPropertyGrid();
 				}
+
+				UI::EndPropertyGrid();
 			});
 
 		DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](BoxCollider2DComponent& bc2dc)
 			{
-				BeginPropertyGrid();
+				UI::BeginPropertyGrid();
 
-				Property("Offset", bc2dc.Offset);
-				Property("Size", bc2dc.Size);
-				Property("Density", bc2dc.Density);
-				Property("Friction", bc2dc.Friction);
+				UI::Property("Offset", bc2dc.Offset);
+				UI::Property("Size", bc2dc.Size);
+				UI::Property("Density", bc2dc.Density);
+				UI::Property("Friction", bc2dc.Friction);
 
-				EndPropertyGrid();
+				UI::EndPropertyGrid();
 			});
 
 		DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", entity, [](CircleCollider2DComponent& cc2dc)
 			{
-				BeginPropertyGrid();
+				UI::BeginPropertyGrid();
 
-				Property("Offset", cc2dc.Offset);
-				Property("Radius", cc2dc.Radius);
-				Property("Density", cc2dc.Density);
-				Property("Friction", cc2dc.Friction);
+				UI::Property("Offset", cc2dc.Offset);
+				UI::Property("Radius", cc2dc.Radius);
+				UI::Property("Density", cc2dc.Density);
+				UI::Property("Friction", cc2dc.Friction);
 
-				EndPropertyGrid();
+				UI::EndPropertyGrid();
 			});
 
+		DrawComponent<RigidBodyComponent>("Rigidbody", entity, [](RigidBodyComponent& rbc)
+			{
+				UI::BeginPropertyGrid();
+
+				// Rigidbody Type
+				const char* rbTypeStrings[] = { "Static", "Dynamic" };
+				UI::PropertyDropdown("Type", rbTypeStrings, 2, (int*)&rbc.BodyType);
+
+				// Layer has been removed, set to Default layer
+				if (!PhysicsLayerManager::IsLayerValid(rbc.Layer))
+					rbc.Layer = 0;
+
+				int layerCount = PhysicsLayerManager::GetLayerCount();
+				const auto& layerNames = PhysicsLayerManager::GetLayerNames();
+				UI::PropertyDropdown("Layer", layerNames, layerCount, (int*)&rbc.Layer);
+
+				if (rbc.BodyType == RigidBodyComponent::Type::Dynamic)
+				{
+					UI::BeginPropertyGrid();
+					UI::Property("Mass", rbc.Mass);
+					UI::Property("Linear Drag", rbc.LinearDrag);
+					UI::Property("Angular Drag", rbc.AngularDrag);
+					UI::Property("Disable Gravity", rbc.DisableGravity);
+					UI::Property("Is Kinematic", rbc.IsKinematic);
+					UI::EndPropertyGrid();
+
+					if (UI::BeginTreeNode("Constraints", false))
+					{
+						UI::BeginPropertyGrid();
+
+						UI::BeginCheckboxGroup("Freeze Position");
+						UI::PropertyCheckboxGroup("X", rbc.LockPositionX);
+						UI::PropertyCheckboxGroup("Y", rbc.LockPositionY);
+						UI::PropertyCheckboxGroup("Z", rbc.LockPositionZ);
+						UI::EndCheckboxGroup();
+
+						UI::BeginCheckboxGroup("Freeze Rotation");
+						UI::PropertyCheckboxGroup("X", rbc.LockRotationX);
+						UI::PropertyCheckboxGroup("Y", rbc.LockRotationY);
+						UI::PropertyCheckboxGroup("Z", rbc.LockRotationZ);
+						UI::EndCheckboxGroup();
+
+						UI::EndPropertyGrid();
+						UI::EndTreeNode();
+					}
+				}
+
+				UI::EndPropertyGrid();
+			});
+
+		DrawComponent<BoxColliderComponent>("Box Collider", entity, [](BoxColliderComponent& bcc)
+			{
+				UI::BeginPropertyGrid();
+
+				if (UI::Property("Size", bcc.Size))
+				{
+					bcc.DebugMesh = MeshFactory::CreateBox(bcc.Size);
+				}
+
+				//Property("Offset", bcc.Offset);
+				UI::Property("Is Trigger", bcc.IsTrigger);
+				UI::PropertyAssetReference("Material", bcc.Material, AssetType::PhysicsMat);
+
+				UI::EndPropertyGrid();
+			});
+
+		DrawComponent<SphereColliderComponent>("Sphere Collider", entity, [](SphereColliderComponent& scc)
+			{
+				UI::BeginPropertyGrid();
+
+				if (UI::Property("Radius", scc.Radius))
+				{
+					scc.DebugMesh = MeshFactory::CreateSphere(scc.Radius);
+				}
+
+				UI::Property("Is Trigger", scc.IsTrigger);
+				UI::PropertyAssetReference("Material", scc.Material, AssetType::PhysicsMat);
+
+				UI::EndPropertyGrid();
+			});
+
+		DrawComponent<CapsuleColliderComponent>("Capsule Collider", entity, [=](CapsuleColliderComponent& ccc)
+			{
+				UI::BeginPropertyGrid();
+
+				bool changed = false;
+
+				if (UI::Property("Radius", ccc.Radius))
+					changed = true;
+
+				if (UI::Property("Height", ccc.Height))
+					changed = true;
+
+				UI::Property("Is Trigger", ccc.IsTrigger);
+				UI::PropertyAssetReference("Material", ccc.Material, AssetType::PhysicsMat);
+
+				if (changed)
+				{
+					ccc.DebugMesh = MeshFactory::CreateCapsule(ccc.Radius, ccc.Height);
+				}
+
+				UI::EndPropertyGrid();
+			});
+
+		DrawComponent<MeshColliderComponent>("Mesh Collider", entity, [&](MeshColliderComponent& mcc)
+			{
+				UI::BeginPropertyGrid();
+
+				if (mcc.OverrideMesh)
+				{
+					if (UI::PropertyAssetReference("Mesh", mcc.CollisionMesh, AssetType::Mesh))
+					{
+						if (mcc.IsConvex)
+							PXPhysicsWrappers::CreateConvexMesh(mcc, entity.Transform().Scale, true);
+						else
+							PXPhysicsWrappers::CreateTriangleMesh(mcc, entity.Transform().Scale, true);
+					}
+				}
+
+				if (UI::Property("Is Convex", mcc.IsConvex))
+				{
+					if (mcc.IsConvex)
+						PXPhysicsWrappers::CreateConvexMesh(mcc, entity.Transform().Scale, true);
+					else
+						PXPhysicsWrappers::CreateTriangleMesh(mcc, entity.Transform().Scale, true);
+				}
+
+				UI::Property("Is Trigger", mcc.IsTrigger);
+				UI::PropertyAssetReference("Material", mcc.Material, AssetType::PhysicsMat);
+
+				if (UI::Property("Override Mesh", mcc.OverrideMesh))
+				{
+					if (!mcc.OverrideMesh && entity.HasComponent<MeshComponent>())
+					{
+						mcc.CollisionMesh = entity.GetComponent<MeshComponent>().Mesh;
+
+						if (mcc.IsConvex)
+							PXPhysicsWrappers::CreateConvexMesh(mcc, entity.Transform().Scale, true);
+						else
+							PXPhysicsWrappers::CreateTriangleMesh(mcc, entity.Transform().Scale, true);
+					}
+				}
+				UI::EndPropertyGrid();
+			});
 	}
 
 }

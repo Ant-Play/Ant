@@ -1,28 +1,47 @@
 #pragma once
 
-#include "Ant/Renderer/RendererAPI.h"
+#include "RendererAPI.h"
+#include "RendererTypes.h"
+#include "Image.h"
 
 #include <glm/glm.hpp>
 
 namespace Ant{
 
-	enum class FramebufferFormat
+	struct FramebufferTextureSpecification
 	{
-		None = 0,
-		RGBA8 = 1,
-		RGBA16F = 2
+		FramebufferTextureSpecification() = default;
+		FramebufferTextureSpecification(ImageFormat format) : Format(format) {}
+
+		ImageFormat Format;
+		// TODO: filtering/wrap
+	};
+
+	struct FramebufferAttachmentSpecification
+	{
+		FramebufferAttachmentSpecification() = default;
+		FramebufferAttachmentSpecification(const std::initializer_list<FramebufferTextureSpecification>& attachments)
+			: Attachments(attachments) {}
+
+		std::vector<FramebufferTextureSpecification> Attachments;
 	};
 
 	struct FramebufferSpecification
 	{
-		uint32_t Width = 1280;
-		uint32_t Height = 720;
-		glm::vec4 ClearColor;
-		FramebufferFormat Format;
+		float Scale = 1.0f;
+		uint32_t Width = 0;
+		uint32_t Height = 0;
+		glm::vec4 ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+		FramebufferAttachmentSpecification Attachments;
 		uint32_t Samples = 1; // multisampling
+
+		// TODO: Temp, needs scale
+		bool NoResize = false;
 
 		// SwapChainTarget = screen buffer (i.e. no framebuffer)
 		bool SwapChainTarget = false;
+
+		std::string DebugName;
 	};
 
 	class Framebuffer : public RefCounted
@@ -33,12 +52,17 @@ namespace Ant{
 		virtual void Unbind() const = 0;
 
 		virtual void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) = 0;
+		virtual void AddResizeCallback(const std::function<void(Ref<Framebuffer>)>& func) = 0;
 
-		virtual void BindTexture(uint32_t slot = 0) const = 0;
+		virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const = 0;
+
+		virtual uint32_t GetWidth() const = 0;
+		virtual uint32_t GetHeight() const = 0;
 
 		virtual RendererID GetRendererID() const = 0;
-		virtual RendererID GetColorAttachmentRendererID() const = 0;
-		virtual RendererID GetDepthAttachmentRendererID() const = 0;
+
+		virtual Ref<Image2D> GetImage(uint32_t attachmentIndex = 0) const = 0;
+		virtual Ref<Image2D> GetDepthImage() const = 0;
 
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
 

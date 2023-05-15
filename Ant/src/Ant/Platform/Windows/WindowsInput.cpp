@@ -1,7 +1,7 @@
 #include "antpch.h"
 #include "Ant/Core/Inputs.h"
 #include "Ant/Core/Application.h"
-#include "Ant/Platform/Windows/WindowsWindow.h"
+#include "WindowsWindow.h"
 
 #include <GLFW/glfw3.h>
 
@@ -42,5 +42,19 @@ namespace Ant {
 		glfwGetCursorPos(static_cast<GLFWwindow*>(window.GetNativeWindow()), &x, &y);
 		return { (float)x, (float)y };
 
+	}
+
+	// TODO: A better way to do this is to handle it internally, and simply move the cursor the opposite side
+	//		of the screen when it reaches the edge
+	void Input::SetCursorMode(CursorMode mode)
+	{
+		auto& window = static_cast<WindowsWindow&>(Application::Get().GetWindow());
+		glfwSetInputMode(static_cast<GLFWwindow*>(window.GetNativeWindow()), GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
+	}
+
+	CursorMode Input::GetCursorMode()
+	{
+		auto& window = static_cast<WindowsWindow&>(Application::Get().GetWindow());
+		return (CursorMode)(glfwGetInputMode(static_cast<GLFWwindow*>(window.GetNativeWindow()), GLFW_CURSOR) - GLFW_CURSOR_NORMAL);
 	}
 }

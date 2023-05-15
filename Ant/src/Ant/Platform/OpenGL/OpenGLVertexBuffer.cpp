@@ -1,5 +1,5 @@
 ﻿#include "antpch.h"
-#include "Ant/Platform/OpenGL/OpenGLVertexBuffer.h"
+#include "OpenGLVertexBuffer.h"
 
 #include "Ant/Renderer/Renderer.h"
 
@@ -56,7 +56,7 @@ namespace Ant{
 		m_Size = size;
 		Ref<OpenGLVertexBuffer> instance = this;
 		Renderer::Submit([instance, offset]() {
-			glNamedBufferSubData(instance->m_RendererID, offset, instance->m_Size, instance->m_LocalData.Data);
+			glNamedBufferSubData(instance->m_RendererID, offset, instance->m_LocalData.Size, instance->m_LocalData.Data);
 			});
 	}
 

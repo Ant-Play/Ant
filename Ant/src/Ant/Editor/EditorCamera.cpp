@@ -1,8 +1,7 @@
 ﻿#include "antpch.h"
-#include "Ant/Editor/EditorCamera.h"
+#include "EditorCamera.h"
 
 #include "Ant/Core/Inputs.h"
-#include "Ant/Core/MouseCodes.h"
 
 #include <glfw/glfw3.h>
 #include <glm/gtc/quaternion.hpp>
@@ -39,9 +38,17 @@ namespace Ant{
 		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 	}
 
-	void EditorCamera::Focus()
+	void EditorCamera::Focus(const glm::vec3& focusPoint)
 	{
+		m_FocalPoint = focusPoint;
+		if (m_Distance > m_MinFocusDistance)
+		{
+			float distance = m_Distance - m_MinFocusDistance;
+			MouseZoom(distance / ZoomSpeed());
+			UpdateCameraView();
+		}
 	}
+
 
 	std::pair<float, float> EditorCamera::PanSpeed() const
 	{

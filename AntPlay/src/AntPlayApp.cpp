@@ -18,7 +18,7 @@ public:
 	}
 };
 
-Ant::Application* Ant::CreateApplication()
+Ant::Application* Ant::CreateApplication(int argc, char** argv)
 {
 	return new AntPlayApplication({ "AntPlay", 1600, 900 });
 }

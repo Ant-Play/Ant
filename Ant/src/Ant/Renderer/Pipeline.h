@@ -1,17 +1,25 @@
 ﻿#pragma once
 
+#include "RenderPass.h"
 #include "Ant/Core/Ref.h"
 
-#include "Ant/Renderer/VertexBuffer.h"
-#include "Ant/Renderer/Shader.h"
+#include "VertexBuffer.h"
+#include "Shader.h"
+#include "RenderPass.h"
 
 
 namespace Ant{
 
+	class RenderPass;
+
 	struct PipelineSpecification
 	{
-		Ref<Ant::Shader> Shader;
+		Ref<Shader> Shader;
 		VertexBufferLayout Layout;
+
+		Ref<RenderPass> RenderPass;
+
+		std::string DebugName;
 	};
 
 

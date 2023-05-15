@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Ant/Core/Base.h"
-#include "Ant/Core/Timestep.h"
-#include "Ant/Core/Window.h"
-#include "Ant/Core/LayerStack.h"
+#include "Base.h"
+#include "Timestep.h"
+#include "Window.h"
+#include "LayerStack.h"
 
-#include "Ant/Core/Events/ApplicationEvent.h"
+#include "Events/ApplicationEvent.h"
 
 #include "Ant/ImGui/ImGuiLayer.h"
 
@@ -24,6 +24,7 @@ namespace Ant {
 		virtual ~Application();
 
 		void Run();
+		void Close();
 
 		virtual void OnInit() {}
 		virtual void OnShutdown() {}
@@ -62,5 +63,5 @@ namespace Ant {
 	};
 
 	// Implemented by CLIENT
-	Application* CreateApplication();
+	Application* CreateApplication(int argc, char** argv);
 }

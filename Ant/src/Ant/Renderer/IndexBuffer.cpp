@@ -1,9 +1,12 @@
 ﻿#include "antpch.h"
-#include "Ant/Renderer/IndexBuffer.h"
+#include "IndexBuffer.h"
 
-#include "Ant/Renderer/Renderer.h"
+#include "Renderer.h"
 
 #include "Ant/Platform/OpenGL/OpenGLIndexBuffer.h"
+#include "Ant/Platform/Vulkan/VulkanIndexBuffer.h"
+
+#include "RendererAPI.h"
 
 namespace Ant{
 
@@ -13,6 +16,7 @@ namespace Ant{
 		{
 			case RendererAPIType::None:    return nullptr;
 			case RendererAPIType::OpenGL:  return Ref<OpenGLIndexBuffer>::Create(size);
+			case RendererAPIType::Vulkan:  return Ref<VulkanIndexBuffer>::Create(size);
 		}
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;
@@ -24,6 +28,7 @@ namespace Ant{
 		{
 			case RendererAPIType::None:    return nullptr;
 			case RendererAPIType::OpenGL:  return Ref<OpenGLIndexBuffer>::Create(data, size);
+			case RendererAPIType::Vulkan:  return Ref<VulkanIndexBuffer>::Create(data, size);
 		}
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;

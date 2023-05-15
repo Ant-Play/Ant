@@ -1,5 +1,5 @@
 #include "antpch.h"
-#include "Ant/Renderer/Camera.h"
+#include "Camera.h"
 
 namespace Ant{
 

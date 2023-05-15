@@ -12,7 +12,7 @@ namespace Ant{
 		EditorCamera() = default;
 		EditorCamera(const glm::mat4& projectionMatrix);
 
-		void Focus();
+		void Focus(const glm::vec3& focusPoint);
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 
@@ -29,9 +29,6 @@ namespace Ant{
 		glm::vec3 GetForwardDirection();
 		const glm::vec3& GetPosition() const { return m_Position; }
 		glm::quat GetOrientation() const;
-
-		float GetExposure() const { return m_Exposure; }
-		float& GetExposure() { return m_Exposure; }
 
 		float GetPitch() const { return m_Pitch; }
 		float GetYaw() const { return m_Yaw; }
@@ -60,7 +57,7 @@ namespace Ant{
 		float m_Distance;
 		float m_Pitch, m_Yaw;
 
-		float m_Exposure = 0.8f;
+		float m_MinFocusDistance = 100.0f;
 
 		uint32_t m_ViewportWidth = 1280, m_ViewportHeight = 720;
 	};

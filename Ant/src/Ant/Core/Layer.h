@@ -1,8 +1,6 @@
 #pragma once
-#include "Ant/Core/Timestep.h"
-#include "Ant/Core/Events/ApplicationEvent.h"
-#include "Ant/Core/Events/KeyEvent.h"
-#include "Ant/Core/Events/MouseEvent.h"
+#include "Base.h"
+#include "Timestep.h"
 
 namespace Ant{
 

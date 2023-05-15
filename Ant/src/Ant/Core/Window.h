@@ -1,14 +1,13 @@
 #pragma once
-#include "Ant/Core/Base.h"
-#include "Ant/Core/Events/Event.h"
-#include "Ref.h"
 
-#include <sstream>
+#include <functional>
 
+#include "Base.h"
+#include "Events/Event.h"
+#include "Ant/Renderer/RendererContext.h"
 
 namespace Ant {
 
-	//¥∞ø⁄ Ù–‘
 	struct WindowProps
 	{
 		std::string Title;
@@ -32,12 +31,15 @@ namespace Ant {
 
 		virtual ~Window() {}
 
-		virtual void OnUpdate() = 0;
+		virtual void ProcessEvents() = 0;
+		virtual void SwapBuffers() = 0;
 
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 		virtual std::pair<uint32_t, uint32_t> GetSize() const = 0;
 		virtual std::pair<float, float> GetWindowPos() const = 0;
+
+		virtual void Maximize() = 0;
 
 
 		// Window attributes
@@ -49,6 +51,8 @@ namespace Ant {
 		virtual void SetTitle(const std::string& title) = 0;
 
 		virtual void* GetNativeWindow() const = 0;
+
+		virtual Ref<RendererContext> GetRenderContext() = 0;
 
 		static Window* Create(const WindowProps& props = WindowProps());
 	};

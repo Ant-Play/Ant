@@ -1,5 +1,5 @@
 ﻿#include "antpch.h"
-#include "Ant/Platform/OpenGL/OpenGLPipeline.h"
+#include "OpenGLPipeline.h"
 
 #include "Ant/Renderer/Renderer.h"
 
@@ -30,6 +30,8 @@ namespace Ant{
 	OpenGLPipeline::OpenGLPipeline(const PipelineSpecification& spec)
 		: m_Specification(spec)
 	{
+		ANT_CORE_ASSERT(spec.Shader);
+		ANT_CORE_ASSERT(spec.RenderPass);
 		Invalidate();
 	}
 

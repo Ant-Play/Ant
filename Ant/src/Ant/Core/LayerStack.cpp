@@ -1,5 +1,5 @@
 #include "antpch.h"
-#include "Ant/Core/LayerStack.h"
+#include "LayerStack.h"
 
 namespace Ant {
 
@@ -9,8 +9,6 @@ namespace Ant {
 
 	LayerStack::~LayerStack()
 	{
-		for (Layer* layer : m_Layers)
-			delete layer;
 	}
 
 	void LayerStack::PushLayer(Layer* layer)

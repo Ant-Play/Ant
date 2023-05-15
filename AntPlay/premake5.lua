@@ -17,14 +17,16 @@ project "AntPlay"
 
 	includedirs
 	{
-		"/src",
+		"%{wks.location}/AntPlay/src",
 		"%{wks.location}/Ant/vendor/spdlog/include",
 		"%{wks.location}/Ant/src",
 		"%{wks.location}/Ant/vendor",
 		"%{IncludeDir.entt}",
 		--"%{IncludeDir.filewatch}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.ImGuizmo}"
+		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.Glad}"
 	}
 
 	links
@@ -34,7 +36,7 @@ project "AntPlay"
 
     postbuildcommands 
 	{
-		-- '{COPY} "%{wks.location}/AntPlay/assets" "%{cfg.targetdir}/assets"'
+		'{COPY} "%{wks.location}/Ant/vendor/NvidiaAftermath/lib/x64/GFSDK_Aftermath_Lib.x64.dll" "%{cfg.targetdir}"'
 	}
 
 	filter "system:windows"
@@ -54,6 +56,12 @@ project "AntPlay"
 			"%{wks.location}/Ant/vendor/assimp/bin/Debug/assimp-vc143-mtd.lib"
 		}
 
+		defines 
+		{
+			"ANT_DEBUG",
+			"ANT_TRACK_MEMORY"
+		}
+
         postbuildcommands 
 		{
 			'{COPY} "%{wks.location}/Ant/vendor/assimp/bin/Debug/assimp-vc143-mtd.dll" "%{cfg.targetdir}"'
@@ -66,6 +74,13 @@ project "AntPlay"
         links
 		{
 			"%{wks.location}/Ant/vendor/assimp/bin/Release/assimp-vc143-mt.lib"
+		}
+
+		defines
+		{
+			"ANT_RELEASE",
+			"ANT_TRACK_MEMORY",
+			"NDEBUG" -- PhysX Requires This
 		}
 
 		postbuildcommands 
@@ -81,6 +96,13 @@ project "AntPlay"
 		{
 			"%{wks.location}/Ant/vendor/assimp/bin/Release/assimp-vc143-mt.lib"
 		}
+
+		defines
+		{
+			"ANT_DIST",
+			"NDEBUG" -- PhysX Requires This
+		}
+
 
 		postbuildcommands 
 		{

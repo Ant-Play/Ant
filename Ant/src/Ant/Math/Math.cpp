@@ -1,5 +1,5 @@
 #include "antpch.h"
-#include "Ant/Math/Math.h"
+#include "Math.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>

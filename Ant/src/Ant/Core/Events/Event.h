@@ -3,7 +3,6 @@
 #include "Ant/Core/Base.h"
 
 #include <string>
-#include <iostream>
 
 namespace Ant {
 

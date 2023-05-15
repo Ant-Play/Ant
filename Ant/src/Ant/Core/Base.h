@@ -1,7 +1,8 @@
 #pragma once
-#include "Ant/Core/PlatformDetection.h"
 
 #include <memory>
+#include "Ref.h"
+
 
 namespace Ant {
 
@@ -10,23 +11,10 @@ namespace Ant {
 
 }
 
-
-#ifdef ANT_DEBUG
-#if defined(ANT_PLATFORM_WINDOWS)
-#define ANT_DEBUGBREAK() __debugbreak();
-#elif defined(ANT_PLATFORM_LINUX)
-#include <signal.h>
-#define ANT_DEBUGBREAK() __debugbreak();
-#else
-#error "Platform doesn't support debugbreak yet!"
+#define ANT_PLATFORM_WINDOWS
+#ifndef ANT_PLATFORM_WINDOWS
+	#error Ant only supports Windows!
 #endif
-#define ANT_ENABLE_ASSERTS
-#else
-#define ANT_DEBUGBREAK()
-#endif // ANT_DEBUG
-
-#define ANT_EXPAND_MACRO(x) x
-#define ANT_STRINGIFY_MACRO(x) #x
 
 // __VA_ARGS__ expansion to get past MSVC "bug"
 #define ANT_EXPAND_VARGS(x) x
@@ -35,8 +23,9 @@ namespace Ant {
 
 #define ANT_BIND_EVENT_FN(fn) std::bind(&##fn, this, std::placeholders::_1)
 
-#include <memory>
+#include "Assert.h"
 
+// Pointer wrappers
 namespace Ant {
 	template<typename T>
 	using Scope = std::unique_ptr<T>;
@@ -46,16 +35,6 @@ namespace Ant {
 		return std::make_unique<T>(std::forward<Args>(args)...);
 	}
 
-	/*template<typename T>
-	using Ref = std::shared_ptr<T>;
-	template<typename T, typename ... Args>
-	constexpr Ref<T> CreateRef(Args&& ... args)
-	{
-		return std::make_shared<T>(std::forward<Args>(args)...);
-	}*/
-
 	using byte = uint8_t;
 }
 
-#include "Ant/Core/Log.h"
-#include "Ant/Core/Assert.h"

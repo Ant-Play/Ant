@@ -1,14 +1,14 @@
 #include "antpch.h"
-#include "Ant/Platform/Windows/WindowsWindow.h"
+#include <glad/glad.h>
+#include "WindowsWindow.h"
 
 #include "Ant/Core/Events/ApplicationEvent.h"
 #include "Ant/Core/Events/KeyEvent.h"
 #include "Ant/Core/Events/MouseEvent.h"
-#include "Ant/Renderer/Renderer.h"
+
+#include "Ant/Renderer/RendererAPI.h"
 
 #include "imgui.h"
-#include "glad/glad.h"
-
 
 namespace Ant {
 
@@ -31,6 +31,7 @@ namespace Ant {
 
 	WindowsWindow::~WindowsWindow()
 	{
+		Shutdown();
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)
@@ -51,11 +52,15 @@ namespace Ant {
 			s_GLFWInitialized = true;
 		}
 
+		if (RendererAPI::Current() == RendererAPIType::Vulkan)
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
-		glfwMaximizeWindow(m_Window);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		ANT_CORE_ASSERT(status, "Failed to initialize Glad!");
+
+		// Create Renderer Context
+		m_RendererContext = RendererContext::Create(m_Window);
+		m_RendererContext->Create();
+
+		//glfwMaximizeWindow(m_Window);
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 
 		// Set GLFW callbacks
@@ -169,7 +174,8 @@ namespace Ant {
 
 	void WindowsWindow::Shutdown()
 	{
-
+		glfwTerminate();
+		s_GLFWInitialized = false;
 	}
 
 	inline std::pair<float, float> WindowsWindow::GetWindowPos() const
@@ -179,26 +185,29 @@ namespace Ant {
 		return { x, y };
 	}
 
-	void WindowsWindow::OnUpdate()
+	void WindowsWindow::ProcessEvents()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
 
-		ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-		glfwSetCursor(m_Window, m_ImGuiMouseCursors[imgui_cursor] ? m_ImGuiMouseCursors[imgui_cursor] : m_ImGuiMouseCursors[ImGuiMouseCursor_Arrow]);
-		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		//ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
+		//glfwSetCursor(m_Window, m_ImGuiMouseCursors[imgui_cursor] ? m_ImGuiMouseCursors[imgui_cursor] : m_ImGuiMouseCursors[ImGuiMouseCursor_Arrow]);
+		//glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
 
-		float time = glfwGetTime();
-		float delta = time - m_LastFrameTime;
-		m_LastFrameTime = time;
+	void WindowsWindow::SwapBuffers()
+	{
+		m_RendererContext->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
-		if (enabled)
-			glfwSwapInterval(1);
-		else
-			glfwSwapInterval(0);
+		if (RendererAPI::Current() == RendererAPIType::OpenGL)
+		{
+			if (enabled)
+				glfwSwapInterval(1);
+			else
+				glfwSwapInterval(0);
+		}
 
 		m_Data.VSync = enabled;
 	}
@@ -208,10 +217,15 @@ namespace Ant {
 		return m_Data.VSync;
 	}
 
+	void WindowsWindow::Maximize()
+	{
+		glfwMaximizeWindow(m_Window);
+	}
+
 	void WindowsWindow::SetTitle(const std::string& title)
 	{
 		m_Data.Title = title;
-		glfwSetWindowTitle(m_Window, title.c_str());
+		glfwSetWindowTitle(m_Window, m_Data.Title.c_str());
 
 	}
 

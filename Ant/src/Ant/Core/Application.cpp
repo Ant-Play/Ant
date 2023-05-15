@@ -1,47 +1,73 @@
 #include "antpch.h"
-#include "Ant/Core/Application.h"
-#include "Ant/Core/Log.h"
+#include "Application.h"
 
 #include "Ant/Renderer/Renderer.h"
-
-#include "Ant/Utils/PlatformUtils.h"
-#include "Ant/Scripts/ScriptEngine.h"
+#include "Ant/Renderer/Framebuffer.h"
 
 #include <GLFW/glfw3.h>
+
 #include <imgui.h>
+
+#include "Ant/Scripts/ScriptEngine.h"
+#include "Ant/Physics/Physics.h"
+#include "Ant/Asset/AssetManager.h"
+
+#include "Inputs.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <Windows.h>
 #include <commdlg.h>
 
-#include <glad/glad.h>
+#include "Ant/Platform/Vulkan/VulkanRenderer.h"
+#include "Ant/Platform/Vulkan/VulkanAllocator.h"
+
+extern bool g_ApplicationRunning;
 
 namespace Ant {
+
+#define BIND_EVENT_FN(fn) std::bind(&Application::##fn, this, std::placeholders::_1)
+
 	Application* Application::s_Instance = nullptr;
 
 	Application::Application(const ApplicationProps& props)
 	{
 		s_Instance = this;
 
-		std::filesystem::current_path("D:/career/graphic/workspace/Ant-dev/AntPlay");
-
 		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(props.Name, props.WindowWidth, props.WindowHeight)));
-		m_Window->SetEventCallback(ANT_BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		m_Window->Maximize();
 		m_Window->SetVSync(true);
 
-		m_ImGuiLayer = new ImGuiLayer("ImGui");
+		// Init renderer and execute command queue to compile all shaders
+		Renderer::Init();
+		Renderer::WaitAndRender();
+
+		m_ImGuiLayer = ImGuiLayer::Create();
 		PushOverlay(m_ImGuiLayer);
 
 		ScriptEngine::Init("assets/scripts/ExampleApp.dll");
+		Physics::Init();
 
-		Renderer::Init();
-		Renderer::WaitAndRender();
+		AssetManager::Init();
 	}
 
 	Application::~Application()
 	{
+		for (Layer* layer : m_LayerStack)
+		{
+			layer->OnDetach();
+			delete layer;
+		}
+
+		FramebufferPool::GetGlobal()->GetAll().clear();
+
+		Physics::Shutdown();
 		ScriptEngine::Shutdown();
+		AssetManager::Shutdown();
+
+		Renderer::WaitAndRender();
+		Renderer::Shutdown();
 	}
 
 	void Application::PushLayer(Layer* layer)
@@ -59,19 +85,27 @@ namespace Ant {
 	void Application::RenderImGui()
 	{
 		m_ImGuiLayer->Begin();
-
 		ImGui::Begin("Renderer");
-		auto& caps = RendererAPI::GetCapabilities();
+		auto& caps = Renderer::GetCapabilities();
 		ImGui::Text("Vendor: %s", caps.Vendor.c_str());
-		ImGui::Text("Renderer: %s", caps.Renderer.c_str());
+		ImGui::Text("Renderer: %s", caps.Device.c_str());
 		ImGui::Text("Version: %s", caps.Version.c_str());
+		ImGui::Separator();
 		ImGui::Text("Frame Time: %.2fms\n", m_TimeStep.GetMilliseconds());
+
+		if (RendererAPI::Current() == RendererAPIType::Vulkan)
+		{
+			GPUMemoryStats memoryStats = VulkanAllocator::GetStats();
+			std::string used = Utils::BytesToString(memoryStats.Used);
+			std::string free = Utils::BytesToString(memoryStats.Free);
+			ImGui::Text("Used VRAM: %s", used.c_str());
+			ImGui::Text("Free VRAM: %s", free.c_str());
+		}
+
 		ImGui::End();
 
 		for (Layer* layer : m_LayerStack)
 			layer->OnImGuiRender();
-
-		m_ImGuiLayer->End();
 	}
 
 	void Application::Run()
@@ -79,31 +113,49 @@ namespace Ant {
 		OnInit();
 		while (m_Running)
 		{
+			static uint64_t frameCounter = 0;
+			//ANT_CORE_INFO("-- BEGIN FRAME {0}", frameCounter);
+			m_Window->ProcessEvents();
 			if (!m_Minimized)
 			{
+				Renderer::BeginFrame();
+				//VulkanRenderer::BeginFrame();
 				for (Layer* layer : m_LayerStack)
 					layer->OnUpdate(m_TimeStep);
 
 				// Render ImGui on render thread
 				Application* app = this;
 				Renderer::Submit([app]() { app->RenderImGui(); });
+				Renderer::Submit([=]() {m_ImGuiLayer->End(); });
+				Renderer::EndFrame();
 
+				// On Render thread
+				m_Window->GetRenderContext()->BeginFrame();
 				Renderer::WaitAndRender();
+				m_Window->SwapBuffers();
 			}
-			m_Window->OnUpdate();
 
 			float time = GetTime();
 			m_TimeStep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
+
+			//ANT_CORE_INFO("-- END FRAME {0}", frameCounter);
+			frameCounter++;
 		}
 		OnShutdown();
 	}
 
+	void Application::Close()
+	{
+		m_Running = false;
+	}
+
+
 	void Application::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowResizeEvent>(ANT_BIND_EVENT_FN(Application::OnWindowResize));
-		dispatcher.Dispatch<WindowCloseEvent>(ANT_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
+		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
 		{
@@ -122,16 +174,22 @@ namespace Ant {
 			return false;
 		}
 		m_Minimized = false;
-		Renderer::Submit([=]() { glViewport(0, 0, width, height); });
+
+		m_Window->GetRenderContext()->OnResize(width, height);
+
 		auto& fbs = FramebufferPool::GetGlobal()->GetAll();
 		for (auto& fb : fbs)
-			fb->Resize(width, height);
+		{
+			if (!fb->GetSpecification().NoResize)
+				fb->Resize(width, height);
+		}
 		return false;
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
 		m_Running = false;
+		g_ApplicationRunning = false; // Request close
 		return true;
 	}
 
@@ -146,12 +204,9 @@ namespace Ant {
 		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = "All\0*.*\0";
+		ofn.lpstrFilter = filter;
 		ofn.nFilterIndex = 1;
-		ofn.lpstrFileTitle = NULL;
-		ofn.nMaxFileTitle = 0;
-		ofn.lpstrInitialDir = NULL;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
 		if (GetOpenFileNameA(&ofn) == TRUE)
 		{
@@ -160,7 +215,7 @@ namespace Ant {
 		return std::string();
 	}
 
-	std::string Application::SaveFile(const char* filter /*= "All\0*.*\0"*/) const
+	std::string Application::SaveFile(const char* filter) const
 	{
 		OPENFILENAMEA ofn;       // common dialog box structure
 		CHAR szFile[260] = { 0 };       // if using TCHAR macros
@@ -196,7 +251,7 @@ namespace Ant {
 #elif defined(ANT_DIST)
 		return "Dist";
 #else
-	#error Unknown configuration!
+	#error Undefined configuration?
 #endif
 	}
 
@@ -205,7 +260,7 @@ namespace Ant {
 #if defined(ANT_PLATFORM_WINDOWS)
 		return "Windows x64";
 #else
-	#error Unknown platform!
+	#error Undefined platform?
 #endif
 	}
 

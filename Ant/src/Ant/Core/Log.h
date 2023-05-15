@@ -1,17 +1,11 @@
 #pragma once
 
-#include "Ant/Core/Base.h"
+#include "Base.h"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/string_cast.hpp>
+#include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
 
-// This ignores all warnings raised inside External headers
-#pragma warning(push, 0)
-#include <spdlog/spdlog.h>
-#include <spdlog/fmt/ostr.h>
-
-#include "Ref.h"
-#pragma warning(pop)
+#include <glm/glm.hpp>
 
 
 
@@ -21,6 +15,7 @@ namespace Ant{
 	{
 	public:
 		static void Init();
+		static void Shutdown();
 
 		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
 		inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
@@ -31,36 +26,28 @@ namespace Ant{
 	};
 }
 
-template<typename OStream, glm::length_t L, typename T, glm::qualifier Q>
-inline OStream& operator<<(OStream& os, const glm::vec<L, T, Q>& vector)
+template<typename OStream>
+OStream& operator<<(OStream& os, const glm::vec3& vec)
 {
-	return os << glm::to_string(vector);
+	return os << '(' << vec.x << ", " << vec.y << ", " << vec.z << ')';
 }
 
-template<typename OStream, glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
-inline OStream& operator<<(OStream& os, const glm::mat<C, R, T, Q>& matrix)
+template<typename OStream>
+OStream& operator<<(OStream& os, const glm::vec4& vec)
 {
-	return os << glm::to_string(matrix);
+	return os << '(' << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << ')';
 }
 
-template<typename OStream, typename T, glm::qualifier Q>
-inline OStream& operator<<(OStream& os, glm::qua<T, Q> quaternion)
-{
-	return os << glm::to_string(quaternion);
-}
-
-
-
-// Core log macros
+// Core Logging Macros
 #define ANT_CORE_TRACE(...)    ::Ant::Log::GetCoreLogger()->trace(__VA_ARGS__);
 #define ANT_CORE_INFO(...)     ::Ant::Log::GetCoreLogger()->info(__VA_ARGS__);
 #define ANT_CORE_WARN(...)     ::Ant::Log::GetCoreLogger()->warn(__VA_ARGS__);
 #define ANT_CORE_ERROR(...)    ::Ant::Log::GetCoreLogger()->error(__VA_ARGS__);
-#define ANT_CORE_CRITICAL(...)    ::Ant::Log::GetCoreLogger()->critical(__VA_ARGS__);
+#define ANT_CORE_FATAL(...)    ::Ant::Log::GetCoreLogger()->critical(__VA_ARGS__);
 
-// Client log macros
+// Client Logging Macros
 #define ANT_TRACE(...)		::Ant::Log::GetClientLogger()->trace(__VA_ARGS__);
 #define ANT_INFO(...)		::Ant::Log::GetClientLogger()->info(__VA_ARGS__);
 #define ANT_WARN(...)		::Ant::Log::GetClientLogger()->warn(__VA_ARGS__);
 #define ANT_ERROR(...)		::Ant::Log::GetClientLogger()->error(__VA_ARGS__);
-#define ANT_CRITICAL(...)		::Ant::Log::GetClientLogger()->critical(__VA_ARGS__);
+#define ANT_FATAL(...)		::Ant::Log::GetClientLogger()->critical(__VA_ARGS__);

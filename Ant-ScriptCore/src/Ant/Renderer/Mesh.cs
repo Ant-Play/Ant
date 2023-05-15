@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ant
 {
@@ -26,7 +22,10 @@ namespace Ant
 
         public Material BaseMaterial
         {
-            get { return new Material(GetMaterial_Native(m_UnmanagedInstance)); }
+            get
+            {
+                return new Material(GetMaterial_Native(m_UnmanagedInstance));
+            }
         }
 
         public MaterialInstance GetMaterial(int index)

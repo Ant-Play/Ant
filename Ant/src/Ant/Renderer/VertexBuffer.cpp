@@ -1,9 +1,12 @@
 ﻿#include "antpch.h"
-#include "Ant/Renderer/VertexBuffer.h"
+#include "VertexBuffer.h"
 
-#include "Ant/Renderer/Renderer.h"
+#include "Renderer.h"
 
 #include "Ant/Platform/OpenGL/OpenGLVertexBuffer.h"
+#include "Ant/Platform/Vulkan/VulkanVertexBuffer.h"
+
+#include "RendererAPI.h"
 
 namespace Ant{
 
@@ -13,6 +16,7 @@ namespace Ant{
 		{
 			case RendererAPIType::None:    return nullptr;
 			case RendererAPIType::OpenGL:  return Ref<OpenGLVertexBuffer>::Create(data, size, usage);
+			case RendererAPIType::Vulkan:  return Ref<VulkanVertexBuffer>::Create(data, size, usage);
 		}
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;
@@ -24,6 +28,7 @@ namespace Ant{
 		{
 			case RendererAPIType::None:    return nullptr;
 			case RendererAPIType::OpenGL:  return Ref<OpenGLVertexBuffer>::Create(size, usage);
+			case RendererAPIType::Vulkan:  return Ref<VulkanVertexBuffer>::Create(size, usage);
 		}
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;
