@@ -78,8 +78,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>GLM_FORCE_DEPTH_ZERO_TO_ONE;Ant_PLATFORM_WINDOWS;Ant_DEBUG;Ant_TRACK_MEMORY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;..\Ant\src;..\Ant\vendor;..\Ant\vendor\yaml-cpp\include;..\Ant\vendor\entt\include;..\Ant\vendor\glm;..\Ant\vendor\imgui;..\Ant\vendor\ImGuizmo;..\Ant\vendor\PhysX\include;..\Ant\vendor\PhysX\include\PhysX;..;..\Ant\vendor\Glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLM_FORCE_DEPTH_ZERO_TO_ONE;ANT_PLATFORM_WINDOWS;ANT_DEBUG;ANT_TRACK_MEMORY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;..\Ant\src;..\Ant\vendor;..\Ant\vendor\yaml-cpp\include;..\Ant\vendor\entt\include;..\Ant\vendor\glm;..\Ant\vendor\imgui;..\Ant\vendor\imgui-node-editor;..\Ant\vendor\PhysX\include;..\Ant\vendor\PhysX\include\PhysX;..;..\Ant\vendor\Glad\include;..\Ant\vendor\miniaudio\include;..\Ant\vendor\farbot\include;..\Ant\vendor\choc;..\Ant\vendor\magic_enum\include;..\Ant\vendor\Optick\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -95,15 +95,16 @@
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST "..\Ant\vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.dll"\ (xcopy /Q /E /Y /I "..\Ant\vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.dll" "..\bin\Debug-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "..\Ant\vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.dll" "..\bin\Debug-windows-x86_64\AntPlay" &gt; nul)
-IF EXIST "$(SolutionDir)\Ant\vendor\assimp\bin\Debug\assimp-vc143-mtd.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Debug\assimp-vc143-mtd.dll" "..\bin\Debug-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Debug\assimp-vc143-mtd.dll" "..\bin\Debug-windows-x86_64\AntPlay" &gt; nul)</Command>
+IF EXIST "$(SolutionDir)\Ant\vendor\assimp\bin\Debug\assimp-vc143-mtd.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Debug\assimp-vc143-mtd.dll" "..\bin\Debug-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Debug\assimp-vc143-mtd.dll" "..\bin\Debug-windows-x86_64\AntPlay" &gt; nul)
+IF EXIST "..\Ant\vendor\mono\bin\Debug\mono-2.0-sgen.dll"\ (xcopy /Q /E /Y /I "..\Ant\vendor\mono\bin\Debug\mono-2.0-sgen.dll" "..\bin\Debug-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "..\Ant\vendor\mono\bin\Debug\mono-2.0-sgen.dll" "..\bin\Debug-windows-x86_64\AntPlay" &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>GLM_FORCE_DEPTH_ZERO_TO_ONE;Ant_PLATFORM_WINDOWS;ANT_RELEASE;ANT_TRACK_MEMORY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;..\Ant\src;..\Ant\vendor;..\Ant\vendor\yaml-cpp\include;..\Ant\vendor\entt\include;..\Ant\vendor\glm;..\Ant\vendor\imgui;..\Ant\vendor\ImGuizmo;..\Ant\vendor\PhysX\include;..\Ant\vendor\PhysX\include\PhysX;..;..\Ant\vendor\Glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLM_FORCE_DEPTH_ZERO_TO_ONE;ANT_PLATFORM_WINDOWS;ANT_RELEASE;ANT_TRACK_MEMORY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;..\Ant\src;..\Ant\vendor;..\Ant\vendor\yaml-cpp\include;..\Ant\vendor\entt\include;..\Ant\vendor\glm;..\Ant\vendor\imgui;..\Ant\vendor\imgui-node-editor;..\Ant\vendor\PhysX\include;..\Ant\vendor\PhysX\include\PhysX;..;..\Ant\vendor\Glad\include;..\Ant\vendor\miniaudio\include;..\Ant\vendor\farbot\include;..\Ant\vendor\choc;..\Ant\vendor\magic_enum\include;..\Ant\vendor\Optick\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -122,15 +123,16 @@ IF EXIST "$(SolutionDir)\Ant\vendor\assimp\bin\Debug\assimp-vc143-mtd.dll"\ (xco
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST "..\Ant\vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.dll"\ (xcopy /Q /E /Y /I "..\Ant\vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.dll" "..\bin\Release-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "..\Ant\vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.dll" "..\bin\Release-windows-x86_64\AntPlay" &gt; nul)
-IF EXIST "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll" "..\bin\Release-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll" "..\bin\Release-windows-x86_64\AntPlay" &gt; nul)</Command>
+IF EXIST "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll" "..\bin\Release-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll" "..\bin\Release-windows-x86_64\AntPlay" &gt; nul)
+IF EXIST "..\Ant\vendor\mono\bin\Debug\mono-2.0-sgen.dll"\ (xcopy /Q /E /Y /I "..\Ant\vendor\mono\bin\Debug\mono-2.0-sgen.dll" "..\bin\Release-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "..\Ant\vendor\mono\bin\Debug\mono-2.0-sgen.dll" "..\bin\Release-windows-x86_64\AntPlay" &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>GLM_FORCE_DEPTH_ZERO_TO_ONE;Ant_PLATFORM_WINDOWS;ANT_DIST;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;..\Ant\src;..\Ant\vendor;..\Ant\vendor\yaml-cpp\include;..\Ant\vendor\entt\include;..\Ant\vendor\glm;..\Ant\vendor\imgui;..\Ant\vendor\ImGuizmo;..\Ant\vendor\PhysX\include;..\Ant\vendor\PhysX\include\PhysX;..;..\Ant\vendor\Glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLM_FORCE_DEPTH_ZERO_TO_ONE;ANT_PLATFORM_WINDOWS;ANT_DIST;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;..\Ant\src;..\Ant\vendor;..\Ant\vendor\yaml-cpp\include;..\Ant\vendor\entt\include;..\Ant\vendor\glm;..\Ant\vendor\imgui;..\Ant\vendor\imgui-node-editor;..\Ant\vendor\PhysX\include;..\Ant\vendor\PhysX\include\PhysX;..;..\Ant\vendor\Glad\include;..\Ant\vendor\miniaudio\include;..\Ant\vendor\farbot\include;..\Ant\vendor\choc;..\Ant\vendor\magic_enum\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -149,15 +151,93 @@ IF EXIST "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll"\ (xc
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST "..\Ant\vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.dll"\ (xcopy /Q /E /Y /I "..\Ant\vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.dll" "..\bin\Dist-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "..\Ant\vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.dll" "..\bin\Dist-windows-x86_64\AntPlay" &gt; nul)
-IF EXIST "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll" "..\bin\Dist-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll" "..\bin\Dist-windows-x86_64\AntPlay" &gt; nul)</Command>
+IF EXIST "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll" "..\bin\Dist-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\Ant\vendor\assimp\bin\Release\assimp-vc143-mt.dll" "..\bin\Dist-windows-x86_64\AntPlay" &gt; nul)
+IF EXIST "..\Ant\vendor\mono\bin\Debug\mono-2.0-sgen.dll"\ (xcopy /Q /E /Y /I "..\Ant\vendor\mono\bin\Debug\mono-2.0-sgen.dll" "..\bin\Dist-windows-x86_64\AntPlay" &gt; nul) ELSE (xcopy /Q /Y /I "..\Ant\vendor\mono\bin\Debug\mono-2.0-sgen.dll" "..\bin\Dist-windows-x86_64\AntPlay" &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\EditorLayer.h" />
+    <ClInclude Include="src\Panels\ApplicationSettingsPanel.h" />
+    <ClInclude Include="src\Panels\AssetManagerPanel.h" />
+    <ClInclude Include="src\Panels\ContentBrowser\ContentBrowserItem.h" />
+    <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
+    <ClInclude Include="src\Panels\MaterialsPanel.h" />
+    <ClInclude Include="src\Panels\PhysicsStatsPanel.h" />
+    <ClInclude Include="src\Panels\ProjectSettingsWindow.h" />
+    <ClInclude Include="src\Panels\SceneRendererPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AntPlayApp.cpp" />
     <ClCompile Include="src\EditorLayer.cpp" />
+    <ClCompile Include="src\Panels\ApplicationSettingsPanel.cpp" />
+    <ClCompile Include="src\Panels\AssetManagerPanel.cpp" />
+    <ClCompile Include="src\Panels\ContentBrowser\ContentBrowserItem.cpp" />
+    <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
+    <ClCompile Include="src\Panels\MaterialsPanel.cpp" />
+    <ClCompile Include="src\Panels\PhysicsStatsPanel.cpp" />
+    <ClCompile Include="src\Panels\ProjectSettingsWindow.cpp" />
+    <ClCompile Include="src\Panels\SceneRendererPanel.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\Shaders\PostProcessing\GTAO.hlsl">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\AntPBR_Anim.glsl" />
+    <None Include="Resources\Shaders\AntPBR_Static.glsl" />
+    <None Include="Resources\Shaders\AntPBR_Transparent.glsl" />
+    <None Include="Resources\Shaders\Deinterleaving.glsl" />
+    <None Include="Resources\Shaders\DirShadowMap.glsl" />
+    <None Include="Resources\Shaders\DirShadowMap_Anim.glsl" />
+    <None Include="Resources\Shaders\EnvironmentIrradiance.glsl" />
+    <None Include="Resources\Shaders\EnvironmentMipFilter.glsl" />
+    <None Include="Resources\Shaders\EquirectangularToCubeMap.glsl" />
+    <None Include="Resources\Shaders\Grid.glsl" />
+    <None Include="Resources\Shaders\HZB.glsl" />
+    <None Include="Resources\Shaders\Include\Common\Common.slh" />
+    <None Include="Resources\Shaders\Include\Common\GTAO.slh" />
+    <None Include="Resources\Shaders\Include\GLSL\Buffers.glslh" />
+    <None Include="Resources\Shaders\Include\GLSL\Common.glslh" />
+    <None Include="Resources\Shaders\Include\GLSL\EnvironmentMapping.glslh" />
+    <None Include="Resources\Shaders\Include\GLSL\Lighting.glslh" />
+    <None Include="Resources\Shaders\Include\GLSL\PBR.glslh" />
+    <None Include="Resources\Shaders\Include\GLSL\ShadowMapping.glslh" />
+    <None Include="Resources\Shaders\Include\HLSL\Buffers.hlslh" />
+    <None Include="Resources\Shaders\Include\HLSL\Types.hlslh" />
+    <None Include="Resources\Shaders\JumpFlood_Composite.glsl" />
+    <None Include="Resources\Shaders\JumpFlood_Init.glsl" />
+    <None Include="Resources\Shaders\JumpFlood_Pass.glsl" />
+    <None Include="Resources\Shaders\LightCulling.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\AO-Composite.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\Bloom.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\DOF.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\EdgeDetection.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\GTAO-Denoise.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\HBAO.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\HBAOBlur.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\Pre-Convolution.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\SSR-Composite.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\SSR.glsl" />
+    <None Include="Resources\Shaders\PostProcessing\SceneComposite.glsl" />
+    <None Include="Resources\Shaders\Pre-Integration.glsl" />
+    <None Include="Resources\Shaders\PreDepth.glsl" />
+    <None Include="Resources\Shaders\PreDepth_Anim.glsl" />
+    <None Include="Resources\Shaders\PreethamSky.glsl" />
+    <None Include="Resources\Shaders\Reinterleaving.glsl" />
+    <None Include="Resources\Shaders\Renderer2D.glsl" />
+    <None Include="Resources\Shaders\Renderer2D_Circle.glsl" />
+    <None Include="Resources\Shaders\Renderer2D_Line.glsl" />
+    <None Include="Resources\Shaders\Renderer2D_Text.glsl" />
+    <None Include="Resources\Shaders\SelectedGeometry.glsl" />
+    <None Include="Resources\Shaders\SelectedGeometry_Anim.glsl" />
+    <None Include="Resources\Shaders\Skybox.glsl" />
+    <None Include="Resources\Shaders\SpotShadowMap.glsl" />
+    <None Include="Resources\Shaders\SpotShadowMap_Anim.glsl" />
+    <None Include="Resources\Shaders\TexturePass.glsl" />
+    <None Include="Resources\Shaders\Wireframe.glsl" />
+    <None Include="Resources\Shaders\Wireframe_Anim.glsl" />
+    <None Include="Resources\Shaders\shader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ant\Ant.vcxproj">

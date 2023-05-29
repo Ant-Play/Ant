@@ -1,20 +1,58 @@
 # Binaries
 **/bin/
+!vendor/bin/premake/
+!Ant/vendor/assimp/bin
+!Ant/vendor/mono/bin
 bin-int/
+obj/
+**/cache/**
+Ant/vendor/VulkanSDK
+AntPlay/Resources/Scripts/Hazel-ScriptCore.dll
+AntPlay/Resources/Scripts/Hazel-ScriptCore.pdb
 Intermediates/
+Binaries
+AntPlay/Resources/Scripts/
+__pycache__
+.idea/
 
-# Ant files
-*.log
+# AntPlay ApplicationSettings
+AntPlay/Config/ApplicationSettings.yaml
 
 # Visual Studio files and directories
 .vs/
-**.sin
+**.sln
+**.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
 **.csproj
+**.nsight-gfxproj
+**.DotSettings
+**.user
 
-# Directories
-*.json
-Ant/vendor/VulkanSDK/
-AntPlay/assets/cache
-scripts/__pycache__
+# LFS Folders
+lfs/
+hooks/
+
+# Meta Files
+**.meta
+
+# Log files
+**.log
+
+# Auto saves
+*.auto
+
+# Dumps
+*.nvdbg
+*.nv-gpudmp
+*gpudmp.json
+
+# Folder Exceptions
+!AntPlay/SandboxProject/Assets/Scripts/Binaries
+
+# System DLLs
+AntPlay/SandboxProject/Assets/Scripts/Binaries/System*.dll
+AntPlay/SandboxProject/Assets/Scripts/Binaries/Microsoft*.dll
+
+# File Exceptions
+!AssetRegistryCache.antr

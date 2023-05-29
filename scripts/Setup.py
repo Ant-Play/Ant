@@ -1,27 +1,40 @@
 import os
 import subprocess
-import platform
+import CheckPython
 
-from SetupPython import PythonConfiguration as PythonRequirements
+# Make sure everything we need is installed
+CheckPython.ValidatePackages()
 
-# Make sure everything we need for the setup is installed
-PythonRequirements.Validate()
+import Vulkan
+import Utils
 
-from SetupPremake import PremakeConfiguration as PremakeRequirements
-from SetupVulkan import VulkanConfiguration as VulkanRequirements
-os.chdir('./../') # Change from devtools/scripts directory to root
+import colorama
+from colorama import Fore
+from colorama import Back
+from colorama import Style
 
-premakeInstalled = PremakeRequirements.Validate()
-VulkanRequirements.Validate()
+# Change from Scripts directory to root
+os.chdir('../')
 
-print("\nUpdating submodules...")
+colorama.init()
+
+if (not Vulkan.CheckVulkanSDK()):
+    print("Vulkan SDK not installed.")
+    exit()
+
+if (Vulkan.CheckVulkanSDKDebugLibs()):
+    print(f"{Style.BRIGHT}{Back.GREEN}Vulkan SDK debug libs located.{Style.RESET_ALL}")
+
+subprocess.call(["git", "lfs", "pull"])
 subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
 
-if (premakeInstalled):
-    if platform.system() == "Windows":
-        print("\nRunning premake...")
-        subprocess.call([os.path.abspath("./scripts/Win-GenProjects.bat"), "nopause"])
-
-    print("\nSetup completed!")
+if (Utils.IsRunningAsAdmin()):
+    Utils.CreateSymlink('Ant/vendor/mono/lib/Dist', 'Release')
+    Utils.CreateSymlink('Ant/vendor/PhysX/lib/Dist', 'Release')
 else:
-    print("Ant requires Premake to generate project files.")
+    print(f"{Style.BRIGHT}{Back.YELLOW}Re-run as admin to create symlinks required for Dist builds.{Style.RESET_ALL}")
+
+print(f"{Style.BRIGHT}{Back.GREEN}Generating Visual Studio 2022 solution.{Style.RESET_ALL}")
+subprocess.call(["vendor/bin/premake5.exe", "vs2022"])
+os.chdir('AntPlay/SandboxProject')
+subprocess.call(["../../vendor/bin/premake5.exe", "vs2022"])

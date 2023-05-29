@@ -1,0 +1,5 @@
+AnimationController:
+  SkeletonAsset: 6192770739611248390
+  States:
+    - Name: shoot
+      AnimationAsset: 440836276378387360

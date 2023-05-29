@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-#include "Ant/Core/MouseCodes.h"
+#include "Ant/Core/KeyCodes.h"
 
 namespace Ant {
 
@@ -55,20 +55,20 @@ namespace Ant {
 	class MouseButtonEvent : public Event
 	{
 	public:
-		inline MouseCode GetMouseButton() const { return m_Button; }
+		inline MouseButton GetMouseButton() const { return m_Button; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	protected:
-		MouseButtonEvent(MouseCode button)
+		MouseButtonEvent(MouseButton button)
 			: m_Button(button) {}
 
-		MouseCode m_Button;
+		MouseButton m_Button;
 	};
 
 	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(MouseCode button)
+		MouseButtonPressedEvent(MouseButton button)
 			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override
@@ -84,7 +84,7 @@ namespace Ant {
 	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(MouseCode button)
+		MouseButtonReleasedEvent(MouseButton button)
 			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override
@@ -95,5 +95,23 @@ namespace Ant {
 		}
 
 		EVENT_CLASS_TYPE(MouseButtonReleased)
+	};
+
+	class MouseButtonDownEvent : public MouseButtonEvent
+	{
+	public:
+		MouseButtonDownEvent(MouseButton button)
+			: MouseButtonEvent(button)
+		{
+		}
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "MouseButtonDownEvent: " << m_Button;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(MouseButtonDown)
 	};
 }

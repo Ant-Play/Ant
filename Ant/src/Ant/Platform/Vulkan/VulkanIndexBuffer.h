@@ -13,6 +13,7 @@ namespace Ant{
 	public:
 		VulkanIndexBuffer(uint32_t size);
 		VulkanIndexBuffer(void* data, uint32_t size = 0);
+		virtual ~VulkanIndexBuffer();
 
 		virtual void SetData(void* buffer, uint32_t size, uint32_t offset = 0) override;
 		virtual void Bind() const override;
@@ -27,7 +28,7 @@ namespace Ant{
 		uint32_t m_Size = 0;
 		Buffer m_LocalData;
 
-		VkBuffer m_VulkanBuffer;
-		VkDeviceMemory m_DeviceMemory;
+		VkBuffer m_VulkanBuffer = nullptr;
+		VmaAllocation m_MemoryAllocation;
 	};
 }

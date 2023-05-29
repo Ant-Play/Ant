@@ -1,0 +1,2426 @@
+Scene: AnimationTest
+Entities:
+  - Entity: 33356636090940243
+    TagComponent:
+      Tag: mixamorig:LeftHandMiddle3
+    Parent: 1743456847755363175
+    Children:
+      - Handle: 2537904759470472911
+    TransformComponent:
+      Position: [1.10012124e-08, 0.0387999825, -9.25874559e-08]
+      Rotation: [0.321195304, 0.00525363255, -0.0324386358]
+      Scale: [0.999999762, 0.99999994, 0.999999881]
+  - Entity: 45268689272973240
+    TagComponent:
+      Tag: mixamorig:RightToeBase
+    Parent: 7492667261508141304
+    Children:
+      - Handle: 5405099459020142232
+    TransformComponent:
+      Position: [3.001308e-08, 0.17591311, -1.01239905e-08]
+      Rotation: [0.800673366, 0.0534059331, -0.00172199786]
+      Scale: [1.00000012, 0.999999881, 1.00000012]
+  - Entity: 241110710969397605
+    TagComponent:
+      Tag: mixamorig:RightHandThumb2
+    Parent: 4528864211834990012
+    Children:
+      - Handle: 6217097551849572416
+    TransformComponent:
+      Position: [-0.00520006428, 0.0373999663, -5.30648485e-08]
+      Rotation: [-0.103185631, -0.168106571, 0.788983703]
+      Scale: [1.00000012, 0.99999994, 1]
+  - Entity: 274982437543653241
+    TagComponent:
+      Tag: L_fng_1_3
+    Parent: 7715921233778009269
+    Children:
+      []
+    TransformComponent:
+      Position: [3.38134107e-08, 0.0195432547, -2.5161258e-08]
+      Rotation: [-0.155848414, -0.0203939099, 0.123260461]
+      Scale: [0.999999821, 0.999999881, 1.00000012]
+  - Entity: 280481328824177393
+    TagComponent:
+      Tag: mixamorig:RightHandPinky3
+    Parent: 427307722764419559
+    Children:
+      - Handle: 7723162928724160767
+    TransformComponent:
+      Position: [1.86264215e-09, 0.0236000679, -1.73866283e-07]
+      Rotation: [0.288724363, -0.00301114609, 0.0207226258]
+      Scale: [0.99999994, 1, 0.99999994]
+  - Entity: 427307722764419559
+    TagComponent:
+      Tag: mixamorig:RightHandPinky2
+    Parent: 13647470903395461697
+    Children:
+      - Handle: 280481328824177393
+    TransformComponent:
+      Position: [-1.31056295e-08, 0.0276999194, -9.48460865e-08]
+      Rotation: [0.304454505, -0.00334884808, 0.0218174197]
+      Scale: [0.99999994, 0.99999994, 0.99999994]
+  - Entity: 428282410375413251
+    TagComponent:
+      Tag: mixamorig:LeftHandIndex2
+    Parent: 4209910285657306964
+    Children:
+      - Handle: 7979774389469858352
+    TransformComponent:
+      Position: [-1.49279327e-08, 0.0359999351, -7.58429266e-08]
+      Rotation: [0.303083688, 0.00472440477, -0.0309324656]
+      Scale: [0.99999994, 1, 1]
+  - Entity: 431128393939017718
+    TagComponent:
+      Tag: mixamorig:RightHandMiddle1
+    Parent: 3808743119735028169
+    Children:
+      - Handle: 1702281050663119964
+    TransformComponent:
+      Position: [0.0163000021, 0.117699966, 0.000299914507]
+      Rotation: [0.264467508, 0.00290575763, -0.0996344164]
+      Scale: [1, 1, 1]
+  - Entity: 486503218959928210
+    TagComponent:
+      Tag: mixamorig:LeftHandRing2
+    Parent: 4873014921502038955
+    Children:
+      - Handle: 14680681125157732297
+    TransformComponent:
+      Position: [-3.98053501e-09, 0.0323999971, 4.17263344e-08]
+      Rotation: [0.364711255, 0.0067849583, -0.0367792696]
+      Scale: [1.00000012, 1.00000012, 1.00000012]
+  - Entity: 772840158198756968
+    TagComponent:
+      Tag: mixamorig:Spine1
+    Parent: 14887012054047208291
+    Children:
+      - Handle: 6393788415317806824
+    TransformComponent:
+      Position: [3.25962901e-09, 0.111199901, 7.45057083e-09]
+      Rotation: [0.0202341788, 0.00360177853, 0.0275065657]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 1082242279833809825
+    TagComponent:
+      Tag: mixamorig:RightHandIndex4
+    Parent: 1956336425503995451
+    Children:
+      []
+    TransformComponent:
+      Position: [3.82392074e-09, 0.0270999372, -3.08621892e-08]
+      Rotation: [-1.48748107e-08, -6.51925713e-09, 6.44359144e-09]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 1150887291616937881
+    TagComponent:
+      Tag: L_fng_2_3
+    Parent: 3666865374200362957
+    Children:
+      []
+    TransformComponent:
+      Position: [-2.13085505e-09, 0.0229409747, -3.93209199e-08]
+      Rotation: [-0.429831266, -0.116653539, -0.0758930594]
+      Scale: [1.00000012, 1.00000012, 1]
+  - Entity: 1205485032476739744
+    TagComponent:
+      Tag: L_fng_3_1
+    Parent: 16722147225848307743
+    Children:
+      - Handle: 6988288995342112373
+    TransformComponent:
+      Position: [8.53459241e-08, 0.10868004, -6.44630234e-08]
+      Rotation: [-0.823062897, -0.491233438, -0.305263311]
+      Scale: [0.999999881, 0.999999821, 0.999999881]
+  - Entity: 1252288691826482308
+    TagComponent:
+      Tag: mixamorig:LeftHandMiddle2
+    Parent: 12901780997828797054
+    Children:
+      - Handle: 5440247781054338953
+    TransformComponent:
+      Position: [7.38481054e-09, 0.0413999334, -8.63988845e-08]
+      Rotation: [0.303631455, 0.0047005727, -0.0307204109]
+      Scale: [0.999999881, 0.999999762, 0.999999762]
+  - Entity: 1493697703386730572
+    TagComponent:
+      Tag: Model
+    Parent: 9363616522839639206
+    Children:
+      - Handle: 4208920037805837729
+      - Handle: 16546391993526577709
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    AnimationComponent:
+      AnimationController: 13105368507993226897
+      BoneEntities: [16546391993526577709, 14887012054047208291, 772840158198756968, 6393788415317806824, 12502775036370323575, 14203848194648230336, 6969744451154700406, 5518234910620440738, 3470575847488440634, 18331845209281880317, 18331640684067612026, 16014758913723659176, 18322744703170496555, 13296116332847800446, 3178755309260744768, 4209910285657306964, 428282410375413251, 7979774389469858352, 9120484680669318677, 12901780997828797054, 1252288691826482308, 5440247781054338953, 7921000811102996963, 12065613232240152980, 12339996612749503075, 7401059688313430505, 12336006089044297452, 5541543387303434434, 14106970100776243637, 7975217067878586794, 12211546117624126767, 7525514073090607968, 3813386302650758059, 3967622598745119151, 3808743119735028169, 4528864211834990012, 241110710969397605, 6217097551849572416, 3168657544079787413, 7399229493146320869, 5291860476249313780, 1956336425503995451, 1082242279833809825, 431128393939017718, 1702281050663119964, 8380708262662248061, 13486774036038522713, 17278222997303367927, 10816920984046576520, 6319600210931494146, 17763846564425985689, 13647470903395461697, 427307722764419559, 280481328824177393, 7723162928724160767, 8673603815476564877, 4062582625925648063, 7545258788208296803, 8997603737665247660, 15340646447430140032, 16081315617680870453, 18441288025094242493, 5316760370169943555, 15280921407817439236, 15935662752753569684]
+      EnableAnimation: true
+      PlaybackSpeed: 1
+      StateIndex: 0
+      AnimationTime: 0
+      EnableRootMotion: true
+      RootMotionTarget: 9363616522839639206
+  - Entity: 1534252164738577896
+    TagComponent:
+      Tag: mixamorig:LeftHandIndex1
+    Parent: 5482990131070201968
+    Children:
+      - Handle: 14905530931326311348
+    TransformComponent:
+      Position: [-0.0434000194, 0.117500007, 0.00220000325]
+      Rotation: [0.111419395, -0.0108860601, 0.143489823]
+      Scale: [0.99999994, 0.999999702, 1.00000024]
+  - Entity: 1702281050663119964
+    TagComponent:
+      Tag: mixamorig:RightHandMiddle2
+    Parent: 431128393939017718
+    Children:
+      - Handle: 8380708262662248061
+    TransformComponent:
+      Position: [5.42490852e-09, 0.0415999591, 1.2980216e-08]
+      Rotation: [0.30439797, -0.00344605534, 0.0224657338]
+      Scale: [1.00000024, 1, 1]
+  - Entity: 1743456847755363175
+    TagComponent:
+      Tag: mixamorig:LeftHandMiddle2
+    Parent: 12788924602092292924
+    Children:
+      - Handle: 33356636090940243
+    TransformComponent:
+      Position: [7.38481054e-09, 0.0413999334, -8.63988845e-08]
+      Rotation: [0.303631455, 0.0047005727, -0.0307204109]
+      Scale: [0.999999881, 0.999999762, 0.999999762]
+  - Entity: 1784284421456699075
+    TagComponent:
+      Tag: Armature
+    Parent: 5645127604949174905
+    Children:
+      - Handle: 14898389781221960646
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 1883194782954509953
+    TagComponent:
+      Tag: mixamorig:RightHandMiddle3
+    Parent: 18197903975709660608
+    Children:
+      - Handle: 15715547085076838497
+    TransformComponent:
+      Position: [-2.04730348e-08, 0.0398000777, 4.23863007e-08]
+      Rotation: [0.322009265, -0.00385121931, 0.0237222146]
+      Scale: [0.99999994, 1, 1]
+  - Entity: 1956336425503995451
+    TagComponent:
+      Tag: mixamorig:RightHandIndex3
+    Parent: 5291860476249313780
+    Children:
+      - Handle: 1082242279833809825
+    TransformComponent:
+      Position: [-3.95149868e-09, 0.0326999128, -3.8309242e-08]
+      Rotation: [0.140592247, -0.000763236603, 0.010839018]
+      Scale: [1, 1, 0.99999994]
+  - Entity: 1985619798526969920
+    TagComponent:
+      Tag: bullets
+    Parent: 5645127604949174905
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 13805959725786282698
+      SubmeshIndex: 3
+      MaterialTable:
+        0: 0
+      BoneEntities: [14898389781221960646, 14368023650997098129, 7926670345477037323, 14884713084062674692, 2743020383841186357, 13601420331520465116, 13311508212663419674, 2392250840202712601, 7506858813388414710, 15088299910620954391, 8991398193368125961, 10106138174848341417, 14866827984314281978, 16715792584384995248, 9347517459560024958, 5452940783979564212, 8950981130968070710, 13165883899823093392, 10881282550291884610, 15777397951271152511, 8120827762530551984, 16968288453969536944, 10231772079843903731, 12390712113232693160, 6873436098655751758, 9223720771606104653, 8842016287057013942, 11146564652012677909, 11888156713904365447, 6333028251168881587, 17066749334565773085, 11975100673400267077, 13336521690086299248, 3976667949399219359, 3106062323412546122, 4319254703913884949, 3835752658628639304, 4611251778053241566, 13283779977414374141, 15039549246869799939, 3187092863343231131, 16722147225848307743, 1205485032476739744, 6988288995342112373, 14527317228276052718, 11772855698957586751, 11236729836111811060, 3666865374200362957, 1150887291616937881, 17677241265034730050, 6793421485649506055, 7715921233778009269, 274982437543653241, 12965263043824796172, 13827251960691126404, 13939460708038109541, 5809031828814755566, 9690629078504711038, 9164999088786338182]
+  - Entity: 2213517682621906936
+    TagComponent:
+      Tag: mixamorig:LeftFoot
+    Parent: 10896255026610901502
+    Children:
+      - Handle: 10641060078967771498
+    TransformComponent:
+      Position: [2.88582189e-08, 0.447999418, -1.11961169e-08]
+      Rotation: [1.03203094, 0.0459547676, -0.0570101887]
+      Scale: [1, 0.999999881, 0.99999994]
+  - Entity: 2392250840202712601
+    TagComponent:
+      Tag: hammer
+    Parent: 13311508212663419674
+    Children:
+      []
+    TransformComponent:
+      Position: [-0.00037678532, 0.0710334331, 3.4415516e-05]
+      Rotation: [-1.25620162, -9.25381158e-08, -4.53241029e-07]
+      Scale: [1, 0.99999994, 1]
+  - Entity: 2498839847074512915
+    TagComponent:
+      Tag: mixamorig:LeftHandThumb3
+    Parent: 14800391305211198616
+    Children:
+      - Handle: 11204475213283077059
+    TransformComponent:
+      Position: [-0.00230003241, 0.0419998914, -9.39683744e-08]
+      Rotation: [-0.228089809, -0.165739089, -0.0502640605]
+      Scale: [0.99999994, 1, 0.999999821]
+  - Entity: 2537904759470472911
+    TagComponent:
+      Tag: mixamorig:LeftHandMiddle4
+    Parent: 33356636090940243
+    Children:
+      []
+    TransformComponent:
+      Position: [-1.717126e-09, 0.0334001593, -2.28651515e-07]
+      Rotation: [1.4901163e-08, -9.31322464e-10, 4.6566111e-09]
+      Scale: [0.99999994, 0.999999881, 0.999999821]
+  - Entity: 2743020383841186357
+    TagComponent:
+      Tag: L_arm
+    Parent: 14368023650997098129
+    Children:
+      - Handle: 13601420331520465116
+    TransformComponent:
+      Position: [-0.179512247, -0.0860326365, -0.1064208]
+      Rotation: [-2.08799195, 0.66699928, 2.00269127]
+      Scale: [1.00000012, 0.999999642, 1.00000024]
+  - Entity: 2772303475328810291
+    TagComponent:
+      Tag: joint_bullet
+    Parent: 12007686346684124593
+    Children:
+      []
+    TransformComponent:
+      Position: [4.55074201e-10, 0.0279846769, 0.0394512564]
+      Rotation: [0.060044039, 4.61308822e-08, 3.1415925]
+      Scale: [1, 0.999999881, 1.00000954]
+  - Entity: 2925310134045178127
+    TagComponent:
+      Tag: mixamorig:RightHandThumb1
+    Parent: 14808133931561269887
+    Children:
+      - Handle: 7429898129429159991
+    TransformComponent:
+      Position: [0.0323000997, 0.029999949, 0.0168998521]
+      Rotation: [0.41729176, -0.0799963772, -0.847515702]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 3106062323412546122
+    TagComponent:
+      Tag: L_fng_5_1
+    Parent: 3976667949399219359
+    Children:
+      - Handle: 4319254703913884949
+    TransformComponent:
+      Position: [-2.32795951e-08, 0.0973326489, 5.18787147e-08]
+      Rotation: [-0.831733346, -0.238676816, -0.523806095]
+      Scale: [0.99999994, 0.999999821, 1]
+  - Entity: 3168657544079787413
+    TagComponent:
+      Tag: mixamorig:RightHandThumb4
+    Parent: 6217097551849572416
+    Children:
+      []
+    TransformComponent:
+      Position: [0.00430000573, 0.0372999534, 1.67638063e-07]
+      Rotation: [-2.82376982e-06, 1.63726554e-06, 2.57042728e-07]
+      Scale: [0.99999994, 1.00000012, 1.00000012]
+  - Entity: 3178755309260744768
+    TagComponent:
+      Tag: mixamorig:LeftHandThumb4
+    Parent: 13296116332847800446
+    Children:
+      []
+    TransformComponent:
+      Position: [-0.00230005756, 0.0355999358, -8.19563866e-08]
+      Rotation: [5.21540642e-08, -1.95577705e-08, -1.71363354e-07]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 3187092863343231131
+    TagComponent:
+      Tag: L_fng_4_3
+    Parent: 15039549246869799939
+    Children:
+      []
+    TransformComponent:
+      Position: [-1.21083028e-08, 0.0253231451, 5.15392991e-08]
+      Rotation: [-0.114342257, -0.030564405, -0.0499545112]
+      Scale: [1.00000024, 1.00000024, 1.00000024]
+  - Entity: 3257358775317163887
+    TagComponent:
+      Tag: mixamorig:RightHandIndex4
+    Parent: 7316204660692122957
+    Children:
+      []
+    TransformComponent:
+      Position: [3.82392074e-09, 0.0270999372, -3.08621892e-08]
+      Rotation: [-1.48748107e-08, -6.51925713e-09, 6.44359144e-09]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 3470575847488440634
+    TagComponent:
+      Tag: mixamorig:LeftArm
+    Parent: 5518234910620440738
+    Children:
+      - Handle: 18331845209281880317
+    TransformComponent:
+      Position: [9.10643472e-09, 0.136999995, 1.34284022e-07]
+      Rotation: [0.964129448, 0.169134825, 0.326240867]
+      Scale: [0.999999881, 0.999999821, 0.999999821]
+  - Entity: 3550194074474480595
+    TagComponent:
+      Tag: mixamorig:LeftArm
+    Parent: 10082659680107924530
+    Children:
+      - Handle: 18142666501918516663
+    TransformComponent:
+      Position: [9.10643472e-09, 0.136999995, 1.34284022e-07]
+      Rotation: [0.964129448, 0.169134825, 0.326240867]
+      Scale: [0.999999881, 0.999999821, 0.999999821]
+  - Entity: 3666865374200362957
+    TagComponent:
+      Tag: L_fng_2_2
+    Parent: 11236729836111811060
+    Children:
+      - Handle: 1150887291616937881
+    TransformComponent:
+      Position: [7.81964218e-08, 0.0258911382, -4.81749538e-08]
+      Rotation: [-0.505044162, -0.103575654, -0.0890355483]
+      Scale: [0.99999994, 0.999999821, 1]
+  - Entity: 3808743119735028169
+    TagComponent:
+      Tag: mixamorig:RightHand
+    Parent: 3967622598745119151
+    Children:
+      - Handle: 4528864211834990012
+      - Handle: 7399229493146320869
+      - Handle: 431128393939017718
+      - Handle: 17278222997303367927
+      - Handle: 13647470903395461697
+      - Handle: 10594518346650787347
+    TransformComponent:
+      Position: [4.81265552e-08, 0.233899832, -7.34651664e-08]
+      Rotation: [0.176868573, 0.346933454, 0.195968762]
+      Scale: [1, 1, 0.99999994]
+  - Entity: 3813386302650758059
+    TagComponent:
+      Tag: mixamorig:RightArm
+    Parent: 7525514073090607968
+    Children:
+      - Handle: 3967622598745119151
+    TransformComponent:
+      Position: [1.14232064e-08, 0.136999905, 3.14620436e-08]
+      Rotation: [0.877327025, -0.35126105, -0.477997363]
+      Scale: [0.999999762, 0.999999821, 0.999999881]
+  - Entity: 3835752658628639304
+    TagComponent:
+      Tag: L_fng_5_3
+    Parent: 4319254703913884949
+    Children:
+      []
+    TransformComponent:
+      Position: [-3.25543006e-08, 0.0185922682, 7.56506466e-08]
+      Rotation: [-0.0071866056, -0.489938617, -0.125219092]
+      Scale: [1.00000024, 0.99999994, 1.00000012]
+  - Entity: 3967622598745119151
+    TagComponent:
+      Tag: mixamorig:RightForeArm
+    Parent: 3813386302650758059
+    Children:
+      - Handle: 3808743119735028169
+    TransformComponent:
+      Position: [3.12080761e-09, 0.245800167, 3.74941997e-08]
+      Rotation: [-0.00439973501, 0.0186234154, -0.1154809]
+      Scale: [0.999999881, 0.999999821, 1]
+  - Entity: 3976667949399219359
+    TagComponent:
+      Tag: L_hand1
+    Parent: 13336521690086299248
+    Children:
+      - Handle: 3106062323412546122
+    TransformComponent:
+      Position: [-0.00120270497, -0.00104620843, -0.0010649336]
+      Rotation: [-1.65310645, 0.390909314, 0.0498580523]
+      Scale: [0.999999881, 0.999999881, 0.999999702]
+  - Entity: 3984862987448267800
+    TagComponent:
+      Tag: mixamorig:RightHandThumb3
+    Parent: 7429898129429159991
+    Children:
+      - Handle: 10729312600596253332
+    TransformComponent:
+      Position: [0.000899994688, 0.0427999571, 1.98387653e-07]
+      Rotation: [-0.284195721, 0.204296798, 0.156483129]
+      Scale: [0.999999762, 0.999999881, 0.999999762]
+  - Entity: 4062582625925648063
+    TagComponent:
+      Tag: mixamorig:LeftLeg
+    Parent: 8673603815476564877
+    Children:
+      - Handle: 7545258788208296803
+    TransformComponent:
+      Position: [-1.16197834e-08, 0.433700085, -2.27033037e-09]
+      Rotation: [-0.373226285, -0.0201210175, 0.0421884768]
+      Scale: [1, 1, 1]
+  - Entity: 4208920037805837729
+    TagComponent:
+      Tag: Stormtrooper
+    Parent: 1493697703386730572
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 16545373569273384455
+      SubmeshIndex: 0
+      MaterialTable:
+        0: 0
+      BoneEntities: [16546391993526577709, 14887012054047208291, 772840158198756968, 6393788415317806824, 12502775036370323575, 14203848194648230336, 6969744451154700406, 5518234910620440738, 3470575847488440634, 18331845209281880317, 18331640684067612026, 16014758913723659176, 18322744703170496555, 13296116332847800446, 3178755309260744768, 4209910285657306964, 428282410375413251, 7979774389469858352, 9120484680669318677, 12901780997828797054, 1252288691826482308, 5440247781054338953, 7921000811102996963, 12065613232240152980, 12339996612749503075, 7401059688313430505, 12336006089044297452, 5541543387303434434, 14106970100776243637, 7975217067878586794, 12211546117624126767, 7525514073090607968, 3813386302650758059, 3967622598745119151, 3808743119735028169, 4528864211834990012, 241110710969397605, 6217097551849572416, 3168657544079787413, 7399229493146320869, 5291860476249313780, 1956336425503995451, 1082242279833809825, 431128393939017718, 1702281050663119964, 8380708262662248061, 13486774036038522713, 17278222997303367927, 10816920984046576520, 6319600210931494146, 17763846564425985689, 13647470903395461697, 427307722764419559, 280481328824177393, 7723162928724160767, 8673603815476564877, 4062582625925648063, 7545258788208296803, 8997603737665247660, 15340646447430140032, 16081315617680870453, 18441288025094242493, 5316760370169943555, 15280921407817439236, 15935662752753569684]
+  - Entity: 4209910285657306964
+    TagComponent:
+      Tag: mixamorig:LeftHandIndex1
+    Parent: 18331640684067612026
+    Children:
+      - Handle: 428282410375413251
+    TransformComponent:
+      Position: [-0.0434000194, 0.117500007, 0.00220000325]
+      Rotation: [0.111419395, -0.0108860601, 0.143489823]
+      Scale: [0.99999994, 0.999999702, 1.00000024]
+  - Entity: 4319254703913884949
+    TagComponent:
+      Tag: L_fng_5_2
+    Parent: 3106062323412546122
+    Children:
+      - Handle: 3835752658628639304
+    TransformComponent:
+      Position: [1.89480254e-08, 0.0198436603, 1.10481459e-07]
+      Rotation: [-0.384016097, -0.264825016, -0.355784118]
+      Scale: [0.99999994, 0.99999994, 0.99999994]
+  - Entity: 4528864211834990012
+    TagComponent:
+      Tag: mixamorig:RightHandThumb1
+    Parent: 3808743119735028169
+    Children:
+      - Handle: 241110710969397605
+    TransformComponent:
+      Position: [0.0323000997, 0.029999949, 0.0168998521]
+      Rotation: [0.41729176, -0.0799963772, -0.847515702]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 4611251778053241566
+    TagComponent:
+      Tag: L_hand2
+    Parent: 13336521690086299248
+    Children:
+      - Handle: 13283779977414374141
+    TransformComponent:
+      Position: [7.05675484e-05, 3.36312914e-05, -9.75265939e-05]
+      Rotation: [-1.45402575, 0.294475317, 0.0109989988]
+      Scale: [0.999999881, 1, 1.00000012]
+  - Entity: 4873014921502038955
+    TagComponent:
+      Tag: mixamorig:LeftHandRing1
+    Parent: 5482990131070201968
+    Children:
+      - Handle: 486503218959928210
+    TransformComponent:
+      Position: [0.0177999809, 0.129200026, -0.00149994344]
+      Rotation: [0.34790054, -0.00134210044, 0.0627729222]
+      Scale: [0.99999994, 1.00000012, 1]
+  - Entity: 4876507803171801902
+    TagComponent:
+      Tag: joint_gripsafety
+    Parent: 12007686346684124593
+    Children:
+      []
+    TransformComponent:
+      Position: [1.96900185e-09, -0.0247642249, 0.029223511]
+      Rotation: [0.0600441359, 4.79779452e-08, 3.1415925]
+      Scale: [1, 0.999999583, 1.00000954]
+  - Entity: 4906898234706942888
+    TagComponent:
+      Tag: mixamorig:LeftHandIndex4
+    Parent: 17008114520295872843
+    Children:
+      []
+    TransformComponent:
+      Position: [7.68351427e-09, 0.0248998795, -6.4021151e-08]
+      Rotation: [1.6874651e-08, -5.82076609e-08, 1.7448026e-06]
+      Scale: [1.00000012, 1.00000012, 1.00000012]
+  - Entity: 5059946352087700488
+    TagComponent:
+      Tag: Sphere
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [3.2099998, 2.65778589, -10.3144093]
+      Rotation: [0, 0, 0]
+      Scale: [3.71000004, 3.71000004, 3.71000004]
+    StaticMeshComponent:
+      AssetID: 14924744775604793321
+      MaterialTable:
+        0: 0
+    SphereColliderComponent:
+      Radius: 0.5
+      IsTrigger: false
+      Offset: [0, 0, 0]
+      Material: 0
+  - Entity: 5133645365339318178
+    TagComponent:
+      Tag: mixamorig:HeadTop_End
+    Parent: 17349996736414483445
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0.284999847, 0.0673000216]
+      Rotation: [5.82076609e-11, 5.82076609e-10, 1.69406589e-20]
+      Scale: [1, 1, 1]
+  - Entity: 5291860476249313780
+    TagComponent:
+      Tag: mixamorig:RightHandIndex2
+    Parent: 7399229493146320869
+    Children:
+      - Handle: 1956336425503995451
+    TransformComponent:
+      Position: [7.30030436e-09, 0.0353999995, -1.80292794e-08]
+      Rotation: [0.303820819, -0.00354299182, 0.0231422838]
+      Scale: [0.99999994, 1, 0.99999994]
+  - Entity: 5316760370169943555
+    TagComponent:
+      Tag: mixamorig:RightFoot
+    Parent: 18441288025094242493
+    Children:
+      - Handle: 15280921407817439236
+    TransformComponent:
+      Position: [1.30312401e-08, 0.447701275, 5.98993211e-09]
+      Rotation: [1.12973022, -0.0178679246, -0.012064741]
+      Scale: [1.00000012, 1, 0.99999994]
+  - Entity: 5405099459020142232
+    TagComponent:
+      Tag: mixamorig:RightToe_End
+    Parent: 45268689272973240
+    Children:
+      []
+    TransformComponent:
+      Position: [3.20138804e-10, 0.0703084543, -1.1641399e-09]
+      Rotation: [1.98828502e-07, 1.79058429e-06, -1.80039194e-06]
+      Scale: [1.00000012, 0.99999994, 1.00000012]
+  - Entity: 5440247781054338953
+    TagComponent:
+      Tag: mixamorig:LeftHandMiddle3
+    Parent: 1252288691826482308
+    Children:
+      - Handle: 7921000811102996963
+    TransformComponent:
+      Position: [1.10012124e-08, 0.0387999825, -9.25874559e-08]
+      Rotation: [0.321195304, 0.00525363255, -0.0324386358]
+      Scale: [0.999999762, 0.99999994, 0.999999881]
+  - Entity: 5452940783979564212
+    TagComponent:
+      Tag: R_fng_5_3
+    Parent: 9347517459560024958
+    Children:
+      []
+    TransformComponent:
+      Position: [-1.41845121e-07, 0.0185921434, -1.47897183e-07]
+      Rotation: [0.0138996327, -0.494994134, 0.121571288]
+      Scale: [1.00000024, 1.00000024, 1.00000036]
+  - Entity: 5482990131070201968
+    TagComponent:
+      Tag: mixamorig:LeftHand
+    Parent: 18142666501918516663
+    Children:
+      - Handle: 7323153130642283436
+      - Handle: 1534252164738577896
+      - Handle: 12788924602092292924
+      - Handle: 4873014921502038955
+      - Handle: 17642591071935520316
+    TransformComponent:
+      Position: [2.19253433e-08, 0.234500036, 5.02637789e-08]
+      Rotation: [0.204945907, -0.52028513, -0.196012735]
+      Scale: [1.00000012, 1, 1.00000024]
+  - Entity: 5518234910620440738
+    TagComponent:
+      Tag: mixamorig:LeftShoulder
+    Parent: 6393788415317806824
+    Children:
+      - Handle: 3470575847488440634
+    TransformComponent:
+      Position: [0.0613999926, 0.117699735, -0.00249999459]
+      Rotation: [2.0165751, 1.30601668, 0.0550665557]
+      Scale: [1.00000012, 0.99999994, 0.999999881]
+  - Entity: 5541543387303434434
+    TagComponent:
+      Tag: mixamorig:LeftHandPinky1
+    Parent: 18331640684067612026
+    Children:
+      - Handle: 14106970100776243637
+    TransformComponent:
+      Position: [0.0408999957, 0.121699989, 0.00220009242]
+      Rotation: [0.451251984, 0.0225742962, 0.0341959149]
+      Scale: [1, 0.999999642, 0.999999821]
+  - Entity: 5589427425067257449
+    TagComponent:
+      Tag: Floor
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, -0.126000002, 0]
+      Rotation: [0, 0, 0]
+      Scale: [30, 0.25, 30]
+    StaticMeshComponent:
+      AssetID: 16704718035390383336
+      MaterialTable:
+        0: 0
+    BoxColliderComponent:
+      Offset: [0, 0, 0]
+      HalfSize: [0.5, 0.5, 0.5]
+      IsTrigger: false
+      Material: 0
+  - Entity: 5626049734653426535
+    TagComponent:
+      Tag: Armature
+    Parent: 10586057646948030486
+    Children:
+      - Handle: 12007686346684124593
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [1.57079649, -0, 0]
+      Scale: [1, 0.99999994, 0.99999994]
+  - Entity: 5645127604949174905
+    TagComponent:
+      Tag: Mosin
+    Parent: 0
+    Children:
+      - Handle: 1784284421456699075
+      - Handle: 18159032526798209959
+      - Handle: 17527231123207058040
+      - Handle: 1985619798526969920
+    TransformComponent:
+      Position: [0.5288378, 0, -10.0972881]
+      Rotation: [0, 1.57079637, 0]
+      Scale: [1.99988794, 2, 1.99988794]
+    AnimationComponent:
+      AnimationController: 4947535746951876407
+      BoneEntities: [14898389781221960646, 14368023650997098129, 7926670345477037323, 14884713084062674692, 2743020383841186357, 13601420331520465116, 13311508212663419674, 2392250840202712601, 7506858813388414710, 15088299910620954391, 8991398193368125961, 10106138174848341417, 14866827984314281978, 16715792584384995248, 9347517459560024958, 5452940783979564212, 8950981130968070710, 13165883899823093392, 10881282550291884610, 15777397951271152511, 8120827762530551984, 16968288453969536944, 10231772079843903731, 12390712113232693160, 6873436098655751758, 9223720771606104653, 8842016287057013942, 11146564652012677909, 11888156713904365447, 6333028251168881587, 17066749334565773085, 11975100673400267077, 13336521690086299248, 3976667949399219359, 3106062323412546122, 4319254703913884949, 3835752658628639304, 4611251778053241566, 13283779977414374141, 15039549246869799939, 3187092863343231131, 16722147225848307743, 1205485032476739744, 6988288995342112373, 14527317228276052718, 11772855698957586751, 11236729836111811060, 3666865374200362957, 1150887291616937881, 17677241265034730050, 6793421485649506055, 7715921233778009269, 274982437543653241, 12965263043824796172, 13827251960691126404, 13939460708038109541, 5809031828814755566, 9690629078504711038, 9164999088786338182]
+      EnableAnimation: true
+      PlaybackSpeed: 1
+      StateIndex: 0
+      AnimationTime: 0
+      EnableRootMotion: false
+      RootMotionTarget: 0
+  - Entity: 5658889597973099524
+    TagComponent:
+      Tag: mixamorig:RightForeArm
+    Parent: 14715497638855224404
+    Children:
+      - Handle: 14808133931561269887
+    TransformComponent:
+      Position: [3.12080761e-09, 0.245800167, 3.74941997e-08]
+      Rotation: [-0.00439973501, 0.0186234154, -0.1154809]
+      Scale: [0.999999881, 0.999999821, 1]
+  - Entity: 5797269408536065816
+    TagComponent:
+      Tag: mixamorig:RightHandPinky2
+    Parent: 14189120386395565222
+    Children:
+      - Handle: 7797775396473200302
+    TransformComponent:
+      Position: [-1.31056295e-08, 0.0276999194, -9.48460865e-08]
+      Rotation: [0.304454505, -0.00334884808, 0.0218174197]
+      Scale: [0.99999994, 0.99999994, 0.99999994]
+  - Entity: 5809031828814755566
+    TagComponent:
+      Tag: extra_3
+    Parent: 14368023650997098129
+    Children:
+      []
+    TransformComponent:
+      Position: [0.0262700915, 0.0111258058, 0.025268402]
+      Rotation: [-9.73162173e-09, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 6217097551849572416
+    TagComponent:
+      Tag: mixamorig:RightHandThumb3
+    Parent: 241110710969397605
+    Children:
+      - Handle: 3168657544079787413
+    TransformComponent:
+      Position: [0.000899994688, 0.0427999571, 1.98387653e-07]
+      Rotation: [-0.284195721, 0.204296798, 0.156483129]
+      Scale: [0.999999762, 0.999999881, 0.999999762]
+  - Entity: 6319600210931494146
+    TagComponent:
+      Tag: mixamorig:RightHandRing3
+    Parent: 10816920984046576520
+    Children:
+      - Handle: 17763846564425985689
+    TransformComponent:
+      Position: [-2.32830644e-09, 0.0318000577, 2.88127797e-08]
+      Rotation: [0.312369227, -0.00374410348, 0.0237656292]
+      Scale: [0.99999994, 1, 0.999999821]
+  - Entity: 6333028251168881587
+    TagComponent:
+      Tag: R_fng_1_1
+    Parent: 11888156713904365447
+    Children:
+      - Handle: 17066749334565773085
+    TransformComponent:
+      Position: [-5.83051261e-08, 0.0913572833, 1.27403837e-07]
+      Rotation: [-0.0438168421, -0.0570162013, -0.567060113]
+      Scale: [0.99999994, 0.99999994, 1.00000024]
+  - Entity: 6393788415317806824
+    TagComponent:
+      Tag: mixamorig:Spine2
+    Parent: 772840158198756968
+    Children:
+      - Handle: 12502775036370323575
+      - Handle: 5518234910620440738
+      - Handle: 7525514073090607968
+      - Handle: 9440653393222083728
+    TransformComponent:
+      Position: [0, 0.127100185, -1.86264515e-09]
+      Rotation: [0.0197933409, 0.00399362249, 0.0275912229]
+      Scale: [0.99999994, 0.99999994, 0.99999994]
+  - Entity: 6793421485649506055
+    TagComponent:
+      Tag: L_fng_1_1
+    Parent: 17677241265034730050
+    Children:
+      - Handle: 7715921233778009269
+    TransformComponent:
+      Position: [5.23990735e-08, 0.0913575515, 5.94334821e-08]
+      Rotation: [0.231791228, -0.141340733, 0.454041392]
+      Scale: [0.999999821, 0.999999881, 0.999999821]
+  - Entity: 6873436098655751758
+    TagComponent:
+      Tag: R_hand4
+    Parent: 10106138174848341417
+    Children:
+      - Handle: 9223720771606104653
+    TransformComponent:
+      Position: [1.47194363e-08, 3.36965442e-08, -6.17695832e-08]
+      Rotation: [-1.17853665, 0.339770138, -0.0283449162]
+      Scale: [0.99999994, 0.99999994, 1]
+  - Entity: 6969744451154700406
+    TagComponent:
+      Tag: mixamorig:HeadTop_End
+    Parent: 14203848194648230336
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0.284999847, 0.0673000216]
+      Rotation: [5.82076609e-11, 5.82076609e-10, 1.69406589e-20]
+      Scale: [1, 1, 1]
+  - Entity: 6988288995342112373
+    TagComponent:
+      Tag: L_fng_3_2
+    Parent: 1205485032476739744
+    Children:
+      - Handle: 14527317228276052718
+    TransformComponent:
+      Position: [1.11705685e-08, 0.0311699826, -1.9965789e-07]
+      Rotation: [-0.465156257, -0.171845704, -0.0659087226]
+      Scale: [0.999999762, 0.99999994, 1.00000012]
+  - Entity: 7316204660692122957
+    TagComponent:
+      Tag: mixamorig:RightHandIndex3
+    Parent: 11378774553816023926
+    Children:
+      - Handle: 3257358775317163887
+    TransformComponent:
+      Position: [-3.95149868e-09, 0.0326999128, -3.8309242e-08]
+      Rotation: [0.140592247, -0.000763236603, 0.010839018]
+      Scale: [1, 1, 0.99999994]
+  - Entity: 7323153130642283436
+    TagComponent:
+      Tag: mixamorig:LeftHandThumb1
+    Parent: 5482990131070201968
+    Children:
+      - Handle: 14800391305211198616
+    TransformComponent:
+      Position: [-0.0324999839, 0.0306999758, 0.017300006]
+      Rotation: [0.399274617, 0.106551468, 0.777077556]
+      Scale: [0.99999994, 1.00000024, 0.99999994]
+  - Entity: 7399229493146320869
+    TagComponent:
+      Tag: mixamorig:RightHandIndex1
+    Parent: 3808743119735028169
+    Children:
+      - Handle: 5291860476249313780
+    TransformComponent:
+      Position: [0.0444000065, 0.117099956, 0.000999872922]
+      Rotation: [0.121201508, 0.00965828169, -0.159176975]
+      Scale: [1, 0.999999762, 1]
+  - Entity: 7401059688313430505
+    TagComponent:
+      Tag: mixamorig:LeftHandRing3
+    Parent: 12339996612749503075
+    Children:
+      - Handle: 12336006089044297452
+    TransformComponent:
+      Position: [7.85802889e-09, 0.0329000205, 3.16467776e-08]
+      Rotation: [0.311627835, 0.00496666692, -0.031614501]
+      Scale: [0.99999994, 1.00000012, 1.00000012]
+  - Entity: 7429898129429159991
+    TagComponent:
+      Tag: mixamorig:RightHandThumb2
+    Parent: 2925310134045178127
+    Children:
+      - Handle: 3984862987448267800
+    TransformComponent:
+      Position: [-0.00520006428, 0.0373999663, -5.30648485e-08]
+      Rotation: [-0.103185631, -0.168106571, 0.788983703]
+      Scale: [1.00000012, 0.99999994, 1]
+  - Entity: 7492667261508141304
+    TagComponent:
+      Tag: mixamorig:RightFoot
+    Parent: 10066463232053883421
+    Children:
+      - Handle: 45268689272973240
+    TransformComponent:
+      Position: [1.30312401e-08, 0.447701275, 5.98993211e-09]
+      Rotation: [1.12973022, -0.0178679246, -0.012064741]
+      Scale: [1.00000012, 1, 0.99999994]
+  - Entity: 7506858813388414710
+    TagComponent:
+      Tag: slide
+    Parent: 13311508212663419674
+    Children:
+      []
+    TransformComponent:
+      Position: [-0.00053221453, 0.0988931879, -0.0824582651]
+      Rotation: [-1.21621907, -1.53938174e-07, -2.25780411e-07]
+      Scale: [1.00000012, 1.00000024, 1.00000024]
+  - Entity: 7525514073090607968
+    TagComponent:
+      Tag: mixamorig:RightShoulder
+    Parent: 6393788415317806824
+    Children:
+      - Handle: 3813386302650758059
+    TransformComponent:
+      Position: [-0.0613999479, 0.117599763, -0.000800006965]
+      Rotation: [2.07751727, -1.31681347, -0.0749254674]
+      Scale: [1, 0.99999994, 1]
+  - Entity: 7545258788208296803
+    TagComponent:
+      Tag: mixamorig:LeftFoot
+    Parent: 4062582625925648063
+    Children:
+      - Handle: 8997603737665247660
+    TransformComponent:
+      Position: [2.88582189e-08, 0.447999418, -1.11961169e-08]
+      Rotation: [1.03203094, 0.0459547676, -0.0570101887]
+      Scale: [1, 0.999999881, 0.99999994]
+  - Entity: 7568627788933365791
+    TagComponent:
+      Tag: mixamorig:Neck
+    Parent: 13141768820797632060
+    Children:
+      - Handle: 17349996736414483445
+    TransformComponent:
+      Position: [-7.4505806e-09, 0.14289993, -5.57227509e-09]
+      Rotation: [0.163029745, -0.00264796917, 0.00760676572]
+      Scale: [1, 0.999999881, 0.99999994]
+  - Entity: 7715921233778009269
+    TagComponent:
+      Tag: L_fng_1_2
+    Parent: 6793421485649506055
+    Children:
+      - Handle: 274982437543653241
+    TransformComponent:
+      Position: [-5.38985461e-08, 0.0191415939, -5.41321761e-08]
+      Rotation: [0.264023095, -0.0294018295, -0.154517367]
+      Scale: [0.999999821, 0.999999821, 1]
+  - Entity: 7723162928724160767
+    TagComponent:
+      Tag: mixamorig:RightHandPinky4
+    Parent: 280481328824177393
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0.0176000856, -1.04308128e-07]
+      Rotation: [1.49011612e-08, -1.25728548e-08, 3.7252903e-09]
+      Scale: [1, 1, 1]
+  - Entity: 7764970628429375995
+    TagComponent:
+      Tag: mixamorig:LeftToe_End
+    Parent: 10641060078967771498
+    Children:
+      []
+    TransformComponent:
+      Position: [-4.40922987e-09, 0.0682955906, 1.16423038e-10]
+      Rotation: [-1.2942472e-07, 2.71640602e-06, 7.47950857e-09]
+      Scale: [1, 1, 1]
+  - Entity: 7797775396473200302
+    TagComponent:
+      Tag: mixamorig:RightHandPinky3
+    Parent: 5797269408536065816
+    Children:
+      - Handle: 8186393325447584391
+    TransformComponent:
+      Position: [1.86264215e-09, 0.0236000679, -1.73866283e-07]
+      Rotation: [0.288724363, -0.00301114609, 0.0207226258]
+      Scale: [0.99999994, 1, 0.99999994]
+  - Entity: 7862587204587404035
+    TagComponent:
+      Tag: mixamorig:Spine
+    Parent: 16497431925444910578
+    Children:
+      - Handle: 9550925542492727537
+    TransformComponent:
+      Position: [1.11758709e-08, 0.095099926, -0.00619999226]
+      Rotation: [-0.00611923868, 0.024126621, 0.046558816]
+      Scale: [1, 0.99999994, 0.99999994]
+  - Entity: 7921000811102996963
+    TagComponent:
+      Tag: mixamorig:LeftHandMiddle4
+    Parent: 5440247781054338953
+    Children:
+      []
+    TransformComponent:
+      Position: [-1.717126e-09, 0.0334001593, -2.28651515e-07]
+      Rotation: [1.4901163e-08, -9.31322464e-10, 4.6566111e-09]
+      Scale: [0.99999994, 0.999999881, 0.999999821]
+  - Entity: 7926670345477037323
+    TagComponent:
+      Tag: R_arm
+    Parent: 14368023650997098129
+    Children:
+      - Handle: 14884713084062674692
+    TransformComponent:
+      Position: [0.245202079, 0.0914146602, 0.243967876]
+      Rotation: [-2.17680645, 0.133009925, 0.00432941969]
+      Scale: [1, 0.999999881, 0.999999821]
+  - Entity: 7975217067878586794
+    TagComponent:
+      Tag: mixamorig:LeftHandPinky3
+    Parent: 14106970100776243637
+    Children:
+      - Handle: 12211546117624126767
+    TransformComponent:
+      Position: [3.72528985e-09, 0.0271999668, -2.67173164e-08]
+      Rotation: [0.288179934, 0.00391145656, -0.0269571058]
+      Scale: [1.00000012, 1, 0.99999994]
+  - Entity: 7979774389469858352
+    TagComponent:
+      Tag: mixamorig:LeftHandIndex3
+    Parent: 428282410375413251
+    Children:
+      - Handle: 9120484680669318677
+    TransformComponent:
+      Position: [1.20293678e-10, 0.0320998803, -9.9720495e-08]
+      Rotation: [0.140258893, 0.00101582031, -0.0144869415]
+      Scale: [1.00000012, 1, 1]
+  - Entity: 8120827762530551984
+    TagComponent:
+      Tag: R_hand3
+    Parent: 10106138174848341417
+    Children:
+      - Handle: 16968288453969536944
+    TransformComponent:
+      Position: [1.34416904e-08, 8.40499013e-08, 1.36150859e-07]
+      Rotation: [-1.22326422, 0.125788391, -0.0359955207]
+      Scale: [0.999999881, 1.00000012, 1.00000012]
+  - Entity: 8121055761974307290
+    TagComponent:
+      Tag: mixamorig:LeftHandPinky4
+    Parent: 11031565016209206056
+    Children:
+      []
+    TransformComponent:
+      Position: [2.3268416e-30, 0.0231001806, -5.65196387e-08]
+      Rotation: [-2.98023224e-08, -1.86264515e-09, -1.8626467e-09]
+      Scale: [1, 0.99999994, 1]
+  - Entity: 8176065922554523424
+    TagComponent:
+      Tag: mixamorig:RightHandMiddle1
+    Parent: 14808133931561269887
+    Children:
+      - Handle: 18197903975709660608
+    TransformComponent:
+      Position: [0.0163000021, 0.117699966, 0.000299914507]
+      Rotation: [0.264467508, 0.00290575763, -0.0996344164]
+      Scale: [1, 1, 1]
+  - Entity: 8186393325447584391
+    TagComponent:
+      Tag: mixamorig:RightHandPinky4
+    Parent: 7797775396473200302
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0.0176000856, -1.04308128e-07]
+      Rotation: [1.49011612e-08, -1.25728548e-08, 3.7252903e-09]
+      Scale: [1, 1, 1]
+  - Entity: 8380708262662248061
+    TagComponent:
+      Tag: mixamorig:RightHandMiddle3
+    Parent: 1702281050663119964
+    Children:
+      - Handle: 13486774036038522713
+    TransformComponent:
+      Position: [-2.04730348e-08, 0.0398000777, 4.23863007e-08]
+      Rotation: [0.322009265, -0.00385121931, 0.0237222146]
+      Scale: [0.99999994, 1, 1]
+  - Entity: 8673603815476564877
+    TagComponent:
+      Tag: mixamorig:LeftUpLeg
+    Parent: 16546391993526577709
+    Children:
+      - Handle: 4062582625925648063
+    TransformComponent:
+      Position: [0.109300025, -0.0529000759, 0.00419999426]
+      Rotation: [0.184833571, -0.28880024, -2.9836235]
+      Scale: [1.00002062, 1.00000024, 1.00006223]
+  - Entity: 8842016287057013942
+    TagComponent:
+      Tag: R_fng_2_2
+    Parent: 9223720771606104653
+    Children:
+      - Handle: 11146564652012677909
+    TransformComponent:
+      Position: [-6.44191189e-08, 0.0258911438, 2.06371187e-08]
+      Rotation: [-0.593677938, 0.0181094129, 0.100050218]
+      Scale: [0.999999762, 0.999999821, 0.99999994]
+  - Entity: 8950981130968070710
+    TagComponent:
+      Tag: R_hand2
+    Parent: 10106138174848341417
+    Children:
+      - Handle: 13165883899823093392
+    TransformComponent:
+      Position: [9.01653863e-09, -1.79550042e-07, 4.66342094e-08]
+      Rotation: [-1.35952425, -0.0364060029, -0.025236059]
+      Scale: [1, 1, 1]
+  - Entity: 8991398193368125961
+    TagComponent:
+      Tag: mag
+    Parent: 13311508212663419674
+    Children:
+      []
+    TransformComponent:
+      Position: [0.00120109133, 0.0727443174, -0.18801035]
+      Rotation: [-1.25066388, -1.49477728e-08, -6.81134907e-07]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 8997603737665247660
+    TagComponent:
+      Tag: mixamorig:LeftToeBase
+    Parent: 7545258788208296803
+    Children:
+      - Handle: 15340646447430140032
+    TransformComponent:
+      Position: [1.07587503e-08, 0.171393454, 3.27250689e-08]
+      Rotation: [0.780332327, -0.0541882962, 0.00122174795]
+      Scale: [0.999999762, 0.999999881, 1]
+  - Entity: 9120484680669318677
+    TagComponent:
+      Tag: mixamorig:LeftHandIndex4
+    Parent: 7979774389469858352
+    Children:
+      []
+    TransformComponent:
+      Position: [7.68351427e-09, 0.0248998795, -6.4021151e-08]
+      Rotation: [1.6874651e-08, -5.82076609e-08, 1.7448026e-06]
+      Scale: [1.00000012, 1.00000012, 1.00000012]
+  - Entity: 9164999088786338182
+    TagComponent:
+      Tag: extra_5
+    Parent: 14368023650997098129
+    Children:
+      []
+    TransformComponent:
+      Position: [0.0496494584, -0.246508658, 0.0252684001]
+      Rotation: [-9.73162173e-09, 0, 0]
+      Scale: [1, 0.99999994, 1]
+  - Entity: 9223720771606104653
+    TagComponent:
+      Tag: R_fng_2_1
+    Parent: 6873436098655751758
+    Children:
+      - Handle: 8842016287057013942
+    TransformComponent:
+      Position: [5.0497615e-08, 0.11363145, -2.10119797e-08]
+      Rotation: [-0.132084414, -0.100013793, -0.224168643]
+      Scale: [1, 0.999999642, 1]
+  - Entity: 9232770976748247452
+    TagComponent:
+      Tag: pCylinder5
+    Parent: 10586057646948030486
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 2027170227582048304
+      SubmeshIndex: 0
+      MaterialTable:
+        0: 0
+      BoneEntities: [12007686346684124593, 18253333423876396030, 9594671188172117672, 9405855155584015417, 4876507803171801902, 2772303475328810291]
+  - Entity: 9347517459560024958
+    TagComponent:
+      Tag: R_fng_5_2
+    Parent: 16715792584384995248
+    Children:
+      - Handle: 5452940783979564212
+    TransformComponent:
+      Position: [3.24343361e-08, 0.0198438745, -1.21953832e-07]
+      Rotation: [-0.346739501, 0.190154701, 0.414581329]
+      Scale: [0.999999702, 1, 0.999999881]
+  - Entity: 9363616522839639206
+    TagComponent:
+      Tag: Player
+    Parent: 0
+    Children:
+      - Handle: 12099340942764675134
+      - Handle: 1493697703386730572
+    TransformComponent:
+      Position: [-10.716342, 0, -11.4244423]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassHandle: 1282442721
+      StoredFields:
+        - ID: 2724685704
+          Name: ThirdPersonExample.PlayerControllerAnimated:RotationSpeed
+          Type: 12
+          Data: 10
+        - ID: 3084303776
+          Name: ThirdPersonExample.PlayerControllerAnimated:JumpPower
+          Type: 12
+          Data: 3
+    CharacterControllerComponent:
+      Layer: 0
+      DisableGravity: false
+      SlopeLimit: 45
+      StepOffset: 0
+    CapsuleColliderComponent:
+      Radius: 0.300000012
+      Height: 1.20000005
+      Offset: [0, 0.899999976, 0]
+      IsTrigger: false
+      Material: 0
+  - Entity: 9405855155584015417
+    TagComponent:
+      Tag: joint_hammer
+    Parent: 12007686346684124593
+    Children:
+      []
+    TransformComponent:
+      Position: [8.30209324e-09, -0.0151678491, 0.036367774]
+      Rotation: [0.0600441433, 4.61143017e-08, 3.1415925]
+      Scale: [1, 0.999999881, 1.00000966]
+  - Entity: 9440653393222083728
+    TagComponent:
+      Tag: Green Light Sabre
+    Parent: 6393788415317806824
+    Children:
+      []
+    TransformComponent:
+      Position: [-0.00185585022, -0.204408407, -0.181609154]
+      Rotation: [1.45482028, -0.0977384374, 1.26824009]
+      Scale: [0.999955893, 0.019999152, 0.0199997481]
+    StaticMeshComponent:
+      AssetID: 16704718035390383336
+      MaterialTable:
+        0: 1162716615310863507
+    BoxColliderComponent:
+      Offset: [0, 0, 0]
+      HalfSize: [0.5, 0.5, 0.5]
+      IsTrigger: false
+      Material: 0
+  - Entity: 9550925542492727537
+    TagComponent:
+      Tag: mixamorig:Spine1
+    Parent: 7862587204587404035
+    Children:
+      - Handle: 13141768820797632060
+    TransformComponent:
+      Position: [3.25962901e-09, 0.111199901, 7.45057083e-09]
+      Rotation: [0.0202341788, 0.00360177853, 0.0275065657]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 9594671188172117672
+    TagComponent:
+      Tag: joint_slide
+    Parent: 12007686346684124593
+    Children:
+      []
+    TransformComponent:
+      Position: [2.95529166e-08, 0.10950011, 0.0455999263]
+      Rotation: [0.0600440614, 4.61381369e-08, 3.1415925]
+      Scale: [1, 0.999999762, 1.00000966]
+  - Entity: 9690629078504711038
+    TagComponent:
+      Tag: extra_4
+    Parent: 14368023650997098129
+    Children:
+      []
+    TransformComponent:
+      Position: [-0.0472482741, 0.0111258058, 0.025268402]
+      Rotation: [-9.73162173e-09, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 9941186251823823088
+    TagComponent:
+      Tag: mixamorig:RightShoulder
+    Parent: 13141768820797632060
+    Children:
+      - Handle: 14715497638855224404
+    TransformComponent:
+      Position: [-0.0613999479, 0.117599763, -0.000800006965]
+      Rotation: [2.07751727, -1.31681347, -0.0749254674]
+      Scale: [1, 0.99999994, 1]
+  - Entity: 10018501208017378060
+    TagComponent:
+      Tag: mixamorig:LeftHandRing4
+    Parent: 14680681125157732297
+    Children:
+      []
+    TransformComponent:
+      Position: [-3.43425199e-09, 0.0278000683, 4.65443009e-08]
+      Rotation: [-7.50701478e-16, -6.51925847e-09, 9.31319688e-10]
+      Scale: [0.999999881, 1, 1.00000012]
+  - Entity: 10066463232053883421
+    TagComponent:
+      Tag: mixamorig:RightLeg
+    Parent: 10281448921322571463
+    Children:
+      - Handle: 7492667261508141304
+    TransformComponent:
+      Position: [1.12668204e-08, 0.433700025, -1.68802217e-09]
+      Rotation: [-0.268413514, 0.160379335, -0.0446546264]
+      Scale: [1.00000012, 0.999999821, 1]
+  - Entity: 10069730629740536394
+    TagComponent:
+      Tag: mixamorig:LeftUpLeg
+    Parent: 16497431925444910578
+    Children:
+      - Handle: 10896255026610901502
+    TransformComponent:
+      Position: [0.109300025, -0.0529000759, 0.00419999426]
+      Rotation: [0.184833571, -0.28880024, -2.9836235]
+      Scale: [1.00002062, 1.00000024, 1.00006223]
+  - Entity: 10082659680107924530
+    TagComponent:
+      Tag: mixamorig:LeftShoulder
+    Parent: 13141768820797632060
+    Children:
+      - Handle: 3550194074474480595
+    TransformComponent:
+      Position: [0.0613999926, 0.117699735, -0.00249999459]
+      Rotation: [2.0165751, 1.30601668, 0.0550665557]
+      Scale: [1.00000012, 0.99999994, 0.999999881]
+  - Entity: 10106138174848341417
+    TagComponent:
+      Tag: R_wrist
+    Parent: 14368023650997098129
+    Children:
+      - Handle: 14866827984314281978
+      - Handle: 8950981130968070710
+      - Handle: 8120827762530551984
+      - Handle: 6873436098655751758
+      - Handle: 11888156713904365447
+    TransformComponent:
+      Position: [0.100232653, 0.0250199847, -0.0507817566]
+      Rotation: [-0.394689798, -0.320513368, -0.491763949]
+      Scale: [1.00000012, 1.00000012, 1.00000012]
+  - Entity: 10129706042215161406
+    TagComponent:
+      Tag: mixamorig:RightHandIndex1
+    Parent: 14808133931561269887
+    Children:
+      - Handle: 11378774553816023926
+    TransformComponent:
+      Position: [0.0444000065, 0.117099956, 0.000999872922]
+      Rotation: [0.121201508, 0.00965828169, -0.159176975]
+      Scale: [1, 0.999999762, 1]
+  - Entity: 10231772079843903731
+    TagComponent:
+      Tag: R_fng_3_2
+    Parent: 16968288453969536944
+    Children:
+      - Handle: 12390712113232693160
+    TransformComponent:
+      Position: [-5.63259483e-08, 0.0311701242, -1.10157636e-07]
+      Rotation: [-0.45821619, 0.0498313978, 0.127537906]
+      Scale: [1.00000012, 0.999999881, 0.99999994]
+  - Entity: 10281448921322571463
+    TagComponent:
+      Tag: mixamorig:RightUpLeg
+    Parent: 16497431925444910578
+    Children:
+      - Handle: 10066463232053883421
+    TransformComponent:
+      Position: [-0.109300032, -0.0529000163, 0.0018000073]
+      Rotation: [0.0206066351, 0.184334978, -3.10875368]
+      Scale: [0.999964774, 0.999999642, 0.999882162]
+  - Entity: 10586057646948030486
+    TagComponent:
+      Tag: m1911
+    Parent: 0
+    Children:
+      - Handle: 5626049734653426535
+      - Handle: 9232770976748247452
+    TransformComponent:
+      Position: [0, 5.26316595, 0]
+      Rotation: [0, -1.57079637, 0]
+      Scale: [4, 4, 4]
+    AnimationComponent:
+      AnimationController: 15833132186548904512
+      BoneEntities: [12007686346684124593, 18253333423876396030, 9594671188172117672, 9405855155584015417, 4876507803171801902, 2772303475328810291]
+      EnableAnimation: true
+      PlaybackSpeed: 1
+      StateIndex: 0
+      AnimationTime: 0
+      EnableRootMotion: false
+      RootMotionTarget: 0
+  - Entity: 10594518346650787347
+    TagComponent:
+      Tag: Light Sabre
+    Parent: 3808743119735028169
+    Children:
+      []
+    TransformComponent:
+      Position: [0.46713829, 0.0985819697, 0.0299768448]
+      Rotation: [-6.98813301e-06, -1.82174779e-06, 1.57363247e-05]
+      Scale: [0.999955654, 0.0199991316, 0.0199997388]
+    StaticMeshComponent:
+      AssetID: 16704718035390383336
+      MaterialTable:
+        0: 1561346292037904914
+    BoxColliderComponent:
+      Offset: [0, 0, 0]
+      HalfSize: [0.5, 0.5, 0.5]
+      IsTrigger: false
+      Material: 0
+  - Entity: 10641060078967771498
+    TagComponent:
+      Tag: mixamorig:LeftToeBase
+    Parent: 2213517682621906936
+    Children:
+      - Handle: 7764970628429375995
+    TransformComponent:
+      Position: [1.07587503e-08, 0.171393454, 3.27250689e-08]
+      Rotation: [0.780332327, -0.0541882962, 0.00122174795]
+      Scale: [0.999999762, 0.999999881, 1]
+  - Entity: 10729312600596253332
+    TagComponent:
+      Tag: mixamorig:RightHandThumb4
+    Parent: 3984862987448267800
+    Children:
+      []
+    TransformComponent:
+      Position: [0.00430000573, 0.0372999534, 1.67638063e-07]
+      Rotation: [-2.82376982e-06, 1.63726554e-06, 2.57042728e-07]
+      Scale: [0.99999994, 1.00000012, 1.00000012]
+  - Entity: 10816920984046576520
+    TagComponent:
+      Tag: mixamorig:RightHandRing2
+    Parent: 17278222997303367927
+    Children:
+      - Handle: 6319600210931494146
+    TransformComponent:
+      Position: [-7.77828468e-09, 0.0322999619, 3.22948992e-08]
+      Rotation: [0.365588933, -0.00510785636, 0.027648218]
+      Scale: [0.99999994, 1, 1]
+  - Entity: 10881282550291884610
+    TagComponent:
+      Tag: R_fng_4_2
+    Parent: 13165883899823093392
+    Children:
+      - Handle: 15777397951271152511
+    TransformComponent:
+      Position: [-7.84342014e-09, 0.0267397463, -5.08277864e-08]
+      Rotation: [-0.456745178, -0.103124656, 0.413544208]
+      Scale: [1, 0.999999881, 0.999999881]
+  - Entity: 10896255026610901502
+    TagComponent:
+      Tag: mixamorig:LeftLeg
+    Parent: 10069730629740536394
+    Children:
+      - Handle: 2213517682621906936
+    TransformComponent:
+      Position: [-1.16197834e-08, 0.433700085, -2.27033037e-09]
+      Rotation: [-0.373226285, -0.0201210175, 0.0421884768]
+      Scale: [1, 1, 1]
+  - Entity: 10952562297650914919
+    TagComponent:
+      Tag: Stormtrooper
+    Parent: 14724083777855920820
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 16545373569273384455
+      SubmeshIndex: 0
+      MaterialTable:
+        0: 0
+      BoneEntities: [16497431925444910578, 7862587204587404035, 9550925542492727537, 13141768820797632060, 7568627788933365791, 17349996736414483445, 5133645365339318178, 10082659680107924530, 3550194074474480595, 18142666501918516663, 5482990131070201968, 7323153130642283436, 14800391305211198616, 2498839847074512915, 11204475213283077059, 1534252164738577896, 14905530931326311348, 17008114520295872843, 4906898234706942888, 12788924602092292924, 1743456847755363175, 33356636090940243, 2537904759470472911, 4873014921502038955, 486503218959928210, 14680681125157732297, 10018501208017378060, 17642591071935520316, 17593888194952488165, 11031565016209206056, 8121055761974307290, 9941186251823823088, 14715497638855224404, 5658889597973099524, 14808133931561269887, 2925310134045178127, 7429898129429159991, 3984862987448267800, 10729312600596253332, 10129706042215161406, 11378774553816023926, 7316204660692122957, 3257358775317163887, 8176065922554523424, 18197903975709660608, 1883194782954509953, 15715547085076838497, 15070619868186387450, 13632679639105870759, 12493169970305750884, 11386383992181767607, 14189120386395565222, 5797269408536065816, 7797775396473200302, 8186393325447584391, 10069730629740536394, 10896255026610901502, 2213517682621906936, 10641060078967771498, 7764970628429375995, 10281448921322571463, 10066463232053883421, 7492667261508141304, 45268689272973240, 5405099459020142232]
+  - Entity: 11031565016209206056
+    TagComponent:
+      Tag: mixamorig:LeftHandPinky3
+    Parent: 17593888194952488165
+    Children:
+      - Handle: 8121055761974307290
+    TransformComponent:
+      Position: [3.72528985e-09, 0.0271999668, -2.67173164e-08]
+      Rotation: [0.288179934, 0.00391145656, -0.0269571058]
+      Scale: [1.00000012, 1, 0.99999994]
+  - Entity: 11146564652012677909
+    TagComponent:
+      Tag: R_fng_2_3
+    Parent: 8842016287057013942
+    Children:
+      []
+    TransformComponent:
+      Position: [1.45011594e-08, 0.0229407661, 5.62064848e-08]
+      Rotation: [-0.0493792109, -0.0373358242, -0.0459446311]
+      Scale: [0.99999994, 0.999999404, 0.999999821]
+  - Entity: 11204475213283077059
+    TagComponent:
+      Tag: mixamorig:LeftHandThumb4
+    Parent: 2498839847074512915
+    Children:
+      []
+    TransformComponent:
+      Position: [-0.00230005756, 0.0355999358, -8.19563866e-08]
+      Rotation: [5.21540642e-08, -1.95577705e-08, -1.71363354e-07]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 11236729836111811060
+    TagComponent:
+      Tag: L_fng_2_1
+    Parent: 11772855698957586751
+    Children:
+      - Handle: 3666865374200362957
+    TransformComponent:
+      Position: [-3.18212976e-08, 0.11363136, -2.42133833e-08]
+      Rotation: [-0.435886145, -0.193227798, 0.163186088]
+      Scale: [0.999999881, 0.999999642, 0.999999881]
+  - Entity: 11378774553816023926
+    TagComponent:
+      Tag: mixamorig:RightHandIndex2
+    Parent: 10129706042215161406
+    Children:
+      - Handle: 7316204660692122957
+    TransformComponent:
+      Position: [7.30030436e-09, 0.0353999995, -1.80292794e-08]
+      Rotation: [0.303820819, -0.00354299182, 0.0231422838]
+      Scale: [0.99999994, 1, 0.99999994]
+  - Entity: 11386383992181767607
+    TagComponent:
+      Tag: mixamorig:RightHandRing4
+    Parent: 12493169970305750884
+    Children:
+      []
+    TransformComponent:
+      Position: [1.11758709e-08, 0.0257001203, 1.5454134e-08]
+      Rotation: [-2.98023206e-08, -2.79396817e-09, 7.45057971e-09]
+      Scale: [1, 1, 0.99999994]
+  - Entity: 11772855698957586751
+    TagComponent:
+      Tag: L_hand4
+    Parent: 13336521690086299248
+    Children:
+      - Handle: 11236729836111811060
+    TransformComponent:
+      Position: [7.03896221e-05, 3.38679347e-05, -9.77441014e-05]
+      Rotation: [-1.24623263, -0.0848698467, -0.217558622]
+      Scale: [1.00000012, 0.999999762, 1.00000012]
+  - Entity: 11888156713904365447
+    TagComponent:
+      Tag: R_hand5
+    Parent: 10106138174848341417
+    Children:
+      - Handle: 6333028251168881587
+    TransformComponent:
+      Position: [4.16318713e-09, -1.90461513e-08, -1.12990186e-07]
+      Rotation: [-1.47882926, 0.831804991, 0.113113344]
+      Scale: [1, 1, 0.999999821]
+  - Entity: 11975100673400267077
+    TagComponent:
+      Tag: R_fng_1_3
+    Parent: 17066749334565773085
+    Children:
+      []
+    TransformComponent:
+      Position: [3.23471738e-08, 0.0195437782, 2.44477803e-07]
+      Rotation: [-0.116426475, 0.00269334018, -0.0394182242]
+      Scale: [0.999999762, 1, 1]
+  - Entity: 12007686346684124593
+    TagComponent:
+      Tag: joint_CORE
+    Parent: 5626049734653426535
+    Children:
+      - Handle: 18253333423876396030
+      - Handle: 9594671188172117672
+      - Handle: 9405855155584015417
+      - Handle: 4876507803171801902
+      - Handle: 2772303475328810291
+    TransformComponent:
+      Position: [-1.19428352e-08, 0.00237072958, -0.0733045712]
+      Rotation: [1.63083994, -9.34103994e-08, 3.1415925]
+      Scale: [1, 0.99999994, 1.00000298]
+  - Entity: 12065613232240152980
+    TagComponent:
+      Tag: mixamorig:LeftHandRing1
+    Parent: 18331640684067612026
+    Children:
+      - Handle: 12339996612749503075
+    TransformComponent:
+      Position: [0.0177999809, 0.129200026, -0.00149994344]
+      Rotation: [0.34790054, -0.00134210044, 0.0627729222]
+      Scale: [0.99999994, 1.00000012, 1]
+  - Entity: 12099340942764675134
+    TagComponent:
+      Tag: Camera
+    Parent: 9363616522839639206
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 2, 8]
+      Rotation: [3.10319543, 0, 3.14159274]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassHandle: 2532335888
+      StoredFields:
+        - ID: 2600427184
+          Name: ThirdPersonExample.CameraController:DistanceFromPlayer
+          Type: 12
+          Data: 8
+        - ID: 1874956036
+          Name: ThirdPersonExample.CameraController:MouseSensitivity
+          Type: 12
+          Data: 1
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 60.0000038
+        PerspectiveNear: 0.100000001
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+  - Entity: 12211546117624126767
+    TagComponent:
+      Tag: mixamorig:LeftHandPinky4
+    Parent: 7975217067878586794
+    Children:
+      []
+    TransformComponent:
+      Position: [2.3268416e-30, 0.0231001806, -5.65196387e-08]
+      Rotation: [-2.98023224e-08, -1.86264515e-09, -1.8626467e-09]
+      Scale: [1, 0.99999994, 1]
+  - Entity: 12336006089044297452
+    TagComponent:
+      Tag: mixamorig:LeftHandRing4
+    Parent: 7401059688313430505
+    Children:
+      []
+    TransformComponent:
+      Position: [-3.43425199e-09, 0.0278000683, 4.65443009e-08]
+      Rotation: [-7.50701478e-16, -6.51925847e-09, 9.31319688e-10]
+      Scale: [0.999999881, 1, 1.00000012]
+  - Entity: 12339996612749503075
+    TagComponent:
+      Tag: mixamorig:LeftHandRing2
+    Parent: 12065613232240152980
+    Children:
+      - Handle: 7401059688313430505
+    TransformComponent:
+      Position: [-3.98053501e-09, 0.0323999971, 4.17263344e-08]
+      Rotation: [0.364711255, 0.0067849583, -0.0367792696]
+      Scale: [1.00000012, 1.00000012, 1.00000012]
+  - Entity: 12390712113232693160
+    TagComponent:
+      Tag: R_fng_3_3
+    Parent: 10231772079843903731
+    Children:
+      []
+    TransformComponent:
+      Position: [-3.64197277e-08, 0.0258854982, -3.39290693e-07]
+      Rotation: [-0.00352051388, -0.0810350925, 0.049032826]
+      Scale: [0.999999881, 1, 1]
+  - Entity: 12493169970305750884
+    TagComponent:
+      Tag: mixamorig:RightHandRing3
+    Parent: 13632679639105870759
+    Children:
+      - Handle: 11386383992181767607
+    TransformComponent:
+      Position: [-2.32830644e-09, 0.0318000577, 2.88127797e-08]
+      Rotation: [0.312369227, -0.00374410348, 0.0237656292]
+      Scale: [0.99999994, 1, 0.999999821]
+  - Entity: 12502775036370323575
+    TagComponent:
+      Tag: mixamorig:Neck
+    Parent: 6393788415317806824
+    Children:
+      - Handle: 14203848194648230336
+    TransformComponent:
+      Position: [-7.4505806e-09, 0.14289993, -5.57227509e-09]
+      Rotation: [0.163029745, -0.00264796917, 0.00760676572]
+      Scale: [1, 0.999999881, 0.99999994]
+  - Entity: 12537440611475512932
+    TagComponent:
+      Tag: Directional Light
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [1.62036359, 0.206996039, 0.205425262]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Intensity: 1
+      Radiance: [1, 1, 1]
+      CastShadows: true
+      SoftShadows: true
+      LightSize: 0.5
+      ShadowAmount: 1
+  - Entity: 12788924602092292924
+    TagComponent:
+      Tag: mixamorig:LeftHandMiddle1
+    Parent: 5482990131070201968
+    Children:
+      - Handle: 1743456847755363175
+    TransformComponent:
+      Position: [-0.0152999852, 0.119299822, -0.00250000576]
+      Rotation: [0.25318557, -0.0055466122, 0.079863444]
+      Scale: [0.999999881, 1.00000012, 1]
+  - Entity: 12901780997828797054
+    TagComponent:
+      Tag: mixamorig:LeftHandMiddle1
+    Parent: 18331640684067612026
+    Children:
+      - Handle: 1252288691826482308
+    TransformComponent:
+      Position: [-0.0152999852, 0.119299822, -0.00250000576]
+      Rotation: [0.25318557, -0.0055466122, 0.079863444]
+      Scale: [0.999999881, 1.00000012, 1]
+  - Entity: 12965263043824796172
+    TagComponent:
+      Tag: camera
+    Parent: 14368023650997098129
+    Children:
+      []
+    TransformComponent:
+      Position: [0.00959260389, 0.113951921, 0.0279420596]
+      Rotation: [-9.73162173e-09, 2.38418465e-07, -2.32020133e-15]
+      Scale: [1, 1, 1]
+  - Entity: 13141768820797632060
+    TagComponent:
+      Tag: mixamorig:Spine2
+    Parent: 9550925542492727537
+    Children:
+      - Handle: 7568627788933365791
+      - Handle: 10082659680107924530
+      - Handle: 9941186251823823088
+    TransformComponent:
+      Position: [0, 0.127100185, -1.86264515e-09]
+      Rotation: [0.0197933409, 0.00399362249, 0.0275912229]
+      Scale: [0.99999994, 0.99999994, 0.99999994]
+  - Entity: 13165883899823093392
+    TagComponent:
+      Tag: R_fng_4_1
+    Parent: 8950981130968070710
+    Children:
+      - Handle: 10881282550291884610
+    TransformComponent:
+      Position: [5.99737149e-08, 0.103682578, -5.97013283e-08]
+      Rotation: [-0.394173443, 0.0455175601, 0.132133484]
+      Scale: [0.999999762, 0.999999464, 0.999999642]
+  - Entity: 13283779977414374141
+    TagComponent:
+      Tag: L_fng_4_1
+    Parent: 4611251778053241566
+    Children:
+      - Handle: 15039549246869799939
+    TransformComponent:
+      Position: [1.44180746e-07, 0.103682742, -7.0433579e-08]
+      Rotation: [-0.909277737, -0.389077306, -0.465069264]
+      Scale: [0.99999994, 1.00000024, 0.99999994]
+  - Entity: 13296116332847800446
+    TagComponent:
+      Tag: mixamorig:LeftHandThumb3
+    Parent: 18322744703170496555
+    Children:
+      - Handle: 3178755309260744768
+    TransformComponent:
+      Position: [-0.00230003241, 0.0419998914, -9.39683744e-08]
+      Rotation: [-0.228089809, -0.165739089, -0.0502640605]
+      Scale: [0.99999994, 1, 0.999999821]
+  - Entity: 13311508212663419674
+    TagComponent:
+      Tag: grip
+    Parent: 14368023650997098129
+    Children:
+      - Handle: 2392250840202712601
+      - Handle: 7506858813388414710
+      - Handle: 15088299910620954391
+      - Handle: 8991398193368125961
+    TransformComponent:
+      Position: [0.0731318742, -0.0118187387, -0.113265045]
+      Rotation: [-0.318244994, 0.010926445, 0.0303942226]
+      Scale: [1, 0.999999881, 0.99999994]
+  - Entity: 13336521690086299248
+    TagComponent:
+      Tag: L_wris
+    Parent: 14368023650997098129
+    Children:
+      - Handle: 3976667949399219359
+      - Handle: 4611251778053241566
+      - Handle: 16722147225848307743
+      - Handle: 11772855698957586751
+      - Handle: 17677241265034730050
+    TransformComponent:
+      Position: [0.0538352802, -0.0352231152, -0.369875938]
+      Rotation: [-0.491978884, 0.009514587, 2.63246751]
+      Scale: [1.00000048, 1.00000048, 0.99999994]
+  - Entity: 13486774036038522713
+    TagComponent:
+      Tag: mixamorig:RightHandMiddle4
+    Parent: 8380708262662248061
+    Children:
+      []
+    TransformComponent:
+      Position: [-2.02796393e-08, 0.0341999233, -4.98118808e-08]
+      Rotation: [1.49011612e-08, -1.62162888e-08, 1.86791183e-09]
+      Scale: [1, 0.999999881, 1]
+  - Entity: 13601420331520465116
+    TagComponent:
+      Tag: L_vol
+    Parent: 2743020383841186357
+    Children:
+      []
+    TransformComponent:
+      Position: [6.95987339e-08, 0.239412233, -3.47828077e-08]
+      Rotation: [-0.533262372, -0.224973023, -0.841458619]
+      Scale: [1.00000036, 1.00000024, 0.99999994]
+  - Entity: 13632679639105870759
+    TagComponent:
+      Tag: mixamorig:RightHandRing2
+    Parent: 15070619868186387450
+    Children:
+      - Handle: 12493169970305750884
+    TransformComponent:
+      Position: [-7.77828468e-09, 0.0322999619, 3.22948992e-08]
+      Rotation: [0.365588933, -0.00510785636, 0.027648218]
+      Scale: [0.99999994, 1, 1]
+  - Entity: 13647470903395461697
+    TagComponent:
+      Tag: mixamorig:RightHandPinky1
+    Parent: 3808743119735028169
+    Children:
+      - Handle: 427307722764419559
+    TransformComponent:
+      Position: [-0.0437000133, 0.132399976, 0.00200005621]
+      Rotation: [0.463816851, -0.0187480375, -0.0568954274]
+      Scale: [0.99999994, 1, 1]
+  - Entity: 13827251960691126404
+    TagComponent:
+      Tag: extra_1
+    Parent: 14368023650997098129
+    Children:
+      []
+    TransformComponent:
+      Position: [-0.00046388802, 0.0111258058, 0.025268402]
+      Rotation: [-9.73162173e-09, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 13939460708038109541
+    TagComponent:
+      Tag: extra_2
+    Parent: 14368023650997098129
+    Children:
+      []
+    TransformComponent:
+      Position: [-0.0242533498, 0.0111258058, 0.025268402]
+      Rotation: [-9.73162173e-09, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 14051217456792152456
+    TagComponent:
+      Tag: Sky Light
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SkyLightComponent:
+      EnvironmentMap: 17776251001083650100
+      Intensity: 0.5
+      Lod: 1
+      DynamicSky: false
+  - Entity: 14106970100776243637
+    TagComponent:
+      Tag: mixamorig:LeftHandPinky2
+    Parent: 5541543387303434434
+    Children:
+      - Handle: 7975217067878586794
+    TransformComponent:
+      Position: [-2.55118948e-09, 0.0319000967, -3.07400363e-08]
+      Rotation: [0.303879708, 0.00434613973, -0.0283817798]
+      Scale: [0.99999994, 1.00000012, 0.99999994]
+  - Entity: 14189120386395565222
+    TagComponent:
+      Tag: mixamorig:RightHandPinky1
+    Parent: 14808133931561269887
+    Children:
+      - Handle: 5797269408536065816
+    TransformComponent:
+      Position: [-0.0437000133, 0.132399976, 0.00200005621]
+      Rotation: [0.463816851, -0.0187480375, -0.0568954274]
+      Scale: [0.99999994, 1, 1]
+  - Entity: 14203848194648230336
+    TagComponent:
+      Tag: mixamorig:Head
+    Parent: 12502775036370323575
+    Children:
+      - Handle: 6969744451154700406
+    TransformComponent:
+      Position: [-7.4505806e-09, 0.0418001376, 0.00990001857]
+      Rotation: [-0.132075906, 0.0236167964, -0.00455521932]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 14353759144682974329
+    TagComponent:
+      Tag: Mosin_Nagant_Izhevsk_1930
+    Parent: 17527231123207058040
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 13805959725786282698
+      SubmeshIndex: 1
+      MaterialTable:
+        0: 0
+      BoneEntities: [14898389781221960646, 14368023650997098129, 7926670345477037323, 14884713084062674692, 2743020383841186357, 13601420331520465116, 13311508212663419674, 2392250840202712601, 7506858813388414710, 15088299910620954391, 8991398193368125961, 10106138174848341417, 14866827984314281978, 16715792584384995248, 9347517459560024958, 5452940783979564212, 8950981130968070710, 13165883899823093392, 10881282550291884610, 15777397951271152511, 8120827762530551984, 16968288453969536944, 10231772079843903731, 12390712113232693160, 6873436098655751758, 9223720771606104653, 8842016287057013942, 11146564652012677909, 11888156713904365447, 6333028251168881587, 17066749334565773085, 11975100673400267077, 13336521690086299248, 3976667949399219359, 3106062323412546122, 4319254703913884949, 3835752658628639304, 4611251778053241566, 13283779977414374141, 15039549246869799939, 3187092863343231131, 16722147225848307743, 1205485032476739744, 6988288995342112373, 14527317228276052718, 11772855698957586751, 11236729836111811060, 3666865374200362957, 1150887291616937881, 17677241265034730050, 6793421485649506055, 7715921233778009269, 274982437543653241, 12965263043824796172, 13827251960691126404, 13939460708038109541, 5809031828814755566, 9690629078504711038, 9164999088786338182]
+  - Entity: 14368023650997098129
+    TagComponent:
+      Tag: chest
+    Parent: 14898389781221960646
+    Children:
+      - Handle: 7926670345477037323
+      - Handle: 2743020383841186357
+      - Handle: 13311508212663419674
+      - Handle: 10106138174848341417
+      - Handle: 13336521690086299248
+      - Handle: 12965263043824796172
+      - Handle: 13827251960691126404
+      - Handle: 13939460708038109541
+      - Handle: 5809031828814755566
+      - Handle: 9690629078504711038
+      - Handle: 9164999088786338182
+    TransformComponent:
+      Position: [0, 0, 1.10000014]
+      Rotation: [1.57079649, -0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 14527317228276052718
+    TagComponent:
+      Tag: L_fng_3_3
+    Parent: 6988288995342112373
+    Children:
+      []
+    TransformComponent:
+      Position: [-2.72831446e-08, 0.0258857217, 2.39560123e-08]
+      Rotation: [-0.225348011, -0.164848804, -0.162490055]
+      Scale: [1, 0.999999821, 0.999999881]
+  - Entity: 14680681125157732297
+    TagComponent:
+      Tag: mixamorig:LeftHandRing3
+    Parent: 486503218959928210
+    Children:
+      - Handle: 10018501208017378060
+    TransformComponent:
+      Position: [7.85802889e-09, 0.0329000205, 3.16467776e-08]
+      Rotation: [0.311627835, 0.00496666692, -0.031614501]
+      Scale: [0.99999994, 1.00000012, 1.00000012]
+  - Entity: 14715497638855224404
+    TagComponent:
+      Tag: mixamorig:RightArm
+    Parent: 9941186251823823088
+    Children:
+      - Handle: 5658889597973099524
+    TransformComponent:
+      Position: [1.14232064e-08, 0.136999905, 3.14620436e-08]
+      Rotation: [0.877327025, -0.35126105, -0.477997363]
+      Scale: [0.999999762, 0.999999821, 0.999999881]
+  - Entity: 14724083777855920820
+    TagComponent:
+      Tag: Stormtrooper
+    Parent: 0
+    Children:
+      - Handle: 10952562297650914919
+      - Handle: 16497431925444910578
+    TransformComponent:
+      Position: [-8.66794777, 0, -11.3774414]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    AnimationComponent:
+      AnimationController: 13105368507993226897
+      BoneEntities: [16497431925444910578, 7862587204587404035, 9550925542492727537, 13141768820797632060, 7568627788933365791, 17349996736414483445, 5133645365339318178, 10082659680107924530, 3550194074474480595, 18142666501918516663, 5482990131070201968, 7323153130642283436, 14800391305211198616, 2498839847074512915, 11204475213283077059, 1534252164738577896, 14905530931326311348, 17008114520295872843, 4906898234706942888, 12788924602092292924, 1743456847755363175, 33356636090940243, 2537904759470472911, 4873014921502038955, 486503218959928210, 14680681125157732297, 10018501208017378060, 17642591071935520316, 17593888194952488165, 11031565016209206056, 8121055761974307290, 9941186251823823088, 14715497638855224404, 5658889597973099524, 14808133931561269887, 2925310134045178127, 7429898129429159991, 3984862987448267800, 10729312600596253332, 10129706042215161406, 11378774553816023926, 7316204660692122957, 3257358775317163887, 8176065922554523424, 18197903975709660608, 1883194782954509953, 15715547085076838497, 15070619868186387450, 13632679639105870759, 12493169970305750884, 11386383992181767607, 14189120386395565222, 5797269408536065816, 7797775396473200302, 8186393325447584391, 10069730629740536394, 10896255026610901502, 2213517682621906936, 10641060078967771498, 7764970628429375995, 10281448921322571463, 10066463232053883421, 7492667261508141304, 45268689272973240, 5405099459020142232]
+      EnableAnimation: true
+      PlaybackSpeed: 1
+      StateIndex: 0
+      AnimationTime: 0
+      EnableRootMotion: false
+      RootMotionTarget: 0
+  - Entity: 14800391305211198616
+    TagComponent:
+      Tag: mixamorig:LeftHandThumb2
+    Parent: 7323153130642283436
+    Children:
+      - Handle: 2498839847074512915
+    TransformComponent:
+      Position: [0.00459990511, 0.0380999185, 1.65551413e-07]
+      Rotation: [-0.145255983, 0.171907648, -0.734755456]
+      Scale: [0.99999994, 0.99999994, 1.00000012]
+  - Entity: 14808133931561269887
+    TagComponent:
+      Tag: mixamorig:RightHand
+    Parent: 5658889597973099524
+    Children:
+      - Handle: 2925310134045178127
+      - Handle: 10129706042215161406
+      - Handle: 8176065922554523424
+      - Handle: 15070619868186387450
+      - Handle: 14189120386395565222
+    TransformComponent:
+      Position: [4.81265552e-08, 0.233899832, -7.34651664e-08]
+      Rotation: [0.176868573, 0.346933454, 0.195968762]
+      Scale: [1, 1, 0.99999994]
+  - Entity: 14866827984314281978
+    TagComponent:
+      Tag: R_hand1
+    Parent: 10106138174848341417
+    Children:
+      - Handle: 16715792584384995248
+    TransformComponent:
+      Position: [2.43670506e-09, -3.16660937e-08, 2.40461073e-08]
+      Rotation: [-1.58106565, -0.130012259, 0.0350436717]
+      Scale: [0.999999821, 1, 0.99999994]
+  - Entity: 14884713084062674692
+    TagComponent:
+      Tag: R_vol
+    Parent: 7926670345477037323
+    Children:
+      []
+    TransformComponent:
+      Position: [-4.1587267e-09, 0.239412308, -1.46261598e-07]
+      Rotation: [0.890174568, -0.377037704, 0.66843468]
+      Scale: [1.00000012, 1.00000012, 1]
+  - Entity: 14887012054047208291
+    TagComponent:
+      Tag: mixamorig:Spine
+    Parent: 16546391993526577709
+    Children:
+      - Handle: 772840158198756968
+    TransformComponent:
+      Position: [1.11758709e-08, 0.095099926, -0.00619999226]
+      Rotation: [-0.00611923868, 0.024126621, 0.046558816]
+      Scale: [1, 0.99999994, 0.99999994]
+  - Entity: 14898389781221960646
+    TagComponent:
+      Tag: Root
+    Parent: 1784284421456699075
+    Children:
+      - Handle: 14368023650997098129
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [-1.57079637, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 14905530931326311348
+    TagComponent:
+      Tag: mixamorig:LeftHandIndex2
+    Parent: 1534252164738577896
+    Children:
+      - Handle: 17008114520295872843
+    TransformComponent:
+      Position: [-1.49279327e-08, 0.0359999351, -7.58429266e-08]
+      Rotation: [0.303083688, 0.00472440477, -0.0309324656]
+      Scale: [0.99999994, 1, 1]
+  - Entity: 15039549246869799939
+    TagComponent:
+      Tag: L_fng_4_2
+    Parent: 13283779977414374141
+    Children:
+      - Handle: 3187092863343231131
+    TransformComponent:
+      Position: [1.8370903e-08, 0.0267399978, -9.27906427e-08]
+      Rotation: [-0.516647518, -0.496383399, -0.10486275]
+      Scale: [1, 0.999999583, 0.999999881]
+  - Entity: 15070619868186387450
+    TagComponent:
+      Tag: mixamorig:RightHandRing1
+    Parent: 14808133931561269887
+    Children:
+      - Handle: 13632679639105870759
+    TransformComponent:
+      Position: [-0.0169999953, 0.133200034, -0.00120007503]
+      Rotation: [0.359587848, 0.00118227513, -0.0843770802]
+      Scale: [1, 0.99999994, 1]
+  - Entity: 15088299910620954391
+    TagComponent:
+      Tag: muz
+    Parent: 13311508212663419674
+    Children:
+      []
+    TransformComponent:
+      Position: [-0.00035417045, 0.357518792, -0.853541255]
+      Rotation: [-1.21621335, -1.54469717e-07, -2.2451205e-07]
+      Scale: [1.00000012, 1.00000024, 1.00000012]
+  - Entity: 15280921407817439236
+    TagComponent:
+      Tag: mixamorig:RightToeBase
+    Parent: 5316760370169943555
+    Children:
+      - Handle: 15935662752753569684
+    TransformComponent:
+      Position: [3.001308e-08, 0.17591311, -1.01239905e-08]
+      Rotation: [0.800673366, 0.0534059331, -0.00172199786]
+      Scale: [1.00000012, 0.999999881, 1.00000012]
+  - Entity: 15340646447430140032
+    TagComponent:
+      Tag: mixamorig:LeftToe_End
+    Parent: 8997603737665247660
+    Children:
+      []
+    TransformComponent:
+      Position: [-4.40922987e-09, 0.0682955906, 1.16423038e-10]
+      Rotation: [-1.2942472e-07, 2.71640602e-06, 7.47950857e-09]
+      Scale: [1, 1, 1]
+  - Entity: 15715547085076838497
+    TagComponent:
+      Tag: mixamorig:RightHandMiddle4
+    Parent: 1883194782954509953
+    Children:
+      []
+    TransformComponent:
+      Position: [-2.02796393e-08, 0.0341999233, -4.98118808e-08]
+      Rotation: [1.49011612e-08, -1.62162888e-08, 1.86791183e-09]
+      Scale: [1, 0.999999881, 1]
+  - Entity: 15777397951271152511
+    TagComponent:
+      Tag: R_fng_4_3
+    Parent: 10881282550291884610
+    Children:
+      []
+    TransformComponent:
+      Position: [-1.73502741e-08, 0.0253235437, 8.21996835e-08]
+      Rotation: [-0.0579506494, 0.0694011822, 0.10814029]
+      Scale: [1.00000024, 1.00000024, 1.00000012]
+  - Entity: 15935662752753569684
+    TagComponent:
+      Tag: mixamorig:RightToe_End
+    Parent: 15280921407817439236
+    Children:
+      []
+    TransformComponent:
+      Position: [3.20138804e-10, 0.0703084543, -1.1641399e-09]
+      Rotation: [1.98828502e-07, 1.79058429e-06, -1.80039194e-06]
+      Scale: [1.00000012, 0.99999994, 1.00000012]
+  - Entity: 16014758913723659176
+    TagComponent:
+      Tag: mixamorig:LeftHandThumb1
+    Parent: 18331640684067612026
+    Children:
+      - Handle: 18322744703170496555
+    TransformComponent:
+      Position: [-0.0324999839, 0.0306999758, 0.017300006]
+      Rotation: [0.399274617, 0.106551468, 0.777077556]
+      Scale: [0.99999994, 1.00000024, 0.99999994]
+  - Entity: 16081315617680870453
+    TagComponent:
+      Tag: mixamorig:RightUpLeg
+    Parent: 16546391993526577709
+    Children:
+      - Handle: 18441288025094242493
+    TransformComponent:
+      Position: [-0.109300032, -0.0529000163, 0.0018000073]
+      Rotation: [0.0206066351, 0.184334978, -3.10875368]
+      Scale: [0.999964774, 0.999999642, 0.999882162]
+  - Entity: 16082095161949497558
+    TagComponent:
+      Tag: Mosin_Nagant_Izhevsk_1930
+    Parent: 17527231123207058040
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 13805959725786282698
+      SubmeshIndex: 2
+      MaterialTable:
+        0: 0
+      BoneEntities: [14898389781221960646, 14368023650997098129, 7926670345477037323, 14884713084062674692, 2743020383841186357, 13601420331520465116, 13311508212663419674, 2392250840202712601, 7506858813388414710, 15088299910620954391, 8991398193368125961, 10106138174848341417, 14866827984314281978, 16715792584384995248, 9347517459560024958, 5452940783979564212, 8950981130968070710, 13165883899823093392, 10881282550291884610, 15777397951271152511, 8120827762530551984, 16968288453969536944, 10231772079843903731, 12390712113232693160, 6873436098655751758, 9223720771606104653, 8842016287057013942, 11146564652012677909, 11888156713904365447, 6333028251168881587, 17066749334565773085, 11975100673400267077, 13336521690086299248, 3976667949399219359, 3106062323412546122, 4319254703913884949, 3835752658628639304, 4611251778053241566, 13283779977414374141, 15039549246869799939, 3187092863343231131, 16722147225848307743, 1205485032476739744, 6988288995342112373, 14527317228276052718, 11772855698957586751, 11236729836111811060, 3666865374200362957, 1150887291616937881, 17677241265034730050, 6793421485649506055, 7715921233778009269, 274982437543653241, 12965263043824796172, 13827251960691126404, 13939460708038109541, 5809031828814755566, 9690629078504711038, 9164999088786338182]
+  - Entity: 16497431925444910578
+    TagComponent:
+      Tag: mixamorig:Hips
+    Parent: 14724083777855920820
+    Children:
+      - Handle: 7862587204587404035
+      - Handle: 10069730629740536394
+      - Handle: 10281448921322571463
+    TransformComponent:
+      Position: [0.0032329713, 1.03934693, -0.00343090855]
+      Rotation: [-0.0598674491, -0.0948553607, -0.0571740791]
+      Scale: [0.999999881, 1, 1]
+  - Entity: 16546391993526577709
+    TagComponent:
+      Tag: mixamorig:Hips
+    Parent: 1493697703386730572
+    Children:
+      - Handle: 14887012054047208291
+      - Handle: 8673603815476564877
+      - Handle: 16081315617680870453
+    TransformComponent:
+      Position: [0.0032329713, 1.03934693, -0.00343090855]
+      Rotation: [-0.0598674491, -0.0948553681, -0.0571740754]
+      Scale: [0.999999881, 1, 1]
+  - Entity: 16715792584384995248
+    TagComponent:
+      Tag: R_fng_5_1
+    Parent: 14866827984314281978
+    Children:
+      - Handle: 9347517459560024958
+    TransformComponent:
+      Position: [-8.70343797e-08, 0.0973324552, -8.02789657e-08]
+      Rotation: [-0.374025553, 0.0736169815, 0.275930405]
+      Scale: [1.00000012, 1, 0.99999994]
+  - Entity: 16722147225848307743
+    TagComponent:
+      Tag: L_hand3
+    Parent: 13336521690086299248
+    Children:
+      - Handle: 1205485032476739744
+    TransformComponent:
+      Position: [7.06362189e-05, 3.35808909e-05, -9.77892414e-05]
+      Rotation: [-1.32870781, 0.165087789, -0.0825151503]
+      Scale: [1, 1.00000012, 1.00000024]
+  - Entity: 16968288453969536944
+    TagComponent:
+      Tag: R_fng_3_1
+    Parent: 8120827762530551984
+    Children:
+      - Handle: 10231772079843903731
+    TransformComponent:
+      Position: [-3.92292172e-08, 0.10868001, -1.89391933e-08]
+      Rotation: [-0.345491767, -0.0228906274, 0.000343065476]
+      Scale: [1, 0.999999583, 0.999999702]
+  - Entity: 17008114520295872843
+    TagComponent:
+      Tag: mixamorig:LeftHandIndex3
+    Parent: 14905530931326311348
+    Children:
+      - Handle: 4906898234706942888
+    TransformComponent:
+      Position: [1.20293678e-10, 0.0320998803, -9.9720495e-08]
+      Rotation: [0.140258893, 0.00101582031, -0.0144869415]
+      Scale: [1.00000012, 1, 1]
+  - Entity: 17066749334565773085
+    TagComponent:
+      Tag: R_fng_1_2
+    Parent: 6333028251168881587
+    Children:
+      - Handle: 11975100673400267077
+    TransformComponent:
+      Position: [-1.71316881e-08, 0.0191413909, 1.71853159e-07]
+      Rotation: [0.0149892159, -0.0137635637, -0.0620923638]
+      Scale: [1.00000012, 1.00000012, 0.99999994]
+  - Entity: 17278222997303367927
+    TagComponent:
+      Tag: mixamorig:RightHandRing1
+    Parent: 3808743119735028169
+    Children:
+      - Handle: 10816920984046576520
+    TransformComponent:
+      Position: [-0.0169999953, 0.133200034, -0.00120007503]
+      Rotation: [0.359587848, 0.00118227513, -0.0843770802]
+      Scale: [1, 0.99999994, 1]
+  - Entity: 17349996736414483445
+    TagComponent:
+      Tag: mixamorig:Head
+    Parent: 7568627788933365791
+    Children:
+      - Handle: 5133645365339318178
+    TransformComponent:
+      Position: [-7.4505806e-09, 0.0418001376, 0.00990001857]
+      Rotation: [-0.132075906, 0.0236167964, -0.00455521932]
+      Scale: [1, 1, 1.00000012]
+  - Entity: 17527231123207058040
+    TagComponent:
+      Tag: Mosin_Nagant_Izhevsk_1930
+    Parent: 5645127604949174905
+    Children:
+      - Handle: 14353759144682974329
+      - Handle: 16082095161949497558
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 17593888194952488165
+    TagComponent:
+      Tag: mixamorig:LeftHandPinky2
+    Parent: 17642591071935520316
+    Children:
+      - Handle: 11031565016209206056
+    TransformComponent:
+      Position: [-2.55118948e-09, 0.0319000967, -3.07400363e-08]
+      Rotation: [0.303879708, 0.00434613973, -0.0283817798]
+      Scale: [0.99999994, 1.00000012, 0.99999994]
+  - Entity: 17642591071935520316
+    TagComponent:
+      Tag: mixamorig:LeftHandPinky1
+    Parent: 5482990131070201968
+    Children:
+      - Handle: 17593888194952488165
+    TransformComponent:
+      Position: [0.0408999957, 0.121699989, 0.00220009242]
+      Rotation: [0.451251984, 0.0225742962, 0.0341959149]
+      Scale: [1, 0.999999642, 0.999999821]
+  - Entity: 17677241265034730050
+    TagComponent:
+      Tag: L_hand5
+    Parent: 13336521690086299248
+    Children:
+      - Handle: 6793421485649506055
+    TransformComponent:
+      Position: [0.00616260665, 0.000426102953, 0.0040009548]
+      Rotation: [-1.768556, -0.465981007, -0.0818711221]
+      Scale: [0.999999702, 0.999999762, 0.999999821]
+  - Entity: 17763846564425985689
+    TagComponent:
+      Tag: mixamorig:RightHandRing4
+    Parent: 6319600210931494146
+    Children:
+      []
+    TransformComponent:
+      Position: [1.11758709e-08, 0.0257001203, 1.5454134e-08]
+      Rotation: [-2.98023206e-08, -2.79396817e-09, 7.45057971e-09]
+      Scale: [1, 1, 0.99999994]
+  - Entity: 18142666501918516663
+    TagComponent:
+      Tag: mixamorig:LeftForeArm
+    Parent: 3550194074474480595
+    Children:
+      - Handle: 5482990131070201968
+    TransformComponent:
+      Position: [1.4052931e-10, 0.245799944, -2.44057805e-08]
+      Rotation: [0.000766263169, -0.00367316627, 0.0251632184]
+      Scale: [1.00000012, 1, 1]
+  - Entity: 18159032526798209959
+    TagComponent:
+      Tag: armmesh
+    Parent: 5645127604949174905
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 13805959725786282698
+      SubmeshIndex: 0
+      MaterialTable:
+        0: 0
+      BoneEntities: [14898389781221960646, 14368023650997098129, 7926670345477037323, 14884713084062674692, 2743020383841186357, 13601420331520465116, 13311508212663419674, 2392250840202712601, 7506858813388414710, 15088299910620954391, 8991398193368125961, 10106138174848341417, 14866827984314281978, 16715792584384995248, 9347517459560024958, 5452940783979564212, 8950981130968070710, 13165883899823093392, 10881282550291884610, 15777397951271152511, 8120827762530551984, 16968288453969536944, 10231772079843903731, 12390712113232693160, 6873436098655751758, 9223720771606104653, 8842016287057013942, 11146564652012677909, 11888156713904365447, 6333028251168881587, 17066749334565773085, 11975100673400267077, 13336521690086299248, 3976667949399219359, 3106062323412546122, 4319254703913884949, 3835752658628639304, 4611251778053241566, 13283779977414374141, 15039549246869799939, 3187092863343231131, 16722147225848307743, 1205485032476739744, 6988288995342112373, 14527317228276052718, 11772855698957586751, 11236729836111811060, 3666865374200362957, 1150887291616937881, 17677241265034730050, 6793421485649506055, 7715921233778009269, 274982437543653241, 12965263043824796172, 13827251960691126404, 13939460708038109541, 5809031828814755566, 9690629078504711038, 9164999088786338182]
+  - Entity: 18197903975709660608
+    TagComponent:
+      Tag: mixamorig:RightHandMiddle2
+    Parent: 8176065922554523424
+    Children:
+      - Handle: 1883194782954509953
+    TransformComponent:
+      Position: [5.42490852e-09, 0.0415999591, 1.2980216e-08]
+      Rotation: [0.30439797, -0.00344605534, 0.0224657338]
+      Scale: [1.00000024, 1, 1]
+  - Entity: 18210452534646883700
+    TagComponent:
+      Tag: Ramp
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [-4, 2, 2.36136714e-07]
+      Rotation: [0, -1.57079637, 0]
+      Scale: [3.99992204, 4, 7.99984407]
+    StaticMeshComponent:
+      AssetID: 4590843730977251518
+      MaterialTable:
+        0: 0
+    MeshColliderComponent:
+      ColliderHandle: 6226953060441677916
+      IsTrigger: false
+      UseSharedShape: false
+      OverrideMaterial: 0
+      CollisionComplexity: "\x00"
+  - Entity: 18253333423876396030
+    TagComponent:
+      Tag: joint_trigger
+    Parent: 12007686346684124593
+    Children:
+      []
+    TransformComponent:
+      Position: [8.61556959e-09, 0.0435000546, 0.00699998485]
+      Rotation: [0.06004389, 4.79978759e-08, 3.1415925]
+      Scale: [1, 0.99999994, 1.00000966]
+  - Entity: 18322744703170496555
+    TagComponent:
+      Tag: mixamorig:LeftHandThumb2
+    Parent: 16014758913723659176
+    Children:
+      - Handle: 13296116332847800446
+    TransformComponent:
+      Position: [0.00459990511, 0.0380999185, 1.65551413e-07]
+      Rotation: [-0.145255983, 0.171907648, -0.734755456]
+      Scale: [0.99999994, 0.99999994, 1.00000012]
+  - Entity: 18331640684067612026
+    TagComponent:
+      Tag: mixamorig:LeftHand
+    Parent: 18331845209281880317
+    Children:
+      - Handle: 16014758913723659176
+      - Handle: 4209910285657306964
+      - Handle: 12901780997828797054
+      - Handle: 12065613232240152980
+      - Handle: 5541543387303434434
+    TransformComponent:
+      Position: [2.19253433e-08, 0.234500036, 5.02637789e-08]
+      Rotation: [0.204945907, -0.52028513, -0.196012735]
+      Scale: [1.00000012, 1, 1.00000024]
+  - Entity: 18331845209281880317
+    TagComponent:
+      Tag: mixamorig:LeftForeArm
+    Parent: 3470575847488440634
+    Children:
+      - Handle: 18331640684067612026
+    TransformComponent:
+      Position: [1.4052931e-10, 0.245799944, -2.44057805e-08]
+      Rotation: [0.000766263169, -0.00367316627, 0.0251632184]
+      Scale: [1.00000012, 1, 1]
+  - Entity: 18441288025094242493
+    TagComponent:
+      Tag: mixamorig:RightLeg
+    Parent: 16081315617680870453
+    Children:
+      - Handle: 5316760370169943555
+    TransformComponent:
+      Position: [1.12668204e-08, 0.433700025, -1.68802217e-09]
+      Rotation: [-0.268413514, 0.160379335, -0.0446546264]
+      Scale: [1.00000012, 0.999999821, 1]
+SceneAudio:
+  MasterReverb:
+    Pre-delay: 44
+    Room size: 0.49999994
+    Damping: 0.5
+    Width: 1

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 namespace Ant {
 	typedef enum class KeyCode : uint16_t
 	{
@@ -136,9 +138,43 @@ namespace Ant {
 		Menu = 348
 	} Key;
 
+	enum class KeyState
+	{
+		None = -1,
+		Pressed,
+		Held,
+		Released
+	};
+
+	enum class CursorMode
+	{
+		Normal = 0,
+		Hidden = 1,
+		Locked = 2
+	};
+
+	typedef enum class MouseButton : uint16_t
+	{
+		Button0 = 0,
+		Button1 = 1,
+		Button2 = 2,
+		Button3 = 3,
+		Button4 = 4,
+		Button5 = 5,
+		Left = Button0,
+		Right = Button1,
+		Middle = Button2
+	} Button;
+
 	inline std::ostream& operator<<(std::ostream& os, KeyCode keyCode)
 	{
 		os << static_cast<int32_t>(keyCode);
+		return os;
+	}
+
+	inline std::ostream& operator<<(std::ostream& os, MouseButton button)
+	{
+		os << static_cast<int32_t>(button);
 		return os;
 	}
 }
@@ -269,3 +305,8 @@ namespace Ant {
 #define ANT_KEY_RIGHT_ALT       ::Ant::Key::RightAlt
 #define ANT_KEY_RIGHT_SUPER     ::Ant::Key::RightSuper
 #define ANT_KEY_MENU            ::Ant::Key::Menu
+
+// Mouse
+#define ANT_MOUSE_BUTTON_LEFT    ::Ant::Button::Left
+#define ANT_MOUSE_BUTTON_RIGHT   ::Ant::Button::Right
+#define ANT_MOUSE_BUTTON_MIDDLE  ::Ant::Button::Middle

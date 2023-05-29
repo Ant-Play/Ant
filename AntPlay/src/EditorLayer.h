@@ -9,14 +9,22 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
-
 #include <string>
 
 #include "Ant/Editor/SceneHierarchyPanel.h"
-#include "Ant/Editor/ContentBrowserPanel.h"
-#include "Ant/Editor/ObjectsPanel.h"
+#include "Panels/ContentBrowserPanel.h"
+#include "Panels/ProjectSettingsWindow.h"
+#include "Panels/ApplicationSettingsPanel.h"
+#include "Ant/Editor/EditorConsolePanel.h"
+#include "Ant/Editor/ECSDebugPanel.h"
+
+#include "Ant/Editor/PanelManager.h"
+
+#include "Ant/Project/UserPreferences.h"
+
+#include "Ant/Renderer/UI/Font.h"
+
+#include <future>
 
 
 namespace Ant {
@@ -25,13 +33,8 @@ namespace Ant {
 	class EditorLayer : public Layer
 	{
 	public:
-		enum class PropertyFlag
-		{
-			None = 0, ColorProperty = 1, DragProperty = 2, SliderProperty = 4
-		};
-	public:
-		EditorLayer();
-		virtual ~EditorLayer();
+		EditorLayer(const Ref<UserPreferences>& userPreferences);
+		virtual ~EditorLayer() override;
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
@@ -39,131 +42,203 @@ namespace Ant {
 
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event& e) override;
+
+		void OnRender2D();
+
 		bool OnKeyPressedEvent(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
-		void ShowBoundingBoxes(bool show, bool onTop = false);
-		void SelectEntity(Entity entity);
-
-		void NewScene();
-		void OpenScene();
-		void OpenScene(const std::string& filepath);
+		void OpenProject();
+		void OpenProject(const std::filesystem::path& filepath);
+		void CreateProject(std::filesystem::path projectPath);
+		void EmptyProject();
+		void UpdateCurrentProject();
+		void SaveProject();
+		void CloseProject(bool unloadProject = true);
+		void NewScene(const std::string& name = "UntitledScene");
+		bool OpenScene();
+		bool OpenScene(const std::filesystem::path& filepath, const bool checkAutoSave);
+		bool OpenScene(const AssetMetadata& assetMetadata);
 		void SaveScene();
+		void SaveSceneAuto();
 		void SaveSceneAs();
-	private:
-		std::pair<float, float> GetMouseViewportSpace();
-		std::pair<glm::vec3, glm::vec3> CastRay(float mx, float my);
 
-		struct SelectedSubmesh
+		void OnCreateMeshFromMeshSource(Entity entity, Ref<MeshSource> meshSource);
+		void SceneHierarchyInvalidMetadataCallback(Entity entity, AssetHandle handle);
+		void SceneHierarchySetEditorCameraTransform(Entity entity);
+	private:
+		std::pair<float, float> GetMouseViewportSpace(bool primaryViewport);
+		std::pair<glm::vec3, glm::vec3> CastRay(const EditorCamera& camera, float mx, float my);
+
+		std::vector<std::function<void()>> m_PostSceneUpdateQueue;
+
+		struct SelectionData
 		{
 			Ant::Entity Entity;
 			Submesh* Mesh = nullptr;
 			float Distance = 0.0f;
 		};
-
-		void OnSelected(const SelectedSubmesh& selectionContext);
 		void OnEntityDeleted(Entity e);
-		Ray CastMouseRay();
 
 		void OnScenePlay();
 		void OnSceneStop();
+		void OnSceneStartSimulation();
+		void OnSceneStopSimulation();
+		void OnSceneTransition(const std::string& scene);
 
 		void UpdateWindowTitle(const std::string& sceneName);
 
-		float GetSnapValue();
-	private:
-		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
-		Scope<ContentBrowserPanel> m_ContentBrowserPanel;
-		Scope<ObjectsPanel> m_ObjectsPanel;
+		void UI_DrawMenubar();
+		// Returns titlebar height
+		float UI_DrawTitlebar();
+		void UI_HandleManualWindowResize();
+		bool UI_TitleBarHitTest(int x, int y) const;
 
-		Ref<Scene> m_RuntimeScene, m_EditorScene, m_CurrentScene;
+		void UI_GizmosToolbar();
+		void UI_CentralToolbar();
+		void UI_ViewportSettings();
+		void UI_DrawGizmos();
+		void UI_HandleAssetDrop();
+
+		// Popups
+		void UI_ShowNewProjectPopup();
+		void UI_ShowLoadAutoSavePopup();
+		void UI_ShowCreateNewMeshPopup();
+		void UI_ShowInvalidAssetMetadataPopup();
+		void UI_ShowNoMeshPopup();
+		void UI_ShowNoSkeletonPopup();
+		void UI_ShowNoAnimationPopup();
+		void UI_ShowNewScenePopup();
+		void UI_ShowWelcomePopup();
+		void UI_ShowAboutPopup();
+
+		void UI_BuildAssetPackDialog();
+
+		// Statistics Panel Rendering
+		void UI_StatisticsPanel();
+
+		float GetSnapValue();
+
+		void DeleteEntity(Entity entity);
+
+		void UpdateSceneRendererSettings();
+		void QueueSceneTransition(const std::string& scene);
+
+		void BuildShaderPack();
+		void BuildAssetPack();
+		void RegenerateProjectScriptSolution(const std::filesystem::path& projectPath);
+	private:
+		Ref<UserPreferences> m_UserPreferences;
+
+		Scope<PanelManager> m_PanelManager;
+		bool m_ShowStatisticsPanel = false;
+
+		Ref<Scene> m_RuntimeScene, m_EditorScene, m_SimulationScene, m_CurrentScene;
+		Ref<SceneRenderer> m_ViewportRenderer;
+		Ref<SceneRenderer> m_SecondViewportRenderer;
+		Ref<SceneRenderer> m_FocusedRenderer;
+		Ref<Renderer2D> m_Renderer2D;
 		std::string m_SceneFilePath;
-		bool m_ReloadScriptOnPlay = true;
 
 		EditorCamera m_EditorCamera;
+		EditorCamera m_SecondEditorCamera;
 
-		Ref<Shader> m_BrushShader;
-		Ref<Material> m_SphereBaseMaterial;
+		float m_LineWidth = 2.0f;
 
-		struct AlbedoInput
-		{
-			glm::vec3 Color = { 0.972f, 0.96f, 0.915f }; // Silver, from https://docs.unrealengine.com/en-us/Engine/Rendering/Materials/PhysicallyBased
-			Ref<Texture2D> TextureMap;
-			bool SRGB = true;
-			bool UseTexture = false;
-		};
-		//AlbedoInput m_AlbedoInput;
-
-		struct NormalInput
-		{
-			Ref<Texture2D> TextureMap;
-			bool UseTexture = false;
-		};
-		//NormalInput m_NormalInput;
-
-		struct MetalnessInput
-		{
-			float Value = 1.0f;
-			Ref<Texture2D> TextureMap;
-			bool UseTexture = false;
-		};
-		//MetalnessInput m_MetalnessInput;
-
-		struct RoughnessInput
-		{
-			float Value = 0.2f;
-			Ref<Texture2D> TextureMap;
-			bool UseTexture = false;
-		};
-		//RoughnessInput m_RoughnessInput;
-
-		// PBR params
-		bool m_RadiancePrefilter = false;
-
-		float m_EnvMapRotation = 0.0f;
-
-		enum class SceneType : uint32_t
-		{
-			Spheres = 0, Model = 1
-		};
-		SceneType m_SceneType;
-
-		// Editor resources
-		Ref<Texture2D> m_CheckerboardTex;
-		Ref<Texture2D> m_PlayButtonTex, m_StopButtonTex, m_PauseButtonTex;
+		bool m_TitleBarHovered = false;
 
 		glm::vec2 m_ViewportBounds[2];
+		glm::vec2 m_SecondViewportBounds[2];
 		int m_GizmoType = -1; // -1 = no gizmo
+		int m_GizmoMode = 0; // 0 = local
+
 		float m_SnapValue = 0.5f;
 		float m_RotationSnapValue = 45.0f;
-		bool m_AllowViewportCameraEvents = false;
-		bool m_DrawOnTopBoundingBoxes = false;
+		bool m_DrawOnTopBoundingBoxes = true;
 
-		bool m_UIShowBoundingBoxes = false;
-		bool m_UIShowBoundingBoxesOnTop = false;
+		// ImGui Tools
+		bool m_ShowMetricsTool = false;
+		bool m_ShowStackTool = false;
+		bool m_ShowStyleEditor = false;
+
+		bool m_StartedCameraClickInViewport = false;
+
+		bool m_ShowBoundingBoxes = false;
+		bool m_ShowBoundingBoxSelectedMeshOnly = true;
+		bool m_ShowBoundingBoxSubmeshes = false;
+
+		bool m_ShowIcons = true;
+		bool m_ShowGizmos = true;
+		bool m_ShowGizmosInPlayMode = false;
 
 		bool m_ViewportPanelMouseOver = false;
 		bool m_ViewportPanelFocused = false;
+		bool m_AllowViewportCameraEvents = false;
 
-		bool m_ShowPhysicsSettings = false;
+		bool m_ViewportPanel2MouseOver = false;
+		bool m_ViewportPanel2Focused = false;
 
-		bool m_ShowWelcomePopup = true;
+		bool m_ShowSecondViewport = false;
+
+		bool m_EditorCameraInRuntime = false;
+
+		enum class TransformationTarget { MedianPoint, IndividualOrigins };
+		TransformationTarget m_MultiTransformTarget = TransformationTarget::MedianPoint;
+
+		struct LoadAutoSavePopupData
+		{
+			std::string FilePath;
+			std::string FilePathAuto;
+		} m_LoadAutoSavePopupData;
+
+		struct CreateNewMeshPopupData
+		{
+			Ref<MeshSource> MeshToCreate;
+			std::array<char, 256> CreateMeshFilenameBuffer;
+			std::array<char, 256> CreateSkeletonFilenameBuffer;
+			std::array<char, 256> CreateAnimationFilenameBuffer;
+			Entity TargetEntity;
+
+			CreateNewMeshPopupData()
+			{
+				CreateMeshFilenameBuffer.fill(0);
+				MeshToCreate = nullptr;
+				TargetEntity = {};
+			}
+
+		} m_CreateNewMeshPopupData;
+
+		struct InvalidAssetMetadataPopupData
+		{
+			AssetMetadata Metadata;
+		} m_InvalidAssetMetadataPopupData;
 
 		enum class SceneState
 		{
-			Edit = 0, Play = 1, Pause = 2
+			Edit = 0, Play = 1, Pause = 2, Simulate = 3
 		};
 		SceneState m_SceneState = SceneState::Edit;
 
+		float m_TimeSinceLastSave = 0.0f; // time (in seconds) since scene was last saved.  Counts up only when scene is in Edit mode. If exceeds 300s then scene is automatically saved
+
 		enum class SelectionMode
 		{
-			None = 0, Entity = 1, SubMesh = 2
+			Entity = 0, SubMesh = 1
 		};
 
 		SelectionMode m_SelectionMode = SelectionMode::Entity;
-		std::vector<SelectedSubmesh> m_SelectionContext;
-		glm::mat4* m_RelativeTransform = nullptr;
-		glm::mat4* m_CurrentlySelectedTransform = nullptr;
+
+		float m_RequiredProjectVersion = 0.0f;
+		bool m_ProjectUpdateNeeded = false;
+		bool m_ShowProjectUpdatedPopup = false;
+
+		std::thread m_AssetPackThread;
+		std::future<void> m_AssetPackFuture;
+		std::atomic<bool> m_AssetPackBuildInProgress = false;
+		std::atomic<float> m_AssetPackBuildProgress = 0.0f;
+		bool m_OpenAssetPackDialog = false;
+
+		void SerializeEnvironmentMap();
 	};
 
 }

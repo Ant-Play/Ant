@@ -1,23 +1,13 @@
 ﻿#include "antpch.h"
 #include "SceneCamera.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-
 
 namespace Ant{
 
-	SceneCamera::SceneCamera()
-	{
-	}
-
-	SceneCamera::~SceneCamera()
-	{
-	}
-
-	void SceneCamera::SetPerspective(float verticalFOV, float nearClip, float farClip)
+	void SceneCamera::SetPerspective(float degVerticalFOV, float nearClip, float farClip)
 	{
 		m_ProjectionType = ProjectionType::Perspective;
-		m_PerspectiveFOV = verticalFOV;
+		m_DegPerspectiveFOV = degVerticalFOV;
 		m_PerspectiveNear = nearClip;
 		m_PerspectiveFar = farClip;
 	}
@@ -35,13 +25,13 @@ namespace Ant{
 		switch (m_ProjectionType)
 		{
 		case ProjectionType::Perspective:
-			m_ProjectionMatrix = glm::perspectiveFov(m_PerspectiveFOV, (float)width, (float)height, m_PerspectiveNear, m_PerspectiveFar);
+			SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), (float)width, (float)height, m_PerspectiveNear, m_PerspectiveFar);
 			break;
 		case ProjectionType::Orthographic:
 			float aspect = (float)width / (float)height;
 			float width = m_OrthographicSize * aspect;
 			float height = m_OrthographicSize;
-			m_ProjectionMatrix = glm::ortho(-width * 0.5f, width * 0.5f, -height * 0.5f, height * 0.5f);
+			SetOrthoProjectionMatrix(width, height, m_OrthographicNear, m_OrthographicFar);
 			break;
 		}
 	}

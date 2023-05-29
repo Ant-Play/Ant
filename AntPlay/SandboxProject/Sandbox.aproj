@@ -1,0 +1,69 @@
+Project:
+  Name: Sandbox
+  AssetDirectory: Assets
+  AssetRegistry: Assets/AssetRegistry.antr
+  AudioCommandsRegistryPath: Assets/AudioCommandsRegistry.antr
+  MeshPath: Assets/Meshes
+  MeshSourcePath: Assets/Meshes/Source
+  AnimationPath: Assets/Animation
+  ScriptModulePath: Assets/Scripts/Binaries
+  DefaultNamespace: Sandbox
+  StartScene: scenes/PrefabSandbox.ascene
+  AutomaticallyReloadAssembly: true
+  AutoSave: false
+  AutoSaveInterval: 300
+  Audio:
+    FileStreamingDurationThreshold: 30
+  Physics:
+    FixedTimestep: 0.00999999978
+    Gravity: [0, -9.81000042, 0]
+    BroadphaseAlgorithm: 2
+    FrictionModel: 0
+    SolverPositionIterations: 8
+    SolverVelocityIterations: 2
+  Log:
+    Animation:
+      Enabled: true
+      LevelFilter: Error
+    AssetManager:
+      Enabled: true
+      LevelFilter: Fatal
+    Assimp:
+      Enabled: true
+      LevelFilter: Fatal
+    Audio:
+      Enabled: true
+      LevelFilter: Error
+    Core:
+      Enabled: true
+      LevelFilter: Trace
+    GLFW:
+      Enabled: true
+      LevelFilter: Trace
+    Memory:
+      Enabled: true
+      LevelFilter: Error
+    Mesh:
+      Enabled: true
+      LevelFilter: Error
+    Physics:
+      Enabled: true
+      LevelFilter: Trace
+    Renderer:
+      Enabled: true
+      LevelFilter: Error
+    Scene:
+      Enabled: true
+      LevelFilter: Trace
+    ScriptEngine:
+      Enabled: true
+      LevelFilter: Error
+    Sound Spatializer:
+      Enabled: true
+      LevelFilter: Trace
+    TIMER:
+      Enabled: true
+      LevelFilter: Trace
+    miniaudio:
+      Enabled: true
+      LevelFilter: Error

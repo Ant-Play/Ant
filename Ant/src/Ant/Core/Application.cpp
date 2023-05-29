@@ -3,26 +3,34 @@
 
 #include "Ant/Renderer/Renderer.h"
 #include "Ant/Renderer/Framebuffer.h"
+#include "Ant/Renderer/UI/Font.h"
 
 #include <GLFW/glfw3.h>
+#include <imgui/imgui.h>
+#include "Ant/ImGui/Colours.h"
 
-#include <imgui.h>
-
-#include "Ant/Scripts/ScriptEngine.h"
-#include "Ant/Physics/Physics.h"
 #include "Ant/Asset/AssetManager.h"
+#include "Ant/Audio/AudioEngine.h"
+#include "Ant/Audio/AudioEvents/AudioCommandRegistry.h"
 
 #include "Inputs.h"
 
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-#include <Windows.h>
-#include <commdlg.h>
-
 #include "Ant/Platform/Vulkan/VulkanRenderer.h"
 #include "Ant/Platform/Vulkan/VulkanAllocator.h"
+#include "Ant/Platform/Vulkan/VulkanSwapChain.h"
+#include "imgui/imgui_internal.h"
+
+#include "Ant/Utilities/StringUtils.h"
+#include "Ant/Debug/Profiler.h"
+
+#include "Ant/Editor/ApplicationSettings.h"
+
+#include <filesystem>
+
+#include "Memory.h"
 
 extern bool g_ApplicationRunning;
+extern ImGuiContext* GImGui;
 
 namespace Ant {
 
@@ -30,44 +38,79 @@ namespace Ant {
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const ApplicationProps& props)
+	Application::Application(const ApplicationSpecification& specification)
+		: m_Specification(specification), m_RenderThread(specification.CoreThreadingPolicy)
 	{
 		s_Instance = this;
 
-		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(props.Name, props.WindowWidth, props.WindowHeight)));
-		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
-		m_Window->Maximize();
-		m_Window->SetVSync(true);
+		m_RenderThread.Run();
+
+		if (!specification.WorkingDirectory.empty())
+			std::filesystem::current_path(specification.WorkingDirectory);
+
+		m_Profiler = anew PerformanceProfiler();
+
+		Renderer::SetConfig(specification.RenderConfig);
+
+		WindowSpecification windowSpec;
+		windowSpec.Title = specification.Name;
+		windowSpec.Width = specification.WindowWidth;
+		windowSpec.Height = specification.WindowHeight;
+		windowSpec.Decorated = specification.WindowDecorated;
+		windowSpec.Fullscreen = specification.Fullscreen;
+		windowSpec.VSync = specification.VSync;
+		m_Window = std::unique_ptr<Window>(Window::Create(windowSpec));
+		m_Window->Init();
+		m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
+
+		// Load editor settings (will generate default settings if the file doesn't exist yet)
+		ApplicationSettingsSerializer::Init();
 
 		// Init renderer and execute command queue to compile all shaders
 		Renderer::Init();
-		Renderer::WaitAndRender();
+		// Render one frame (TODO: maybe make a func called Pump or something)
+		m_RenderThread.Pump();
 
-		m_ImGuiLayer = ImGuiLayer::Create();
-		PushOverlay(m_ImGuiLayer);
+		if (specification.StartMaximized)
+			m_Window->Maximize();
+		else
+			m_Window->CenterWindow();
+		m_Window->SetResizable(specification.Resizable);
 
-		ScriptEngine::Init("assets/scripts/ExampleApp.dll");
-		Physics::Init();
+		if(m_Specification.EnableImGui)
+		{
+			m_ImGuiLayer = ImGuiLayer::Create();
+			PushOverlay(m_ImGuiLayer);
+		}
 
-		AssetManager::Init();
+		ScriptEngine::Init(specification.ScriptConfig);
+		MiniAudioEngine::Init();
+		Font::Init();
 	}
 
 	Application::~Application()
 	{
+		ApplicationSettingsSerializer::SaveSettings();
+
+		m_Window->SetEventCallback([](Event& e) {});
+
+		m_RenderThread.Terminate();
+
 		for (Layer* layer : m_LayerStack)
 		{
 			layer->OnDetach();
 			delete layer;
 		}
 
-		FramebufferPool::GetGlobal()->GetAll().clear();
-
-		Physics::Shutdown();
 		ScriptEngine::Shutdown();
-		AssetManager::Shutdown();
+		Project::SetActive(nullptr);
+		Font::Shutdown();
+		MiniAudioEngine::Shutdown();
 
-		Renderer::WaitAndRender();
 		Renderer::Shutdown();
+
+		delete m_Profiler;
+		m_Profiler = nullptr;
 	}
 
 	void Application::PushLayer(Layer* layer)
@@ -82,30 +125,27 @@ namespace Ant {
 		layer->OnAttach();
 	}
 
+	void Application::PopLayer(Layer* layer)
+	{
+		m_LayerStack.PopLayer(layer);
+		layer->OnDetach();
+	}
+
+	void Application::PopOverlay(Layer* layer)
+	{
+		m_LayerStack.PopOverlay(layer);
+		layer->OnDetach();
+	}
+
 	void Application::RenderImGui()
 	{
+		ANT_PROFILE_FUNC();
+		ANT_SCOPE_PERF("Application::RenderImGui");
+
 		m_ImGuiLayer->Begin();
-		ImGui::Begin("Renderer");
-		auto& caps = Renderer::GetCapabilities();
-		ImGui::Text("Vendor: %s", caps.Vendor.c_str());
-		ImGui::Text("Renderer: %s", caps.Device.c_str());
-		ImGui::Text("Version: %s", caps.Version.c_str());
-		ImGui::Separator();
-		ImGui::Text("Frame Time: %.2fms\n", m_TimeStep.GetMilliseconds());
 
-		if (RendererAPI::Current() == RendererAPIType::Vulkan)
-		{
-			GPUMemoryStats memoryStats = VulkanAllocator::GetStats();
-			std::string used = Utils::BytesToString(memoryStats.Used);
-			std::string free = Utils::BytesToString(memoryStats.Free);
-			ImGui::Text("Used VRAM: %s", used.c_str());
-			ImGui::Text("Free VRAM: %s", free.c_str());
-		}
-
-		ImGui::End();
-
-		for (Layer* layer : m_LayerStack)
-			layer->OnImGuiRender();
+		for (int i = 0; i < m_LayerStack.Size(); i++)
+			m_LayerStack[i]->OnImGuiRender();
 	}
 
 	void Application::Run()
@@ -113,30 +153,73 @@ namespace Ant {
 		OnInit();
 		while (m_Running)
 		{
+			ANT_PROFILE_FRAME("MainThread");
+
+			// Wait for render thread to finish frame
+			{
+				ANT_PROFILE_FUNC("Wait");
+				Timer timer;
+
+				m_RenderThread.BlockUntilRenderComplete();
+
+				m_PerformanceTimers.MainThreadWaitTime = timer.ElapsedMillis();
+			}
+
 			static uint64_t frameCounter = 0;
 			//ANT_CORE_INFO("-- BEGIN FRAME {0}", frameCounter);
-			m_Window->ProcessEvents();
+			ProcessEvents(); // Poll events when both threads are idle
+
+			m_ProfilerPreviousFrameData = m_Profiler->GetPerFrameData();
+			m_Profiler->Clear();
+
+			m_RenderThread.NextFrame();
+
+			// Start rendering previous frame
+			m_RenderThread.Kick();
+
 			if (!m_Minimized)
 			{
+				Timer cpuTimer;
+
+				// On Render thread
+				Renderer::Submit([&]()
+					{
+						m_Window->GetSwapChain().BeginFrame();
+					});
+
 				Renderer::BeginFrame();
-				//VulkanRenderer::BeginFrame();
-				for (Layer* layer : m_LayerStack)
-					layer->OnUpdate(m_TimeStep);
+				{
+					ANT_SCOPE_PERF("Application Layer::OnUpdate");
+					for (Layer* layer : m_LayerStack)
+						layer->OnUpdate(m_TimeStep);
+				}
 
 				// Render ImGui on render thread
 				Application* app = this;
-				Renderer::Submit([app]() { app->RenderImGui(); });
-				Renderer::Submit([=]() {m_ImGuiLayer->End(); });
+				if (m_Specification.EnableImGui)
+				{
+					Renderer::Submit([app]() { app->RenderImGui(); });
+					Renderer::Submit([=]() { m_ImGuiLayer->End(); });
+				}
 				Renderer::EndFrame();
 
 				// On Render thread
-				m_Window->GetRenderContext()->BeginFrame();
-				Renderer::WaitAndRender();
-				m_Window->SwapBuffers();
+				Renderer::Submit([&]() {
+						//m_Window->GetSwapChain().BeginFrame();
+						//Renderer::WaitAndRender();
+						m_Window->SwapBuffers();
+					});
+
+				m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % Renderer::GetConfig().FramesInFlight;
+				m_PerformanceTimers.MainThreadWorkTime = cpuTimer.ElapsedMillis();
 			}
 
+			ScriptEngine::InitializeRuntimeDuplicatedEntities();
+			Input::ClearReleasedKeys();
+
 			float time = GetTime();
-			m_TimeStep = time - m_LastFrameTime;
+			m_Frametime = time - m_LastFrameTime;
+			m_TimeStep = glm::min<float>(m_Frametime, 0.0333f);
 			m_LastFrameTime = time;
 
 			//ANT_CORE_INFO("-- END FRAME {0}", frameCounter);
@@ -150,12 +233,36 @@ namespace Ant {
 		m_Running = false;
 	}
 
+	void Application::OnShutdown()
+	{
+		m_EventCallbacks.clear();
+		g_ApplicationRunning = false;
+	}
+
+	void Application::ProcessEvents()
+	{
+		Input::TransitionPressedKeys();
+		Input::TransitionPressedButtons();
+
+		m_Window->ProcessEvents();
+
+		std::scoped_lock<std::mutex> lock(m_EventQueueMutex);
+
+		// Process custom event queue
+		while (m_EventQueue.size() > 0)
+		{
+			auto& func = m_EventQueue.front();
+			func();
+			m_EventQueue.pop();
+		}
+	}
 
 	void Application::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& e) { return OnWindowResize(e); });
+		dispatcher.Dispatch<WindowMinimizeEvent>([this](WindowMinimizeEvent& e) { return OnWindowMinimize(e); });
+		dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) { return OnWindowClose(e); });
 
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
 		{
@@ -163,78 +270,50 @@ namespace Ant {
 			if (event.Handled)
 				break;
 		}
+
+		if (event.Handled)
+			return;
+
+		// TODO: Should these callbacks be called BEFORE the layers recieve events?
+		//		 We may actually want that since most of these callbacks will be functions REQUIRED in order for the game
+		//		 to work, and if a layer has already handled the event we may end up with problems
+		for (auto& eventCallback : m_EventCallbacks)
+		{
+			eventCallback(event);
+
+			if (event.Handled)
+				break;
+		}
 	}
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
-		int width = e.GetWidth(), height = e.GetHeight();
+		const uint32_t width = e.GetWidth(), height = e.GetHeight();
 		if (width == 0 || height == 0)
 		{
-			m_Minimized = true;
+			//m_Minimized = true;
 			return false;
 		}
-		m_Minimized = false;
+		//m_Minimized = false;
 
-		m_Window->GetRenderContext()->OnResize(width, height);
+		auto& window = m_Window;
+		Renderer::Submit([&window, width, height]() mutable
+			{
+				window->GetSwapChain().OnResize(width, height);
+			});
+		return false;
+	}
 
-		auto& fbs = FramebufferPool::GetGlobal()->GetAll();
-		for (auto& fb : fbs)
-		{
-			if (!fb->GetSpecification().NoResize)
-				fb->Resize(width, height);
-		}
+	bool Application::OnWindowMinimize(WindowMinimizeEvent& e)
+	{
+		m_Minimized = e.IsMinimized();
 		return false;
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
-		m_Running = false;
-		g_ApplicationRunning = false; // Request close
-		return true;
-	}
-
-	std::string Application::OpenFile(const char* filter) const
-	{
-		OPENFILENAMEA ofn;       // common dialog box structure
-		CHAR szFile[260] = { 0 };       // if using TCHAR macros
-
-		// Initialize OPENFILENAME
-		ZeroMemory(&ofn, sizeof(OPENFILENAME));
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
-		ofn.lpstrFile = szFile;
-		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = filter;
-		ofn.nFilterIndex = 1;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-
-		if (GetOpenFileNameA(&ofn) == TRUE)
-		{
-			return ofn.lpstrFile;
-		}
-		return std::string();
-	}
-
-	std::string Application::SaveFile(const char* filter) const
-	{
-		OPENFILENAMEA ofn;       // common dialog box structure
-		CHAR szFile[260] = { 0 };       // if using TCHAR macros
-
-		// Initialize OPENFILENAME
-		ZeroMemory(&ofn, sizeof(OPENFILENAME));
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
-		ofn.lpstrFile = szFile;
-		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = filter;
-		ofn.nFilterIndex = 1;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-
-		if (GetSaveFileNameA(&ofn) == TRUE)
-		{
-			return ofn.lpstrFile;
-		}
-		return std::string();
+		Close();
+		return false; // give other things a chance to react to window close
 	}
 
 	float Application::GetTime() const

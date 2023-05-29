@@ -1,0 +1,53 @@
+Prefab:
+  - Entity: 14123156899059482928
+    TagComponent:
+      Tag: Projectile
+    Parent: 0
+    Children:
+      []
+    PrefabComponent:
+      Prefab: 5349322122580055698
+      Entity: 14123156899059482928
+    TransformComponent:
+      Position: [0, 11.3999996, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.298125029, 0.298125029, 0.298125029]
+    ScriptComponent:
+      ClassHandle: 355930221
+      StoredFields:
+        - ID: 3085612764
+          Name: PrefabSandbox.Projectile:LifeTime
+          Type: 12
+          Data: 0
+        - ID: 179303880
+          Name: PrefabSandbox.Projectile:ExplosiveParticle
+          Type: 18
+          Data: 7816398183765727095
+    StaticMeshComponent:
+      AssetID: 16704718035390383336
+      MaterialTable:
+        0: 1162716615310863507
+    PointLightComponent:
+      Radiance: [0.133853123, 0.845559835, 0.243769243]
+      Intensity: 2
+      CastShadows: true
+      SoftShadows: true
+      MinRadius: 1
+      Radius: 4.19999981
+      LightSize: 0.5
+      Falloff: 1
+    RigidBodyComponent:
+      BodyType: 1
+      LayerID: 0
+      Mass: 0.5
+      LinearDrag: 0
+      AngularDrag: 0.0500000007
+      DisableGravity: false
+      IsKinematic: false
+      CollisionDetection: 0
+      LockFlags: "\x00"
+    BoxColliderComponent:
+      Offset: [0, 0, 0]
+      HalfSize: [0.5, 0.5, 0.5]
+      IsTrigger: false
+      Material: 10310996624323047332

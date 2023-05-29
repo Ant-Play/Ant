@@ -28,25 +28,29 @@ namespace Ant{
 		virtual RendererID GetColorAttachmentRendererID() const { return 0; }
 		virtual RendererID GetDepthAttachmentRendererID() const { return 0; }
 
-		virtual Ref<Image2D> GetImage(uint32_t attachmentIndex = 0) const override { ANT_CORE_ASSERT(attachmentIndex < m_Attachments.size()); return m_Attachments[attachmentIndex]; }
-		virtual Ref<Image2D> GetDepthImage() const override { return m_DepthAttachment; }
-		size_t GetColorAttachmentCount() const { return m_Attachments.size(); }
+		virtual Ref<Image2D> GetImage(uint32_t attachmentIndex = 0) const override { ANT_CORE_ASSERT(attachmentIndex < m_AttachmentImages.size()); return m_AttachmentImages[attachmentIndex]; }
+		virtual Ref<Image2D> GetDepthImage() const override { return m_DepthAttachmentImage; }
+		size_t GetColorAttachmentCount() const { return m_Specification.SwapChainTarget ? 1 : m_AttachmentImages.size(); }
+		bool HasDepthAttachment() const { return (bool)m_DepthAttachmentImage; }
 		VkRenderPass GetRenderPass() const { return m_RenderPass; }
 		VkFramebuffer GetVulkanFramebuffer() const { return m_Framebuffer; }
 		const std::vector<VkClearValue>& GetVulkanClearValues() const { return m_ClearValues; }
 
 		virtual const FramebufferSpecification& GetSpecification() const override { return m_Specification; }
+
+		void Invalidate();
+		void RT_Invalidate();
+		void Release();
 	private:
 		FramebufferSpecification m_Specification;
 		RendererID m_RendererID = 0;
 		uint32_t m_Width = 0, m_Height = 0;
 
-		std::vector<Ref<Image2D>> m_Attachments;
-		Ref<Image2D> m_DepthAttachment;
+		std::vector<Ref<Image2D>> m_AttachmentImages;
+		Ref<Image2D> m_DepthAttachmentImage;
 
 		std::vector<VkClearValue> m_ClearValues;
 
-		VkSampler m_ColorAttachmentSampler;
 		VkRenderPass m_RenderPass = nullptr;
 		VkFramebuffer m_Framebuffer = nullptr;
 

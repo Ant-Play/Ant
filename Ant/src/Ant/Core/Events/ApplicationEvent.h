@@ -28,6 +28,20 @@ namespace Ant {
 		unsigned int m_Width, m_Height;
 	};
 
+	class WindowMinimizeEvent : public Event
+	{
+	public:
+		WindowMinimizeEvent(bool minimized)
+			: m_Minimized(minimized) {}
+
+		bool IsMinimized() const { return m_Minimized; }
+
+		EVENT_CLASS_TYPE(WindowMinimize)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	private:
+		bool m_Minimized = false;
+	};
+
 	class WindowCloseEvent : public Event
 	{
 	public:
@@ -35,6 +49,24 @@ namespace Ant {
 
 		EVENT_CLASS_TYPE(WindowClose)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	};
+
+	class WindowTitleBarHitTestEvent : public Event
+	{
+	public:
+		WindowTitleBarHitTestEvent(int x, int y, int& hit)
+			: m_X(x), m_Y(y), m_Hit(hit) {}
+
+		inline int GetX() const { return m_X; }
+		inline int GetY() const { return m_Y; }
+		inline void SetHit(bool hit) { m_Hit = (int)hit; }
+
+		EVENT_CLASS_TYPE(WindowTitleBarHitTest)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	private:
+		int m_X;
+		int m_Y;
+		int& m_Hit;
 	};
 
 	class AppTickEvent : public Event

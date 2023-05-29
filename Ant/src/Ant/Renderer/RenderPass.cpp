@@ -16,7 +16,7 @@ namespace Ant{
 		{
 			case RendererAPIType::None:    ANT_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPIType::Vulkan:  return Ref<VulkanRenderPass>::Create(spec);
-			case RendererAPIType::OpenGL:  return Ref<OpenGLRenderPass>::Create(spec);
+			//case RendererAPIType::OpenGL:  return Ref<OpenGLRenderPass>::Create(spec);
 		}
 
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI!");

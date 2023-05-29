@@ -2,6 +2,8 @@
 
 #include "Ant/Core/Base.h"
 
+#include <functional>
+#include <ostream>
 #include <string>
 
 namespace Ant {
@@ -14,20 +16,25 @@ namespace Ant {
 	enum class EventType
 	{
 		None = 0,
-		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
+		WindowClose, WindowMinimize, WindowResize, WindowFocus, WindowLostFocus, WindowMoved, WindowTitleBarHitTest,
 		AppTick, AppUpdate, AppRender,
 		KeyPressed, KeyReleased, KeyTyped,
-		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
+		MouseButtonPressed, MouseButtonReleased, MouseButtonDown, MouseMoved, MouseScrolled,
+		ScenePreStart, ScenePostStart, ScenePreStop, ScenePostStop,
+		EditorExitPlayMode,
+		SelectionChanged
 	};
 
 	enum EventCategory
 	{
 		None = 0,
-		EventCategoryApplication = BIT(0),
-		EventCategoryInput = BIT(1),
-		EventCategoryKeyboard = BIT(2),
-		EventCategoryMouse = BIT(3),
-		EventCategoryMouseButton = BIT(4)
+		EventCategoryApplication	= BIT(0),
+		EventCategoryInput			= BIT(1),
+		EventCategoryKeyboard		= BIT(2),
+		EventCategoryMouse			= BIT(3),
+		EventCategoryMouseButton	= BIT(4),
+		EventCategoryScene			= BIT(5),
+		EventCategoryEditor			= BIT(6)
 	};
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::##type; }\
@@ -40,6 +47,8 @@ namespace Ant {
 	{
 	public:
 		bool Handled = false;
+
+		virtual ~Event() {}
 
 		virtual EventType GetEventType() const = 0;
 		virtual const char* GetName() const = 0;
@@ -65,7 +74,7 @@ namespace Ant {
 		template<typename T>
 		bool Dispatch(EventFn<T> func)
 		{
-			if (m_Event.GetEventType() == T::GetStaticType())
+			if (m_Event.GetEventType() == T::GetStaticType() && !m_Event.Handled)
 			{
 				m_Event.Handled = func(*(T*)&m_Event);
 				return true;

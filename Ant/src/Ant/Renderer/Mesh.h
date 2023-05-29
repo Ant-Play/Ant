@@ -1,29 +1,19 @@
 #pragma once
 
-#include <vector>
-#include <glm/glm.hpp>
-
-#include "Ant/Core/Timestep.h"
+#include "Ant/Animation/Animation.h"
+#include "Ant/Animation/Skeleton.h"
 
 #include "Ant/Asset/Asset.h"
 
-#include "Pipeline.h"
-#include "IndexBuffer.h"
-#include "VertexBuffer.h"
-#include "Shader.h"
-#include "Material.h"
-
 #include "Ant/Core/Math/AABB.h"
 
+#include "Ant/Renderer/IndexBuffer.h"
+#include "Ant/Renderer/MaterialAsset.h"
+#include "Ant/Renderer/UniformBuffer.h"
+#include "Ant/Renderer/VertexBuffer.h"
 
-struct aiNode;
-struct aiAnimation;
-struct aiNodeAnim;
-struct aiScene;
-
-namespace Assimp {
-	class Importer;
-}
+#include <vector>
+#include <glm/glm.hpp>
 
 namespace Ant{
 
@@ -36,31 +26,87 @@ namespace Ant{
 		glm::vec2 Texcoord;
 	};
 
-	struct AnimatedVertex
+	struct BoneInfo
 	{
-		glm::vec3 Position;
-		glm::vec3 Normal;
-		glm::vec3 Tangent;
-		glm::vec3 Binormal;
-		glm::vec2 Texcoord;
+		glm::mat4 SubMeshInverseTransform;
+		glm::mat4 InverseBindPose;
+		uint32_t SubMeshIndex;
+		uint32_t BoneIndex;
 
-		uint32_t IDs[4] = { 0, 0,0, 0 };
-		float Weights[4]{ 0.0f, 0.0f, 0.0f, 0.0f };
+		BoneInfo() = default;
+		BoneInfo(glm::mat4 subMeshInverseTransform, glm::mat4 inverseBindPose, uint32_t subMeshIndex, uint32_t boneIndex)
+			: SubMeshInverseTransform(subMeshInverseTransform)
+			, InverseBindPose(inverseBindPose)
+			, SubMeshIndex(subMeshIndex)
+			, BoneIndex(boneIndex)
+		{}
 
-		void AddBoneData(uint32_t BoneID, float Weight)
+		static void Serialize(StreamWriter* serializer, const BoneInfo& instance)
 		{
+			serializer->WriteRaw(instance);
+		}
+
+		static void Deserialize(StreamReader* deserializer, BoneInfo& instance)
+		{
+			deserializer->ReadRaw(instance);
+		}
+	};
+
+	struct BoneInfluence
+	{
+		uint32_t BoneInfoIndices[4] = { 0, 0, 0, 0 };
+		float Weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+		void AddBoneData(uint32_t boneInfoIndex, float weight)
+		{
+			if (weight < 0.0f || weight > 1.0f)
+			{
+				ANT_CORE_WARN("Vertex bone weight is out of range. We will clamp it to [0, 1] (BoneID={0}, Weight={1})", boneInfoIndex, weight);
+				weight = std::clamp(weight, 0.0f, 1.0f);
+			}
+			if (weight > 0.0f)
+			{
+				for (size_t i = 0; i < 4; i++)
+				{
+					if (Weights[i] == 0.0f)
+					{
+						BoneInfoIndices[i] = boneInfoIndex;
+						Weights[i] = weight;
+						return;
+					}
+				}
+
+				// Note: when importing from assimp we are passing aiProcess_LimitBoneWeights which automatically keeps only the top N (where N defaults to 4)
+				//       bone weights (and normalizes the sum to 1), which is exactly what we want.
+				//       So, we should never get here.
+				ANT_CORE_WARN("Vertex has more than four bones affecting it, extra bone influences will be discarded (BoneID={0}, Weight={1})", boneInfoIndex, weight);
+			}
+		}
+
+		void NormalizeWeights()
+		{
+			float sumWeights = 0.0f;
 			for (size_t i = 0; i < 4; i++)
 			{
-				if (Weights[i] == 0.0)
+				sumWeights += Weights[i];
+			}
+			if (sumWeights > 0.0f)
+			{
+				for (size_t i = 0; i < 4; i++)
 				{
-					IDs[i] = BoneID;
-					Weights[i] = Weight;
-					return;
+					Weights[i] /= sumWeights;
 				}
 			}
+		}
 
-			// TODO: Keep top weights
-			ANT_CORE_WARN("Vertex has more than four bones/weights affecting it, extra data will be discarded (BoneID={0}, Weight={1})", BoneID, Weight);
+		static void Serialize(StreamWriter* serializer, const BoneInfluence& instance)
+		{
+			serializer->WriteRaw(instance);
+		}
+
+		static void Deserialize(StreamReader* deserializer, BoneInfluence& instance)
+		{
+			deserializer->ReadRaw(instance);
 		}
 	};
 
@@ -72,40 +118,6 @@ namespace Ant{
 	};
 
 	static_assert(sizeof(Index) == 3 * sizeof(uint32_t));
-
-	struct BoneInfo
-	{
-		glm::mat4 BoneOffset;
-		glm::mat4 FinalTransformation;
-	};
-
-	struct VertexBoneData
-	{
-		uint32_t IDs[4];
-		float Weights[4];
-
-		VertexBoneData()
-		{
-			memset(IDs, 0, sizeof(IDs));
-			memset(Weights, 0, sizeof(Weights));
-		};
-
-		void AddBoneData(uint32_t BoneID, float Weight)
-		{
-			for (size_t i = 0; i < 4; i++)
-			{
-				if (Weights[i] == 0.0)
-				{
-					IDs[i] = BoneID;
-					Weights[i] = Weight;
-					return;
-				}
-			}
-
-			// should never get here - more bones than we have space for
-			ANT_CORE_ASSERT(false, "Too many bones!");
-		}
-	};
 
 	struct Triangle
 	{
@@ -124,92 +136,235 @@ namespace Ant{
 		uint32_t IndexCount;
 		uint32_t VertexCount;
 
-		glm::mat4 Transform{ 1.0f };
+		glm::mat4 Transform{ 1.0f }; // World transform
+		glm::mat4 LocalTransform{ 1.0f };
 		AABB BoundingBox;
 
 		std::string NodeName, MeshName;
+		bool IsRigged = false;
+
+		static void Serialize(StreamWriter* serializer, const Submesh& instance)
+		{
+			serializer->WriteRaw(instance.BaseVertex);
+			serializer->WriteRaw(instance.BaseIndex);
+			serializer->WriteRaw(instance.MaterialIndex);
+			serializer->WriteRaw(instance.IndexCount);
+			serializer->WriteRaw(instance.VertexCount);
+			serializer->WriteRaw(instance.Transform);
+			serializer->WriteRaw(instance.LocalTransform);
+			serializer->WriteRaw(instance.BoundingBox);
+			serializer->WriteString(instance.NodeName);
+			serializer->WriteString(instance.MeshName);
+			serializer->WriteRaw(instance.IsRigged);
+		}
+
+		static void Deserialize(StreamReader* deserializer, Submesh& instance)
+		{
+			deserializer->ReadRaw(instance.BaseVertex);
+			deserializer->ReadRaw(instance.BaseIndex);
+			deserializer->ReadRaw(instance.MaterialIndex);
+			deserializer->ReadRaw(instance.IndexCount);
+			deserializer->ReadRaw(instance.VertexCount);
+			deserializer->ReadRaw(instance.Transform);
+			deserializer->ReadRaw(instance.LocalTransform);
+			deserializer->ReadRaw(instance.BoundingBox);
+			deserializer->ReadString(instance.NodeName);
+			deserializer->ReadString(instance.MeshName);
+			deserializer->ReadRaw(instance.IsRigged);
+		}
 	};
 
-	class Mesh : public Asset
+	struct MeshNode
+	{
+		uint32_t Parent = 0xffffffff;
+		std::vector<uint32_t> Children;
+		std::vector<uint32_t> Submeshes;
+
+		std::string Name;
+		glm::mat4 LocalTransform;
+
+		inline bool IsRoot() const { return Parent == 0xffffffff; }
+
+		static void Serialize(StreamWriter* serializer, const MeshNode& instance)
+		{
+			serializer->WriteRaw(instance.Parent);
+			serializer->WriteArray(instance.Children);
+			serializer->WriteArray(instance.Submeshes);
+			serializer->WriteString(instance.Name);
+			serializer->WriteRaw(instance.LocalTransform);
+		}
+
+		static void Deserialize(StreamReader* deserializer, MeshNode& instance)
+		{
+			deserializer->ReadRaw(instance.Parent);
+			deserializer->ReadArray(instance.Children);
+			deserializer->ReadArray(instance.Submeshes);
+			deserializer->ReadString(instance.Name);
+			deserializer->ReadRaw(instance.LocalTransform);
+		}
+	};
+
+	//
+	// MeshSource is a representation of an actual asset file on disk
+	// Meshes are created from MeshSource
+	//
+	class MeshSource : public Asset
 	{
 	public:
-		Mesh(const std::string& filename);
-		Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices, const glm::mat4& transform);
-		~Mesh();
+		MeshSource() = default;
+		MeshSource(const std::vector<Vertex>& vertices, const std::vector<Index>& indices, const glm::mat4& transform);
+		MeshSource(const std::vector<Vertex>& vertices, const std::vector<Index>& indices, const std::vector<Submesh>& submeshes);
+		virtual ~MeshSource();
 
-		void OnUpdate(Timestep ts);
 		void DumpVertexBuffer();
 
 		std::vector<Submesh>& GetSubmeshes() { return m_Submeshes; }
 		const std::vector<Submesh>& GetSubmeshes() const { return m_Submeshes; }
 
-		const std::vector<Vertex>& GetStaticVertices() const { return m_StaticVertices; }
+		const std::vector<Vertex>& GetVertices() const { return m_Vertices; }
 		const std::vector<Index>& GetIndices() const { return m_Indices; }
 
-		Ref<Shader> GetMeshShader() { return m_MeshShader; }
+		bool HasSkeleton() const { return (bool)m_Skeleton; }
+		bool IsSubmeshRigged(uint32_t submeshIndex) const { return m_Submeshes[submeshIndex].IsRigged; }
+		const Skeleton& GetSkeleton() const { ANT_CORE_ASSERT(m_Skeleton, "Attempted to access null skeleton!"); return *m_Skeleton; }
+		bool IsCompatibleSkeleton(const uint32_t animationIndex, const Skeleton& skeleton) const;
+		uint32_t GetAnimationCount() const;
+		const Animation& GetAnimation(const uint32_t animationIndex, const Skeleton& skeleton) const;
+		const std::vector<BoneInfluence>& GetBoneInfluences() const { return m_BoneInfluences; }
+
 		std::vector<Ref<Material>>& GetMaterials() { return m_Materials; }
 		const std::vector<Ref<Material>>& GetMaterials() const { return m_Materials; }
-		const std::vector<Ref<Texture2D>>& GetTextures() const { return m_Textures; }
 		const std::string& GetFilePath() const { return m_FilePath; }
 
 		const std::vector<Triangle> GetTriangleCache(uint32_t index) const { return m_TriangleCache.at(index); }
 
 		Ref<VertexBuffer> GetVertexBuffer() { return m_VertexBuffer; }
+		Ref<VertexBuffer> GetBoneInfluenceBuffer() { return m_BoneInfluenceBuffer; }
 		Ref<IndexBuffer> GetIndexBuffer() { return m_IndexBuffer; }
-		const VertexBufferLayout& GetVertexBufferLayout() const { return m_VertexBufferLayout; }
-	private:
-		void BoneTransform(float time);
-		void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
-		void TraverseNodes(aiNode* node, const glm::mat4& parentTransform = glm::mat4(1.0f), uint32_t level = 0);
 
-		const aiNodeAnim* FindNodeAnim(const aiAnimation* animation, const std::string& nodeName);
-		uint32_t FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
-		uint32_t FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
-		uint32_t FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
-		glm::vec3 InterpolateTranslation(float animationTime, const aiNodeAnim* nodeAnim);
-		glm::quat InterpolateRotation(float animationTime, const aiNodeAnim* nodeAnim);
-		glm::vec3 InterpolateScale(float animationTime, const aiNodeAnim* nodeAnim);
+		static AssetType GetStaticType() { return AssetType::MeshSource; }
+		virtual AssetType GetAssetType() const override { return GetStaticType(); }
+
+		const AABB& GetBoundingBox() const { return m_BoundingBox; }
+
+		const MeshNode& GetRootNode() const { return m_Nodes[0]; }
+		const std::vector<MeshNode>& GetNodes() const { return m_Nodes; }
 	private:
 		std::vector<Submesh> m_Submeshes;
 
-		std::unique_ptr<Assimp::Importer> m_Importer;
-
-		glm::mat4 m_InverseTransform;
-
-		uint32_t m_BoneCount = 0;
-		std::vector<BoneInfo> m_BoneInfo;
-
 		Ref<VertexBuffer> m_VertexBuffer;
+		Ref<VertexBuffer> m_BoneInfluenceBuffer;
 		Ref<IndexBuffer> m_IndexBuffer;
-		VertexBufferLayout m_VertexBufferLayout;
 
-		std::vector<Vertex> m_StaticVertices;
-		std::vector<AnimatedVertex> m_AnimatedVertices;
+		std::vector<Vertex> m_Vertices;
 		std::vector<Index> m_Indices;
-		std::unordered_map<std::string, uint32_t> m_BoneMapping;
-		std::vector<glm::mat4> m_BoneTransforms;
-		const aiScene* m_Scene;
 
-		// Materials
-		Ref<Shader> m_MeshShader;
-		std::vector<Ref<Texture2D>> m_Textures;
-		std::vector<Ref<Texture2D>> m_NormalMaps;
+		std::vector<BoneInfluence> m_BoneInfluences;
+		std::vector<BoneInfo> m_BoneInfo;
+		mutable Scope<Skeleton> m_Skeleton;
+		mutable std::vector<Scope<Animation>> m_Animations;
+
 		std::vector<Ref<Material>> m_Materials;
 
 		std::unordered_map<uint32_t, std::vector<Triangle>> m_TriangleCache;
 
-		// Animation
-		bool m_IsAnimated = false;
-		float m_AnimationTime = 0.0f;
-		float m_WorldTime = 0.0f;
-		float m_TimeMultiplier = 1.0f;
-		bool m_AnimationPlaying = true;
+		AABB m_BoundingBox;
 
 		std::string m_FilePath;
 
+		std::vector<MeshNode> m_Nodes;
+
+		// TEMP
+		bool m_Runtime = false;
+
+		friend class Scene;
+		friend class SceneRenderer;
 		friend class Renderer;
 		friend class VulkanRenderer;
 		friend class OpenGLRenderer;
 		friend class SceneHierarchyPanel;
+		friend class MeshViewerPanel;
+		friend class Mesh;
+		friend class AssimpMeshImporter;
+		friend class MeshRuntimeSerializer;
+	};
+
+	// Dynamic Mesh - supports skeletal animation and retains hierarchy
+	class Mesh : public Asset
+	{
+	public:
+		explicit Mesh(Ref<MeshSource> meshSource);
+		Mesh(Ref<MeshSource> meshSource, const std::vector<uint32_t>& submeshes);
+		Mesh(const Ref<Mesh>& other);
+		virtual ~Mesh();
+
+		bool HasSkeleton() { return m_MeshSource && m_MeshSource->HasSkeleton(); }
+
+		std::vector<uint32_t>& GetSubmeshes() { return m_Submeshes; }
+		const std::vector<uint32_t>& GetSubmeshes() const { return m_Submeshes; }
+
+		// Pass in an empty vector to set ALL submeshes for MeshSource
+		void SetSubmeshes(const std::vector<uint32_t>& submeshes);
+
+		Ref<MeshSource> GetMeshSource() { return m_MeshSource; }
+		Ref<MeshSource> GetMeshSource() const { return m_MeshSource; }
+		void SetMeshAsset(Ref<MeshSource> meshSource) { m_MeshSource = meshSource; }
+
+		Ref<MaterialTable> GetMaterials() const { return m_Materials; }
+
+		static AssetType GetStaticType() { return AssetType::Mesh; }
+		virtual AssetType GetAssetType() const override { return GetStaticType(); }
+
+	private:
+		Ref<MeshSource> m_MeshSource;
+		std::vector<uint32_t> m_Submeshes; // TODO: physics/render masks
+
+		// Materials
+		Ref<MaterialTable> m_Materials;
+
+		friend class Scene;
+		friend class Renderer;
+		friend class VulkanRenderer;
+		friend class OpenGLRenderer;
+		friend class SceneHierarchyPanel;
+		friend class MeshViewerPanel;
+	};
+
+	// Static Mesh - no skeletal animation, flattened hierarchy
+	class StaticMesh : public Asset
+	{
+	public:
+		explicit StaticMesh(Ref<MeshSource> meshSource);
+		StaticMesh(Ref<MeshSource> meshSource, const std::vector<uint32_t>& submeshes);
+		StaticMesh(const Ref<StaticMesh>& other);
+		virtual ~StaticMesh();
+
+		std::vector<uint32_t>& GetSubmeshes() { return m_Submeshes; }
+		const std::vector<uint32_t>& GetSubmeshes() const { return m_Submeshes; }
+
+		// Pass in an empty vector to set ALL submeshes for MeshSource
+		void SetSubmeshes(const std::vector<uint32_t>& submeshes);
+
+		Ref<MeshSource> GetMeshSource() { return m_MeshSource; }
+		Ref<MeshSource> GetMeshSource() const { return m_MeshSource; }
+		void SetMeshAsset(Ref<MeshSource> meshAsset) { m_MeshSource = meshAsset; }
+
+		Ref<MaterialTable> GetMaterials() const { return m_Materials; }
+
+		static AssetType GetStaticType() { return AssetType::StaticMesh; }
+		virtual AssetType GetAssetType() const override { return GetStaticType(); }
+	private:
+		Ref<MeshSource> m_MeshSource;
+		std::vector<uint32_t> m_Submeshes; // TODO: physics/render masks
+
+		// Materials
+		Ref<MaterialTable> m_Materials;
+
+		friend class Scene;
+		friend class Renderer;
+		friend class VulkanRenderer;
+		friend class OpenGLRenderer;
+		friend class SceneHierarchyPanel;
+		friend class MeshViewerPanel;
 	};
 }

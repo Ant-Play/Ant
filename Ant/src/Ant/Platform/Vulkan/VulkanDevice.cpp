@@ -2,8 +2,13 @@
 #include "VulkanDevice.h"
 
 #include "VulkanContext.h"
-#include "Debug/NsightAftermathGpuCrashTracker.h"
 #include "VulkanMemoryAllocator/vk_mem_alloc.h"
+
+#define ANT_HAS_AFTERMATH !ANT_DIST
+
+#if ANT_HAS_AFTERMATH
+#include "Debug/NsightAftermathGpuCrashTracker.h"
+#endif
 
 namespace Ant{
 
@@ -36,7 +41,7 @@ namespace Ant{
 
 		if (!selectedPhysicalDevice)
 		{
-			ANT_CORE_TRACE("Could not find discrete GPU.");
+			ANT_CORE_TRACE_TAG("Renderer", "Could not find discrete GPU.");
 			selectedPhysicalDevice = physicalDevices.back();
 		}
 
@@ -59,11 +64,11 @@ namespace Ant{
 			std::vector<VkExtensionProperties> extensions(extCount);
 			if (vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, nullptr, &extCount, &extensions.front()) == VK_SUCCESS)
 			{
-				ANT_CORE_TRACE("Selected physical device has {0} extensions", extensions.size());
+				ANT_CORE_TRACE_TAG("Renderer", "Selected physical device has {0} extensions", extensions.size());
 				for (const auto& ext : extensions)
 				{
 					m_SupportedExtensions.emplace(ext.extensionName);
-					ANT_CORE_TRACE("  {0}", ext.extensionName);
+					ANT_CORE_TRACE_TAG("Renderer", "  {0}", ext.extensionName);
 				}
 			}
 		}
@@ -248,8 +253,7 @@ namespace Ant{
 	VulkanDevice::VulkanDevice(const Ref<VulkanPhysicalDevice>& physicalDevice, VkPhysicalDeviceFeatures enabledFeatures)
 		: m_PhysicalDevice(physicalDevice), m_EnabledFeatures(enabledFeatures)
 	{
-		GpuCrashTracker* gpuCrashTracker = new GpuCrashTracker;
-		gpuCrashTracker->Initialize();
+		const bool enableAftermath = true;
 
 		// Do we need to enable any other extensions (eg. NV_RAYTRACING?)
 		std::vector<const char*> deviceExtensions;
@@ -262,17 +266,30 @@ namespace Ant{
 		if (m_PhysicalDevice->IsExtensionSupported(VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME))
 			deviceExtensions.push_back(VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME);
 
-		VkDeviceDiagnosticsConfigFlagBitsNV aftermathFlags = (VkDeviceDiagnosticsConfigFlagBitsNV)(VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_RESOURCE_TRACKING_BIT_NV |
-			VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_AUTOMATIC_CHECKPOINTS_BIT_NV |
-			VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_DEBUG_INFO_BIT_NV);
-
+#if ANT_HAS_AFTERMATH
 		VkDeviceDiagnosticsConfigCreateInfoNV aftermathInfo = {};
-		aftermathInfo.sType = VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV;
-		aftermathInfo.flags = aftermathFlags;
+		bool canEnableAftermath = enableAftermath && m_PhysicalDevice->IsExtensionSupported(VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME) && m_PhysicalDevice->IsExtensionSupported(VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME);
+		if (canEnableAftermath)
+		{
+			// Must be initialized ~before~ device has been created
+			GpuCrashTracker* gpuCrashTracker = anew GpuCrashTracker();
+			gpuCrashTracker->Initialize();
+
+			VkDeviceDiagnosticsConfigFlagBitsNV aftermathFlags = (VkDeviceDiagnosticsConfigFlagBitsNV)(VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_RESOURCE_TRACKING_BIT_NV |
+				VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_AUTOMATIC_CHECKPOINTS_BIT_NV |
+				VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_DEBUG_INFO_BIT_NV);
+
+			aftermathInfo.sType = VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV;
+			aftermathInfo.flags = aftermathFlags;
+		}
+#endif
 
 		VkDeviceCreateInfo deviceCreateInfo = {};
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		deviceCreateInfo.pNext = &aftermathInfo;
+#if ANT_HAS_AFTERMATH
+		if (canEnableAftermath)
+			deviceCreateInfo.pNext = &aftermathInfo;
+#endif
 		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(physicalDevice->m_QueueCreateInfos.size());;
 		deviceCreateInfo.pQueueCreateInfos = physicalDevice->m_QueueCreateInfos.data();
 		deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
@@ -296,17 +313,8 @@ namespace Ant{
 		VkResult result = vkCreateDevice(m_PhysicalDevice->GetVulkanPhysicalDevice(), &deviceCreateInfo, nullptr, &m_LogicalDevice);
 		ANT_CORE_ASSERT(result == VK_SUCCESS);
 
-		VkCommandPoolCreateInfo cmdPoolInfo = {};
-		cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		cmdPoolInfo.queueFamilyIndex = m_PhysicalDevice->m_QueueFamilyIndices.Graphics;
-		cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		VK_CHECK_RESULT(vkCreateCommandPool(m_LogicalDevice, &cmdPoolInfo, nullptr, &m_CommandPool));
-
-		cmdPoolInfo.queueFamilyIndex = m_PhysicalDevice->m_QueueFamilyIndices.Compute;
-		VK_CHECK_RESULT(vkCreateCommandPool(m_LogicalDevice, &cmdPoolInfo, nullptr, &m_ComputeCommandPool));
-
 		// Get a graphics queue from the device
-		vkGetDeviceQueue(m_LogicalDevice, m_PhysicalDevice->m_QueueFamilyIndices.Graphics, 0, &m_Queue);
+		vkGetDeviceQueue(m_LogicalDevice, m_PhysicalDevice->m_QueueFamilyIndices.Graphics, 0, &m_GraphicsQueue);
 		vkGetDeviceQueue(m_LogicalDevice, m_PhysicalDevice->m_QueueFamilyIndices.Compute, 0, &m_ComputeQueue);
 	}
 
@@ -316,8 +324,7 @@ namespace Ant{
 
 	void VulkanDevice::Destroy()
 	{
-		vkDestroyCommandPool(m_LogicalDevice, m_CommandPool, nullptr);
-		vkDestroyCommandPool(m_LogicalDevice, m_ComputeCommandPool, nullptr);
+		m_CommandPools.clear();
 
 		vkDeviceWaitIdle(m_LogicalDevice);
 		vkDestroyDevice(m_LogicalDevice, nullptr);
@@ -325,15 +332,92 @@ namespace Ant{
 
 	VkCommandBuffer VulkanDevice::GetCommandBuffer(bool begin, bool compute)
 	{
+		return GetOrCreateThreadLocalCommandPool()->AllocateCommandBuffer(begin, compute);
+	}
+
+	void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer)
+	{
+		GetThreadLocalCommandPool()->FlushCommandBuffer(commandBuffer);
+	}
+
+	void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue)
+	{
+		GetThreadLocalCommandPool()->FlushCommandBuffer(commandBuffer);
+	}
+
+	VkCommandBuffer VulkanDevice::CreateSecondaryCommandBuffer(const char* debugName)
+	{
 		VkCommandBuffer cmdBuffer;
 
 		VkCommandBufferAllocateInfo cmdBufAllocateInfo = {};
 		cmdBufAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		cmdBufAllocateInfo.commandPool = compute ? m_ComputeCommandPool : m_CommandPool;
-		cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		cmdBufAllocateInfo.commandPool = GetOrCreateThreadLocalCommandPool()->GetGraphicsCommandPool();
+		cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
 		cmdBufAllocateInfo.commandBufferCount = 1;
 
 		VK_CHECK_RESULT(vkAllocateCommandBuffers(m_LogicalDevice, &cmdBufAllocateInfo, &cmdBuffer));
+		VKUtils::SetDebugUtilsObjectName(m_LogicalDevice, VK_OBJECT_TYPE_COMMAND_BUFFER, debugName, cmdBuffer);
+		return cmdBuffer;
+	}
+
+	Ref<VulkanCommandPool> VulkanDevice::GetThreadLocalCommandPool()
+	{
+		auto threadID = std::this_thread::get_id();
+		ANT_CORE_VERIFY(m_CommandPools.find(threadID) != m_CommandPools.end());
+
+		return m_CommandPools.at(threadID);
+	}
+
+	Ref<VulkanCommandPool> VulkanDevice::GetOrCreateThreadLocalCommandPool()
+	{
+		auto threadID = std::this_thread::get_id();
+		auto commandPoolIt = m_CommandPools.find(threadID);
+		if (commandPoolIt != m_CommandPools.end())
+			return commandPoolIt->second;
+
+		Ref<VulkanCommandPool> commandPool = Ref<VulkanCommandPool>::Create();
+		m_CommandPools[threadID] = commandPool;
+		return commandPool;
+	}
+
+	VulkanCommandPool::VulkanCommandPool()
+	{
+		auto device = VulkanContext::GetCurrentDevice();
+		auto vulkanDevice = device->GetVulkanDevice();
+
+		VkCommandPoolCreateInfo cmdPoolInfo = {};
+		cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		cmdPoolInfo.queueFamilyIndex = device->GetPhysicalDevice()->GetQueueFamilyIndices().Graphics;
+		cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		VK_CHECK_RESULT(vkCreateCommandPool(vulkanDevice, &cmdPoolInfo, nullptr, &m_GraphicsCommandPool));
+
+		cmdPoolInfo.queueFamilyIndex = device->GetPhysicalDevice()->GetQueueFamilyIndices().Compute;
+		VK_CHECK_RESULT(vkCreateCommandPool(vulkanDevice, &cmdPoolInfo, nullptr, &m_ComputeCommandPool));
+	}
+
+	VulkanCommandPool::~VulkanCommandPool()
+	{
+		auto device = VulkanContext::GetCurrentDevice();
+		auto vulkanDevice = device->GetVulkanDevice();
+
+		vkDestroyCommandPool(vulkanDevice, m_GraphicsCommandPool, nullptr);
+		vkDestroyCommandPool(vulkanDevice, m_ComputeCommandPool, nullptr);
+	}
+
+	VkCommandBuffer VulkanCommandPool::AllocateCommandBuffer(bool begin, bool compute)
+	{
+		auto device = VulkanContext::GetCurrentDevice();
+		auto vulkanDevice = device->GetVulkanDevice();
+
+		VkCommandBuffer cmdBuffer;
+
+		VkCommandBufferAllocateInfo cmdBufAllocateInfo = {};
+		cmdBufAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		cmdBufAllocateInfo.commandPool = compute ? m_ComputeCommandPool : m_GraphicsCommandPool;
+		cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		cmdBufAllocateInfo.commandBufferCount = 1;
+
+		VK_CHECK_RESULT(vkAllocateCommandBuffers(vulkanDevice, &cmdBufAllocateInfo, &cmdBuffer));
 
 		// If requested, also start the new command buffer
 		if (begin)
@@ -346,13 +430,17 @@ namespace Ant{
 		return cmdBuffer;
 	}
 
-	void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer)
+	void VulkanCommandPool::FlushCommandBuffer(VkCommandBuffer commandBuffer)
 	{
-		FlushCommandBuffer(commandBuffer, m_Queue);
+		auto device = VulkanContext::GetCurrentDevice();
+		FlushCommandBuffer(commandBuffer, device->GetGraphicsQueue());
 	}
 
-	void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue)
+	void VulkanCommandPool::FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue)
 	{
+		auto device = VulkanContext::GetCurrentDevice();
+		auto vulkanDevice = device->GetVulkanDevice();
+
 		const uint64_t DEFAULT_FENCE_TIMEOUT = 100000000000;
 
 		ANT_CORE_ASSERT(commandBuffer != VK_NULL_HANDLE);
@@ -369,28 +457,19 @@ namespace Ant{
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCreateInfo.flags = 0;
 		VkFence fence;
-		VK_CHECK_RESULT(vkCreateFence(m_LogicalDevice, &fenceCreateInfo, nullptr, &fence));
+		VK_CHECK_RESULT(vkCreateFence(vulkanDevice, &fenceCreateInfo, nullptr, &fence));
 
-		// Submit to the queue
-		VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, fence));
+		{
+			static std::mutex submissionLock;
+			std::scoped_lock<std::mutex> lock(submissionLock);
+
+			// Submit to the queue
+			VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, fence));
+		}
 		// Wait for the fence to signal that command buffer has finished executing
-		VK_CHECK_RESULT(vkWaitForFences(m_LogicalDevice, 1, &fence, VK_TRUE, DEFAULT_FENCE_TIMEOUT));
+		VK_CHECK_RESULT(vkWaitForFences(vulkanDevice, 1, &fence, VK_TRUE, DEFAULT_FENCE_TIMEOUT));
 
-		vkDestroyFence(m_LogicalDevice, fence, nullptr);
-		vkFreeCommandBuffers(m_LogicalDevice, m_CommandPool, 1, &commandBuffer);
-	}
-
-	VkCommandBuffer VulkanDevice::CreateSecondaryCommandBuffer()
-	{
-		VkCommandBuffer cmdBuffer;
-
-		VkCommandBufferAllocateInfo cmdBufAllocateInfo = {};
-		cmdBufAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		cmdBufAllocateInfo.commandPool = m_CommandPool;
-		cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-		cmdBufAllocateInfo.commandBufferCount = 1;
-
-		VK_CHECK_RESULT(vkAllocateCommandBuffers(m_LogicalDevice, &cmdBufAllocateInfo, &cmdBuffer));
-		return cmdBuffer;
+		vkDestroyFence(vulkanDevice, fence, nullptr);
+		vkFreeCommandBuffers(vulkanDevice, m_GraphicsCommandPool, 1, &commandBuffer);
 	}
 }

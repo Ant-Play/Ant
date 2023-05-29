@@ -1,0 +1,221 @@
+Scene: ScriptingTest
+Entities:
+  - Entity: 1674431012102301234
+    TagComponent:
+      Tag: FieldTest
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassHandle: 2417425344
+      StoredFields:
+        - ID: 3833779122
+          Name: Sandbox.Tests.CSharpTest:Boolean
+          Type: 2
+          Data: true
+        - ID: 2329039084
+          Name: Sandbox.Tests.CSharpTest:Byte
+          Type: 5
+          Data: "\x0e"
+        - ID: 2268393776
+          Name: Sandbox.Tests.CSharpTest:SignedByte
+          Type: 4
+          Data: -31
+        - ID: 903463142
+          Name: Sandbox.Tests.CSharpTest:Char
+          Type: 3
+          Data: 67
+        - ID: 317180585
+          Name: Sandbox.Tests.CSharpTest:Double
+          Type: 13
+          Data: 8.5500000000000007
+        - ID: 91056876
+          Name: Sandbox.Tests.CSharpTest:Float
+          Type: 12
+          Data: 59.0999985
+        - ID: 1234956120
+          Name: Sandbox.Tests.CSharpTest:Integer
+          Type: 8
+          Data: 169
+        - ID: 3465562471
+          Name: Sandbox.Tests.CSharpTest:UnsignedInteger
+          Type: 9
+          Data: 73
+        - ID: 3678445624
+          Name: Sandbox.Tests.CSharpTest:Long
+          Type: 10
+          Data: 99999870
+        - ID: 421734769
+          Name: Sandbox.Tests.CSharpTest:UnsignedLong
+          Type: 11
+          Data: 10150
+        - ID: 4263678584
+          Name: Sandbox.Tests.CSharpTest:Short
+          Type: 6
+          Data: -13
+        - ID: 1814348663
+          Name: Sandbox.Tests.CSharpTest:UnsignedShort
+          Type: 7
+          Data: 382
+        - ID: 3974873997
+          Name: Sandbox.Tests.CSharpTest:String
+          Type: 14
+          Data: Test String this is test
+        - ID: 3543877949
+          Name: Sandbox.Tests.CSharpTest:BooleanArray
+          Type: 29
+          Length: 2
+          Data:
+            - false
+            - false
+        - ID: 3088493915
+          Name: Sandbox.Tests.CSharpTest:ByteArray
+          Type: 29
+          Length: 2
+          Data:
+            - "\x01"
+            - "\x00"
+        - ID: 3179241239
+          Name: Sandbox.Tests.CSharpTest:SignedByteArray
+          Type: 29
+          Length: 2
+          Data:
+            - 10
+            - 0
+        - ID: 2866245689
+          Name: Sandbox.Tests.CSharpTest:CharArray
+          Type: 29
+          Length: 1
+          Data:
+            - 0
+        - ID: 934408888
+          Name: Sandbox.Tests.CSharpTest:DoubleArray
+          Type: 29
+          Length: 2
+          Data:
+            - 10.050000000000001
+            - 0
+        - ID: 376535899
+          Name: Sandbox.Tests.CSharpTest:FloatArray
+          Type: 29
+          Length: 2
+          Data:
+            - 10.5
+            - 0
+        - ID: 1156225343
+          Name: Sandbox.Tests.CSharpTest:IntegerArray
+          Type: 29
+          Length: 2
+          Data:
+            - 10
+            - 0
+        - ID: 1795701178
+          Name: Sandbox.Tests.CSharpTest:UnsignedIntegerArray
+          Type: 29
+          Length: 1
+          Data:
+            - 10
+        - ID: 1157569503
+          Name: Sandbox.Tests.CSharpTest:LongArray
+          Type: 29
+          Length: 2
+          Data:
+            - 100000000
+            - 0
+        - ID: 3935707616
+          Name: Sandbox.Tests.CSharpTest:UnsignedLongArray
+          Type: 29
+          Length: 2
+          Data:
+            - 10000
+            - 0
+        - ID: 2221249823
+          Name: Sandbox.Tests.CSharpTest:ShortArray
+          Type: 29
+          Length: 1
+          Data:
+            - 5
+        - ID: 2640559882
+          Name: Sandbox.Tests.CSharpTest:UnsignedShortArray
+          Type: 29
+          Length: 1
+          Data:
+            - 10
+        - ID: 4223209908
+          Name: Sandbox.Tests.CSharpTest:StringArray
+          Type: 29
+          Length: 1
+          Data:
+            - Test String
+  - Entity: 8712889448324528174
+    TagComponent:
+      Tag: EqualityTest
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassHandle: 4181951096
+      StoredFields:
+        - ID: 565963497
+          Name: Sandbox.Tests.EntityTest:MyEntity
+          Type: 18
+          Data: 16687915323321949426
+  - Entity: 9591297317656190442
+    TagComponent:
+      Tag: Directional Light
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [1.39626336, 0.17453292, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Intensity: 1
+      Radiance: [1, 1, 1]
+      CastShadows: true
+      SoftShadows: true
+      LightSize: 0.5
+      ShadowAmount: 1
+  - Entity: 12240587157806566064
+    TagComponent:
+      Tag: Sky Light
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SkyLightComponent:
+      EnvironmentMap: 0
+      Intensity: 1
+      Lod: 0
+      DynamicSky: true
+      TurbidityAzimuthInclination: [2, 0, 0]
+  - Entity: 16687915323321949426
+    TagComponent:
+      Tag: ExceptionTest
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassHandle: 921512408
+SceneAudio:
+  MasterReverb:
+    Pre-delay: 44
+    Room size: 0.49999994
+    Damping: 0.5
+    Width: 1

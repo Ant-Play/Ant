@@ -1,0 +1,43 @@
+AnimationController:
+  SkeletonAsset: 12584854050304052755
+  States:
+    - Name: Idle
+      AnimationAsset: 11985587246298327863
+      Loop: true
+      PlaybackSpeed: 1
+      RootTranslationMask: [1, 1, 1]
+      RootRotationMask: 1
+      RootTranslationExtractMask: [0, 0, 0]
+      RootRotationExtractMask: 0
+    - Name: Walking
+      AnimationAsset: 16265968945290472075
+      Loop: true
+      PlaybackSpeed: 1
+      RootTranslationMask: [1, 1, 0]
+      RootRotationMask: 1
+      RootTranslationExtractMask: [0, 0, 1]
+      RootRotationExtractMask: 0
+    - Name: Running
+      AnimationAsset: 3397946840728288338
+      Loop: true
+      PlaybackSpeed: 1
+      RootTranslationMask: [1, 1, 0]
+      RootRotationMask: 1
+      RootTranslationExtractMask: [0, 0, 1]
+      RootRotationExtractMask: 0
+    - Name: Backflip
+      AnimationAsset: 5224940803560988930
+      Loop: true
+      PlaybackSpeed: 1
+      RootTranslationMask: [1, 1, 0]
+      RootRotationMask: 1
+      RootTranslationExtractMask: [0, 0, 0]
+      RootRotationExtractMask: 0
+    - Name: Falling
+      AnimationAsset: 352125316479895569
+      Loop: true
+      PlaybackSpeed: 1
+      RootTranslationMask: [1, 1, 1]
+      RootRotationMask: 1
+      RootTranslationExtractMask: [0, 0, 0]
+      RootRotationExtractMask: 0

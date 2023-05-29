@@ -3,30 +3,15 @@
 
 #include "VulkanContext.h"
 
+#include "Ant/Utilities/StringUtils.h"
+
+#if ANT_LOG_RENDERER_ALLOCATIONS
+#define ANT_ALLOCATOR_LOG(...) ANT_CORE_TRACE(__VA_ARGS__)
+#else
+#define ANT_ALLOCATOR_LOG(...)
+#endif
+
 namespace Ant{
-
-	namespace Utils{
-
-		std::string BytesToString(uint64_t bytes)
-		{
-			static const float gb = 1024 * 1024 * 1024;
-			static const float mb = 1024 * 1024;
-			static const float kb = 1024;
-
-			char buffer[16];
-
-			if (bytes > gb)
-				sprintf_s(buffer, "%.2f GB", bytes / gb);
-			else if (bytes > mb)
-				sprintf_s(buffer, "%.2f MB", bytes / mb);
-			else if (bytes > kb)
-				sprintf_s(buffer, "%.2f KB", bytes / kb);
-			else
-				sprintf_s(buffer, "%.2f bytes", bytes);
-
-			return std::string(buffer);
-		}
-	}
 
 	struct VulkanAllocatorData
 	{
@@ -69,6 +54,8 @@ namespace Ant{
 
 	VmaAllocation VulkanAllocator::AllocateBuffer(VkBufferCreateInfo bufferCreateInfo, VmaMemoryUsage usage, VkBuffer& outBuffer)
 	{
+		ANT_CORE_VERIFY(bufferCreateInfo.size > 0);
+
 		VmaAllocationCreateInfo allocCreateInfo = {};
 		allocCreateInfo.usage = usage;
 
@@ -76,19 +63,19 @@ namespace Ant{
 		vmaCreateBuffer(s_Data->Allocator, &bufferCreateInfo, &allocCreateInfo, &outBuffer, &allocation, nullptr);
 
 		// TODO: Tracking
-		VmaAllocationInfo allocInfo;
+		VmaAllocationInfo allocInfo{};
 		vmaGetAllocationInfo(s_Data->Allocator, allocation, &allocInfo);
-		ANT_CORE_TRACE("VulkanAllocator ({0}): allocating buffer; size = {1}", m_Tag, Utils::BytesToString(allocInfo.size));
+		ANT_ALLOCATOR_LOG("VulkanAllocator ({0}): allocating buffer; size = {1}", m_Tag, Utils::BytesToString(allocInfo.size));
 
 		{
 			s_Data->TotalAllocatedBytes += allocInfo.size;
-			ANT_CORE_TRACE("VulkanAllocator ({0}): total allocated since start is {1}", m_Tag, Utils::BytesToString(s_Data->TotalAllocatedBytes));
+			ANT_ALLOCATOR_LOG("VulkanAllocator ({0}): total allocated since start is {1}", m_Tag, Utils::BytesToString(s_Data->TotalAllocatedBytes));
 		}
 
 		return allocation;
 	}
 
-	VmaAllocation VulkanAllocator::AllocateImage(VkImageCreateInfo imageCreateInfo, VmaMemoryUsage usage, VkImage& outImage)
+	VmaAllocation VulkanAllocator::AllocateImage(VkImageCreateInfo imageCreateInfo, VmaMemoryUsage usage, VkImage& outImage, VkDeviceSize* allocatedSize)
 	{
 		VmaAllocationCreateInfo allocCreateInfo = {};
 		allocCreateInfo.usage = usage;
@@ -99,11 +86,13 @@ namespace Ant{
 		// TODO: Tracking
 		VmaAllocationInfo allocInfo;
 		vmaGetAllocationInfo(s_Data->Allocator, allocation, &allocInfo);
-		ANT_CORE_TRACE("VulkanAllocator ({0}): allocating image; size = {1}", m_Tag, Utils::BytesToString(allocInfo.size));
+		if (allocatedSize)
+			*allocatedSize = allocInfo.size;
+		ANT_ALLOCATOR_LOG("VulkanAllocator ({0}): allocating image; size = {1}", m_Tag, Utils::BytesToString(allocInfo.size));
 
 		{
 			s_Data->TotalAllocatedBytes += allocInfo.size;
-			ANT_CORE_TRACE("VulkanAllocator ({0}): total allocated since start is {1}", m_Tag, Utils::BytesToString(s_Data->TotalAllocatedBytes));
+			ANT_ALLOCATOR_LOG("VulkanAllocator ({0}): total allocated since start is {1}", m_Tag, Utils::BytesToString(s_Data->TotalAllocatedBytes));
 		}
 		return allocation;
 	}
@@ -134,15 +123,40 @@ namespace Ant{
 
 	void VulkanAllocator::DumpStats()
 	{
-		VmaStats stats;
-		vmaCalculateStats(s_Data->Allocator, &stats);
+		const auto& memoryProps = VulkanContext::GetCurrentDevice()->GetPhysicalDevice()->GetMemoryProperties();
+		std::vector<VmaBudget> budgets(memoryProps.memoryHeapCount);
+		vmaGetBudget(s_Data->Allocator, budgets.data());
 
-		uint64_t usedMemory = stats.memoryHeap[0].usedBytes;
-		uint64_t freeMemory = stats.memoryHeap[0].unusedBytes;
+		ANT_CORE_WARN("-----------------------------------");
+		for (VmaBudget& b : budgets)
+		{
+			ANT_CORE_WARN("VmaBudget.allocationBytes = {0}", Utils::BytesToString(b.allocationBytes));
+			ANT_CORE_WARN("VmaBudget.blockBytes = {0}", Utils::BytesToString(b.blockBytes));
+			ANT_CORE_WARN("VmaBudget.usage = {0}", Utils::BytesToString(b.usage));
+			ANT_CORE_WARN("VmaBudget.budget = {0}", Utils::BytesToString(b.budget));
+		}
+		ANT_CORE_WARN("-----------------------------------");
 	}
 
 	GPUMemoryStats VulkanAllocator::GetStats()
 	{
+		const auto& memoryProps = VulkanContext::GetCurrentDevice()->GetPhysicalDevice()->GetMemoryProperties();
+		std::vector<VmaBudget> budgets(memoryProps.memoryHeapCount);
+		vmaGetBudget(s_Data->Allocator, budgets.data());
+
+		uint64_t usage = 0;
+		uint64_t budget = 0;
+
+		for (VmaBudget& b : budgets)
+		{
+			usage += b.usage;
+			budget += b.budget;
+		}
+
+		// Ternary because budget can somehow be smaller than usage.
+		return { usage, budget > usage ? budget - usage : 0ull };
+
+#if 0
 		VmaStats stats;
 		vmaCalculateStats(s_Data->Allocator, &stats);
 
@@ -150,11 +164,12 @@ namespace Ant{
 		uint64_t freeMemory = stats.total.unusedBytes;
 
 		return { usedMemory, freeMemory };
+#endif
 	}
 
 	void VulkanAllocator::Init(Ref<VulkanDevice> device)
 	{
-		s_Data = new VulkanAllocatorData();
+		s_Data = anew VulkanAllocatorData();
 
 		// Initialize VulkanMemoryAllocator
 		VmaAllocatorCreateInfo allocatorInfo = {};

@@ -4,10 +4,12 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include "Ant/Asset/AssetManager.h"
+
 
 namespace Ant{
 
-	Ref<Mesh> MeshFactory::CreateBox(const glm::vec3& size)
+	AssetHandle MeshFactory::CreateBox(const glm::vec3& size)
 	{
 		std::vector<Vertex> vertices;
 		vertices.resize(8);
@@ -44,10 +46,12 @@ namespace Ant{
 		indices[10] = { 3, 2, 6 };
 		indices[11] = { 6, 7, 3 };
 
-		return Ref<Mesh>::Create(vertices, indices, glm::mat4(1.0F));
+		AssetHandle meshSourceHandle = AssetManager::CreateMemoryOnlyAsset<MeshSource>(vertices, indices, glm::mat4(1.0f));
+		Ref<MeshSource> meshSource = AssetManager::GetAsset<MeshSource>(meshSourceHandle);
+		return AssetManager::CreateMemoryOnlyAsset<StaticMesh>(meshSource);
 	}
 
-	Ant::Ref<Ant::Mesh> MeshFactory::CreateSphere(float radius)
+	AssetHandle MeshFactory::CreateSphere(float radius)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<Index> indices;
@@ -55,17 +59,17 @@ namespace Ant{
 		constexpr float latitudeBands = 30;
 		constexpr float longitudeBands = 30;
 
-		for (float latitude = 0.0F; latitude <= latitudeBands; latitude++)
+		for (float latitude = 0.0f; latitude <= latitudeBands; latitude++)
 		{
-			float theta = latitude * M_PI / latitudeBands;
-			float sinTheta = glm::sin(theta);
-			float cosTheta = glm::cos(theta);
+			const float theta = latitude * (float)M_PI / latitudeBands;
+			const float sinTheta = glm::sin(theta);
+			const float cosTheta = glm::cos(theta);
 
-			for (float longitude = 0.0F; longitude <= longitudeBands; longitude++)
+			for (float longitude = 0.0f; longitude <= longitudeBands; longitude++)
 			{
-				float phi = longitude * 2 * M_PI / longitudeBands;
-				float sinPhi = glm::sin(phi);
-				float cosPhi = glm::cos(phi);
+				const float phi = longitude * 2.f * (float)M_PI / longitudeBands;
+				const float sinPhi = glm::sin(phi);
+				const float cosPhi = glm::cos(phi);
 
 				Vertex vertex;
 				vertex.Normal = { cosPhi * sinTheta, cosTheta, sinPhi * sinTheta };
@@ -74,97 +78,80 @@ namespace Ant{
 			}
 		}
 
-		for (uint32_t latitude = 0; latitude < latitudeBands; latitude++)
+		for (uint32_t latitude = 0; latitude < (uint32_t)latitudeBands; latitude++)
 		{
-			for (uint32_t longitude = 0; longitude < longitudeBands; longitude++)
+			for (uint32_t longitude = 0; longitude < (uint32_t)longitudeBands; longitude++)
 			{
-				uint32_t first = (latitude * (longitudeBands + 1)) + longitude;
-				uint32_t second = first + longitudeBands + 1;
+				const uint32_t first = (latitude * ((uint32_t)longitudeBands + 1)) + longitude;
+				const uint32_t second = first + (uint32_t)longitudeBands + 1;
 
 				indices.push_back({ first, second, first + 1 });
 				indices.push_back({ second, second + 1, first + 1 });
 			}
 		}
 
-		return Ref<Mesh>::Create(vertices, indices, glm::mat4(1.0F));
+		AssetHandle meshSourceHandle = AssetManager::CreateMemoryOnlyAsset<MeshSource>(vertices, indices, glm::mat4(1.0f));
+		Ref<MeshSource> meshSource = AssetManager::GetAsset<MeshSource>(meshSourceHandle);
+		return AssetManager::CreateMemoryOnlyAsset<StaticMesh>(meshSource);
 	}
 
-	Ref<Mesh> MeshFactory::CreateCapsule(float radius, float height)
+	static void CalculateRing(size_t segments, float radius, float y, float dy, float height, float actualRadius, std::vector<Vertex>& vertices)
 	{
+		float segIncr = 1.0f / (float)(segments - 1);
+		for (size_t s = 0; s < segments; s++)
+		{
+			float x = glm::cos(float(M_PI * 2) * s * segIncr) * radius;
+			float z = glm::sin(float(M_PI * 2) * s * segIncr) * radius;
+
+			Vertex& vertex = vertices.emplace_back();
+			vertex.Position = glm::vec3(actualRadius * x, actualRadius * y + height * dy, actualRadius * z);
+		}
+	}
+
+	AssetHandle MeshFactory::CreateCapsule(float radius, float height)
+	{
+		constexpr size_t subdivisionsHeight = 8;
+		constexpr size_t ringsBody = subdivisionsHeight + 1;
+		constexpr size_t ringsTotal = subdivisionsHeight + ringsBody;
+		constexpr size_t numSegments = 12;
+		constexpr float radiusModifier = 0.021f; // Needed to ensure that the wireframe is always visible
+
 		std::vector<Vertex> vertices;
 		std::vector<Index> indices;
 
-		constexpr int segments = 30;
-		constexpr int pointCount = segments + 1;
+		vertices.reserve(numSegments * ringsTotal);
+		indices.reserve((numSegments - 1) * (ringsTotal - 1) * 2);
 
-		float pointsX[pointCount];
-		float pointsY[pointCount];
-		float pointsZ[pointCount];
-		float pointsR[pointCount];
+		float bodyIncr = 1.0f / (float)(ringsBody - 1);
+		float ringIncr = 1.0f / (float)(subdivisionsHeight - 1);
 
-		float calcH = 0.0F;
-		float calcV = 0.0F;
+		for (int r = 0; r < subdivisionsHeight / 2; r++)
+			CalculateRing(numSegments, glm::sin(float(M_PI) * r * ringIncr), glm::sin(float(M_PI) * (r * ringIncr - 0.5f)), -0.5f, height, radius + radiusModifier, vertices);
 
-		for (int i = 0; i < pointCount; i++)
+		for (int r = 0; r < ringsBody; r++)
+			CalculateRing(numSegments, 1.0f, 0.0f, r * bodyIncr - 0.5f, height, radius + radiusModifier, vertices);
+
+		for (int r = subdivisionsHeight / 2; r < subdivisionsHeight; r++)
+			CalculateRing(numSegments, glm::sin(float(M_PI) * r * ringIncr), glm::sin(float(M_PI) * (r * ringIncr - 0.5f)), 0.5f, height, radius + radiusModifier, vertices);
+
+		for (int r = 0; r < ringsTotal - 1; r++)
 		{
-			float calcHRadians = glm::radians(calcH);
-			float calcVRadians = glm::radians(calcV);
-
-			pointsX[i] = glm::sin(calcHRadians);
-			pointsZ[i] = glm::cos(calcHRadians);
-			pointsY[i] = glm::cos(calcVRadians);
-			pointsR[i] = glm::sin(calcVRadians);
-
-			calcH += 360.0F / (float)segments;
-			calcV += 180.0F / (float)segments;
-		}
-
-		float yOffset = (height - (radius * 2.0F)) * 0.5F;
-		if (yOffset < 0.0F)
-			yOffset = 0.0F;
-
-		int top = glm::ceil(pointCount * 0.5F);
-
-		for (int y = 0; y < top; y++)
-		{
-			for (int x = 0; x < pointCount; x++)
+			for (int s = 0; s < numSegments - 1; s++)
 			{
-				Vertex vertex;
-				vertex.Position = glm::vec3(pointsX[x] * pointsR[y], pointsY[y] + yOffset, pointsZ[x] * pointsR[y]) * radius;
-				vertices.push_back(vertex);
+				Index& index1 = indices.emplace_back();
+				index1.V1 = (uint32_t)(r * numSegments + s + 1);
+				index1.V2 = (uint32_t)(r * numSegments + s + 0);
+				index1.V3 = (uint32_t)((r + 1) * numSegments + s + 1);
+
+				Index& index2 = indices.emplace_back();
+				index2.V1 = (uint32_t)((r + 1) * numSegments + s + 0);
+				index2.V2 = (uint32_t)((r + 1) * numSegments + s + 1);
+				index2.V3 = (uint32_t)(r * numSegments + s);
 			}
 		}
 
-		int bottom = glm::floor(pointCount * 0.5F);
-
-		for (int y = bottom; y < pointCount; y++)
-		{
-			for (int x = 0; x < pointCount; x++)
-			{
-				Vertex vertex;
-				vertex.Position = glm::vec3(pointsX[x] * pointsR[y], -yOffset + pointsY[y], pointsZ[x] * pointsR[y]) * radius;
-				vertices.push_back(vertex);
-			}
-		}
-
-		for (int y = 0; y < segments + 1; y++)
-		{
-			for (int x = 0; x < segments; x++)
-			{
-				Index index1;
-				index1.V1 = ((y + 0) * (segments + 1)) + x + 0;
-				index1.V2 = ((y + 1) * (segments + 1)) + x + 0;
-				index1.V3 = ((y + 1) * (segments + 1)) + x + 1;
-				indices.push_back(index1);
-
-				Index index2;
-				index2.V1 = ((y + 0) * (segments + 1)) + x + 1;
-				index2.V2 = ((y + 0) * (segments + 1)) + x + 0;
-				index2.V3 = ((y + 1) * (segments + 1)) + x + 1;
-				indices.push_back(index2);
-			}
-		}
-
-		return Ref<Mesh>::Create(vertices, indices, glm::mat4(1.0F));
+		AssetHandle meshSourceHandle = AssetManager::CreateMemoryOnlyAsset<MeshSource>(vertices, indices, glm::mat4(1.0f));
+		Ref<MeshSource> meshSource = AssetManager::GetAsset<MeshSource>(meshSourceHandle);
+		return AssetManager::CreateMemoryOnlyAsset<StaticMesh>(meshSource);
 	}
 }

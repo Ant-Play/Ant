@@ -8,19 +8,27 @@ namespace Ant {
 	struct Buffer
 	{
 		void* Data;
-		uint32_t Size;
+		uint64_t Size;
 
 		Buffer()
 			: Data(nullptr), Size(0)
 		{
 		}
 
-		Buffer(void* data, uint32_t size)
-			: Data(data), Size(size)
+		Buffer(const void* data, uint64_t size = 0)
+			: Data((void*)data), Size(size)
 		{
 		}
 
-		static Buffer Copy(const void* data, uint32_t size)
+		static Buffer Copy(const Buffer& other)
+		{
+			Buffer buffer;
+			buffer.Allocate(other.Size);
+			memcpy(buffer.Data, other.Data, other.Size);
+			return buffer;
+		}
+
+		static Buffer Copy(const void* data, uint64_t size)
 		{
 			Buffer buffer;
 			buffer.Allocate(size);
@@ -28,21 +36,21 @@ namespace Ant {
 			return buffer;
 		}
 
-		void Allocate(uint32_t size)
+		void Allocate(uint64_t size)
 		{
-			delete[] Data;
+			delete[](byte*)Data;
 			Data = nullptr;
 
 			if (size == 0)
 				return;
 
-			Data = new byte[size];
+			Data = anew byte[size];
 			Size = size;
 		}
 
 		void Release()
 		{
-			delete[] Data;
+			delete[](byte*)Data;
 			Data = nullptr;
 			Size = 0;
 		}
@@ -54,20 +62,26 @@ namespace Ant {
 		}
 
 		template<typename T>
-		T& Read(uint32_t offset = 0)
+		T& Read(uint64_t offset = 0)
 		{
 			return *(T*)((byte*)Data + offset);
 		}
 
-		byte* ReadBytes(uint32_t size, uint32_t offset)
+		template<typename T>
+		const T& Read(uint64_t offset = 0) const
+		{
+			return *(T*)((byte*)Data + offset);
+		}
+
+		byte* ReadBytes(uint64_t size, uint64_t offset) const
 		{
 			ANT_CORE_ASSERT(offset + size <= Size, "Buffer overflow!");
-			byte* buffer = new byte[size];
+			byte* buffer = anew byte[size];
 			memcpy(buffer, (byte*)Data + offset, size);
 			return buffer;
 		}
 
-		void Write(void* data, uint32_t size, uint32_t offset = 0)
+		void Write(const void* data, uint64_t size, uint64_t offset = 0)
 		{
 			ANT_CORE_ASSERT(offset + size <= Size, "Buffer overflow!");
 			memcpy((byte*)Data + offset, data, size);
@@ -89,12 +103,28 @@ namespace Ant {
 		}
 
 		template<typename T>
-		T* As()
+		T* As() const
 		{
 			return (T*)Data;
 		}
 
-		inline uint32_t GetSize() const { return Size; }
+		inline uint64_t GetSize() const { return Size; }
+	};
+
+	struct BufferSafe : public Buffer
+	{
+		~BufferSafe()
+		{
+			Release();
+		}
+
+		static BufferSafe Copy(const void* data, uint64_t size)
+		{
+			BufferSafe buffer;
+			buffer.Allocate(size);
+			memcpy(buffer.Data, data, size);
+			return buffer;
+		}
 	};
 
 }

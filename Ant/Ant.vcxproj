@@ -77,7 +77,7 @@
       <PrecompiledHeaderFile>antpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PX_PHYSX_STATIC_LIB;GLM_FORCE_DEPTH_ZERO_TO_ONE;ANT_PLATFORM_WINDOWS;ANT_BUILD_DLL;ANT_DEBUG;ANT_TRACK_MEMORY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor;vendor\assimp\include;vendor\stb_image;vendor\yaml-cpp\include;vendor\GLFW\include;vendor\Glad\include;vendor\glm;vendor\imgui;vendor\ImGuizmo;vendor\Box2D\include;vendor\entt\include;vendor\mono\include;vendor\FastNoise;vendor\PhysX\include;vendor\PhysX\include\PhysX;D:\VulkanSDK\1.3.216.0\Include;vendor\NvidiaAftermath\include;vendor\shaderc\libshaderc_util\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor;vendor\assimp\include;vendor\stb_image;vendor\yaml-cpp\include;vendor\GLFW\include;vendor\Glad\include;vendor\glm;vendor\imgui;vendor\imgui-node-editor;vendor\Box2D\include;vendor\entt\include;vendor\mono\include;vendor\FastNoise;vendor\PhysX\include;vendor\PhysX\include\PhysX;vendor\msdf-atlas-gen\msdf-atlas-gen;vendor\msdf-atlas-gen\msdfgen;D:\VulkanSDK\1.3.216.0\Include;vendor\miniaudio\include;vendor\farbot\include;vendor\choc;vendor\magic_enum\include;vendor\Optick\src;vendor\NvidiaAftermath\include;vendor\shaderc\libshaderc_util\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -91,7 +91,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;D:\VulkanSDK\1.3.216.0\Lib\vulkan-1.lib;D:\VulkanSDK\1.3.216.0\Lib\VkLayer_utils.lib;vendor\mono\lib\Debug\libmono-static-sgen.lib;vendor\PhysX\lib\Debug\PhysX_static_64.lib;vendor\PhysX\lib\Debug\PhysXCharacterKinematic_static_64.lib;vendor\PhysX\lib\Debug\PhysXCommon_static_64.lib;vendor\PhysX\lib\Debug\PhysXCooking_static_64.lib;vendor\PhysX\lib\Debug\PhysXExtensions_static_64.lib;vendor\PhysX\lib\Debug\PhysXFoundation_static_64.lib;vendor\PhysX\lib\Debug\PhysXPvdSDK_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.lib;D:\VulkanSDK\1.3.216.0\Lib\shaderc_sharedd.lib;D:\VulkanSDK\1.3.216.0\Lib\shaderc_utild.lib;vendor\SPIRV-Cross\lib\spirv-cross-cored.lib;vendor\SPIRV-Cross\lib\spirv-cross-glsld.lib;D:\VulkanSDK\1.3.216.0\Lib\SPIRV-Toolsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;D:\VulkanSDK\1.3.216.0\Lib\vulkan-1.lib;D:\VulkanSDK\1.3.216.0\Lib\VkLayer_utils.lib;vendor\mono\lib\Debug\mono-2.0-sgen.lib;vendor\PhysX\lib\Debug\PhysX_static_64.lib;vendor\PhysX\lib\Debug\PhysXCharacterKinematic_static_64.lib;vendor\PhysX\lib\Debug\PhysXCommon_static_64.lib;vendor\PhysX\lib\Debug\PhysXCooking_static_64.lib;vendor\PhysX\lib\Debug\PhysXExtensions_static_64.lib;vendor\PhysX\lib\Debug\PhysXFoundation_static_64.lib;vendor\PhysX\lib\Debug\PhysXPvdSDK_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.lib;D:\VulkanSDK\1.3.216.0\Lib\dxcompiler.lib;D:\VulkanSDK\1.3.216.0\Lib\shaderc_sharedd.lib;D:\VulkanSDK\1.3.216.0\Lib\shaderc_utild.lib;vendor\SPIRV-Cross\lib\spirv-cross-cored.lib;vendor\SPIRV-Cross\lib\spirv-cross-glsld.lib;D:\VulkanSDK\1.3.216.0\Lib\SPIRV-Toolsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -100,7 +100,7 @@
       <PrecompiledHeaderFile>antpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PX_PHYSX_STATIC_LIB;GLM_FORCE_DEPTH_ZERO_TO_ONE;ANT_PLATFORM_WINDOWS;ANT_BUILD_DLL;ANT_RELEASE;ANT_TRACK_MEMORY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor;vendor\assimp\include;vendor\stb_image;vendor\yaml-cpp\include;vendor\GLFW\include;vendor\Glad\include;vendor\glm;vendor\imgui;vendor\ImGuizmo;vendor\Box2D\include;vendor\entt\include;vendor\mono\include;vendor\FastNoise;vendor\PhysX\include;vendor\PhysX\include\PhysX;D:\VulkanSDK\1.3.216.0\Include;vendor\NvidiaAftermath\include;vendor\shaderc\libshaderc_util\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor;vendor\assimp\include;vendor\stb_image;vendor\yaml-cpp\include;vendor\GLFW\include;vendor\Glad\include;vendor\glm;vendor\imgui;vendor\imgui-node-editor;vendor\Box2D\include;vendor\entt\include;vendor\mono\include;vendor\FastNoise;vendor\PhysX\include;vendor\PhysX\include\PhysX;vendor\msdf-atlas-gen\msdf-atlas-gen;vendor\msdf-atlas-gen\msdfgen;D:\VulkanSDK\1.3.216.0\Include;vendor\miniaudio\include;vendor\farbot\include;vendor\choc;vendor\magic_enum\include;vendor\Optick\src;vendor\NvidiaAftermath\include;vendor\shaderc\libshaderc_util\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -117,7 +117,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;D:\VulkanSDK\1.3.216.0\Lib\vulkan-1.lib;D:\VulkanSDK\1.3.216.0\Lib\VkLayer_utils.lib;vendor\mono\lib\Release\libmono-static-sgen.lib;vendor\PhysX\lib\Release\PhysX_static_64.lib;vendor\PhysX\lib\Release\PhysXCharacterKinematic_static_64.lib;vendor\PhysX\lib\Release\PhysXCommon_static_64.lib;vendor\PhysX\lib\Release\PhysXCooking_static_64.lib;vendor\PhysX\lib\Release\PhysXExtensions_static_64.lib;vendor\PhysX\lib\Release\PhysXFoundation_static_64.lib;vendor\PhysX\lib\Release\PhysXPvdSDK_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.lib;D:\VulkanSDK\1.3.216.0\Lib\shaderc_shared.lib;D:\VulkanSDK\1.3.216.0\Lib\shaderc_util.lib;vendor\SPIRV-Cross\lib\spirv-cross-core.lib;vendor\SPIRV-Cross\lib\spirv-cross-glsl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;D:\VulkanSDK\1.3.216.0\Lib\vulkan-1.lib;D:\VulkanSDK\1.3.216.0\Lib\VkLayer_utils.lib;vendor\mono\lib\Release\mono-2.0-sgen.lib;vendor\PhysX\lib\Release\PhysX_static_64.lib;vendor\PhysX\lib\Release\PhysXCharacterKinematic_static_64.lib;vendor\PhysX\lib\Release\PhysXCommon_static_64.lib;vendor\PhysX\lib\Release\PhysXCooking_static_64.lib;vendor\PhysX\lib\Release\PhysXExtensions_static_64.lib;vendor\PhysX\lib\Release\PhysXFoundation_static_64.lib;vendor\PhysX\lib\Release\PhysXPvdSDK_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;vendor\NvidiaAftermath\lib\x64\GFSDK_Aftermath_Lib.x64.lib;D:\VulkanSDK\1.3.216.0\Lib\dxcompiler.lib;D:\VulkanSDK\1.3.216.0\Lib\shaderc_shared.lib;D:\VulkanSDK\1.3.216.0\Lib\shaderc_util.lib;vendor\SPIRV-Cross\lib\spirv-cross-core.lib;vendor\SPIRV-Cross\lib\spirv-cross-glsl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -126,7 +126,7 @@
       <PrecompiledHeaderFile>antpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PX_PHYSX_STATIC_LIB;GLM_FORCE_DEPTH_ZERO_TO_ONE;ANT_PLATFORM_WINDOWS;ANT_BUILD_DLL;ANT_DIST;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor;vendor\assimp\include;vendor\stb_image;vendor\yaml-cpp\include;vendor\GLFW\include;vendor\Glad\include;vendor\glm;vendor\imgui;vendor\ImGuizmo;vendor\Box2D\include;vendor\entt\include;vendor\mono\include;vendor\FastNoise;vendor\PhysX\include;vendor\PhysX\include\PhysX;D:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor;vendor\assimp\include;vendor\stb_image;vendor\yaml-cpp\include;vendor\GLFW\include;vendor\Glad\include;..;vendor\glm;vendor\imgui;vendor\imgui-node-editor;vendor\Box2D\include;vendor\entt\include;vendor\mono\include;vendor\FastNoise;vendor\PhysX\include;vendor\PhysX\include\PhysX;vendor\msdf-atlas-gen\msdf-atlas-gen;vendor\msdf-atlas-gen\msdfgen;D:\VulkanSDK\1.3.216.0\Include;vendor\miniaudio\include;vendor\farbot\include;vendor\choc;vendor\magic_enum\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -145,54 +145,181 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;D:\VulkanSDK\1.3.216.0\Lib\vulkan-1.lib;D:\VulkanSDK\1.3.216.0\Lib\VkLayer_utils.lib;vendor\mono\lib\Dist\libmono-static-sgen.lib;vendor\PhysX\lib\Dist\PhysX_static_64.lib;vendor\PhysX\lib\Dist\PhysXCharacterKinematic_static_64.lib;vendor\PhysX\lib\Dist\PhysXCommon_static_64.lib;vendor\PhysX\lib\Dist\PhysXCooking_static_64.lib;vendor\PhysX\lib\Dist\PhysXExtensions_static_64.lib;vendor\PhysX\lib\Dist\PhysXFoundation_static_64.lib;vendor\PhysX\lib\Dist\PhysXPvdSDK_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;D:\VulkanSDK\1.3.216.0\Lib\vulkan-1.lib;D:\VulkanSDK\1.3.216.0\Lib\VkLayer_utils.lib;vendor\mono\lib\Dist\mono-2.0-sgen.lib;vendor\PhysX\lib\Dist\PhysX_static_64.lib;vendor\PhysX\lib\Dist\PhysXCharacterKinematic_static_64.lib;vendor\PhysX\lib\Dist\PhysXCommon_static_64.lib;vendor\PhysX\lib\Dist\PhysXCooking_static_64.lib;vendor\PhysX\lib\Dist\PhysXExtensions_static_64.lib;vendor\PhysX\lib\Dist\PhysXFoundation_static_64.lib;vendor\PhysX\lib\Dist\PhysXPvdSDK_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Ant.h" />
+    <ClInclude Include="src\Ant\Animation\Animation.h" />
+    <ClInclude Include="src\Ant\Animation\AnimationAssetSerializer.h" />
+    <ClInclude Include="src\Ant\Animation\AnimationController.h" />
+    <ClInclude Include="src\Ant\Animation\AnimationImporterAssimp.h" />
+    <ClInclude Include="src\Ant\Animation\Skeleton.h" />
     <ClInclude Include="src\Ant\Asset\Asset.h" />
+    <ClInclude Include="src\Ant\Asset\AssetExtensions.h" />
     <ClInclude Include="src\Ant\Asset\AssetImporter.h" />
     <ClInclude Include="src\Ant\Asset\AssetManager.h" />
+    <ClInclude Include="src\Ant\Asset\AssetManager\AssetManagerBase.h" />
+    <ClInclude Include="src\Ant\Asset\AssetManager\EditorAssetManager.h" />
+    <ClInclude Include="src\Ant\Asset\AssetManager\RuntimeAssetManager.h" />
+    <ClInclude Include="src\Ant\Asset\AssetMetadata.h" />
+    <ClInclude Include="src\Ant\Asset\AssetRegistry.h" />
     <ClInclude Include="src\Ant\Asset\AssetSerializer.h" />
+    <ClInclude Include="src\Ant\Asset\AssetTypes.h" />
+    <ClInclude Include="src\Ant\Asset\AssimpMeshImporter.h" />
+    <ClInclude Include="src\Ant\Asset\GraphSerializer.h" />
+    <ClInclude Include="src\Ant\Asset\MeshColliderAsset.h" />
+    <ClInclude Include="src\Ant\Asset\MeshRuntimeSerializer.h" />
+    <ClInclude Include="src\Ant\Asset\MeshSerializer.h" />
+    <ClInclude Include="src\Ant\Asset\MeshSourceFile.h" />
+    <ClInclude Include="src\Ant\Asset\TextureImporter.h" />
+    <ClInclude Include="src\Ant\Audio\Audio.h" />
+    <ClInclude Include="src\Ant\Audio\AudioCallback.h" />
+    <ClInclude Include="src\Ant\Audio\AudioComponent.h" />
+    <ClInclude Include="src\Ant\Audio\AudioEngine.h" />
+    <ClInclude Include="src\Ant\Audio\AudioEvents\AudioCommandRegistry.h" />
+    <ClInclude Include="src\Ant\Audio\AudioEvents\AudioCommands.h" />
+    <ClInclude Include="src\Ant\Audio\AudioEvents\CommandID.h" />
+    <ClInclude Include="src\Ant\Audio\AudioEventsManager.h" />
+    <ClInclude Include="src\Ant\Audio\AudioFileUtils.h" />
+    <ClInclude Include="src\Ant\Audio\AudioObject.h" />
+    <ClInclude Include="src\Ant\Audio\AudioPlayback.h" />
+    <ClInclude Include="src\Ant\Audio\AudioReader.h" />
+    <ClInclude Include="src\Ant\Audio\Buffer\CircularBuffer.h" />
+    <ClInclude Include="src\Ant\Audio\DSP\Components\DelayLine.h" />
+    <ClInclude Include="src\Ant\Audio\DSP\Components\allpass.hpp" />
+    <ClInclude Include="src\Ant\Audio\DSP\Components\comb.hpp" />
+    <ClInclude Include="src\Ant\Audio\DSP\Components\denormals.h" />
+    <ClInclude Include="src\Ant\Audio\DSP\Components\revmodel.hpp" />
+    <ClInclude Include="src\Ant\Audio\DSP\Components\tuning.h" />
+    <ClInclude Include="src\Ant\Audio\DSP\Filters\FilterHighPass.h" />
+    <ClInclude Include="src\Ant\Audio\DSP\Filters\FilterLowPass.h" />
+    <ClInclude Include="src\Ant\Audio\DSP\Reverb\Reverb.h" />
+    <ClInclude Include="src\Ant\Audio\DSP\Spatializer\Spatializer.h" />
+    <ClInclude Include="src\Ant\Audio\DSP\Spatializer\VBAP.h" />
+    <ClInclude Include="src\Ant\Audio\Editor\AudioEventsEditor.h" />
+    <ClInclude Include="src\Ant\Audio\Editor\OrderedVector.h" />
+    <ClInclude Include="src\Ant\Audio\Editor\TreeModel.h" />
+    <ClInclude Include="src\Ant\Audio\EntityIDMaps.h" />
+    <ClInclude Include="src\Ant\Audio\ResourceManager.h" />
+    <ClInclude Include="src\Ant\Audio\Sound.h" />
+    <ClInclude Include="src\Ant\Audio\SoundBank.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\GraphGeneration.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\NodeProcessor.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Nodes\ArrayNodes.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Nodes\EnvelopeNodes.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Nodes\GeneratorNodes.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Nodes\MathNodes.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Nodes\MusicNodes.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Nodes\NodeDescriptors.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Nodes\NodeTypes.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Nodes\TriggerNodes.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Nodes\WavePlayer.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\SoundGraph.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\SoundGraphFactory.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\SoundGraphPatchPreset.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\SoundGraphPrototype.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\SoundGraphSound.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\SoundGraphSource.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Utils\CompilerCache.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Utils\CompilerCacheRuntime.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\Utils\SoundGraphCache.h" />
+    <ClInclude Include="src\Ant\Audio\SoundGraph\WaveSource.h" />
+    <ClInclude Include="src\Ant\Audio\SoundObject.h" />
+    <ClInclude Include="src\Ant\Audio\SourceManager.h" />
+    <ClInclude Include="src\Ant\Audio\VFS.h" />
     <ClInclude Include="src\Ant\Core\Application.h" />
     <ClInclude Include="src\Ant\Core\Assert.h" />
     <ClInclude Include="src\Ant\Core\Base.h" />
     <ClInclude Include="src\Ant\Core\Buffer.h" />
+    <ClInclude Include="src\Ant\Core\Delegate.h" />
     <ClInclude Include="src\Ant\Core\Events\ApplicationEvent.h" />
+    <ClInclude Include="src\Ant\Core\Events\EditorEvents.h" />
     <ClInclude Include="src\Ant\Core\Events\Event.h" />
     <ClInclude Include="src\Ant\Core\Events\KeyEvent.h" />
     <ClInclude Include="src\Ant\Core\Events\MouseEvent.h" />
+    <ClInclude Include="src\Ant\Core\Events\SceneEvents.h" />
+    <ClInclude Include="src\Ant\Core\FastRandom.h" />
+    <ClInclude Include="src\Ant\Core\Hash.h" />
+    <ClInclude Include="src\Ant\Core\Identifier.h" />
     <ClInclude Include="src\Ant\Core\Inputs.h" />
     <ClInclude Include="src\Ant\Core\KeyCodes.h" />
     <ClInclude Include="src\Ant\Core\Layer.h" />
     <ClInclude Include="src\Ant\Core\LayerStack.h" />
     <ClInclude Include="src\Ant\Core\Log.h" />
+    <ClInclude Include="src\Ant\Core\LogCustomFormatters.h" />
     <ClInclude Include="src\Ant\Core\Math\AABB.h" />
     <ClInclude Include="src\Ant\Core\Math\Mat4.h" />
     <ClInclude Include="src\Ant\Core\Math\Noise.h" />
     <ClInclude Include="src\Ant\Core\Math\Ray.h" />
-    <ClInclude Include="src\Ant\Core\MouseCodes.h" />
+    <ClInclude Include="src\Ant\Core\Memory.h" />
+    <ClInclude Include="src\Ant\Core\Platform.h" />
     <ClInclude Include="src\Ant\Core\Ref.h" />
+    <ClInclude Include="src\Ant\Core\RenderThread.h" />
+    <ClInclude Include="src\Ant\Core\Thread.h" />
     <ClInclude Include="src\Ant\Core\Timer.h" />
     <ClInclude Include="src\Ant\Core\Timestep.h" />
     <ClInclude Include="src\Ant\Core\UUID.h" />
     <ClInclude Include="src\Ant\Core\Window.h" />
+    <ClInclude Include="src\Ant\Core\WindowsThread.h" />
+    <ClInclude Include="src\Ant\Debug\Profiler.h" />
+    <ClInclude Include="src\Ant\Editor\ApplicationSettings.h" />
     <ClInclude Include="src\Ant\Editor\AssetEditorPanel.h" />
-    <ClInclude Include="src\Ant\Editor\ContentBrowserPanel.h" />
+    <ClInclude Include="src\Ant\Editor\AssetEditorPanelInterface.h" />
     <ClInclude Include="src\Ant\Editor\DefaultAssetEditors.h" />
+    <ClInclude Include="src\Ant\Editor\ECSDebugPanel.h" />
     <ClInclude Include="src\Ant\Editor\EditorCamera.h" />
-    <ClInclude Include="src\Ant\Editor\ObjectsPanel.h" />
-    <ClInclude Include="src\Ant\Editor\PhysicsSettingsWindow.h" />
+    <ClInclude Include="src\Ant\Editor\EditorConsole\ConsoleMessage.h" />
+    <ClInclude Include="src\Ant\Editor\EditorConsole\EditorConsoleSink.h" />
+    <ClInclude Include="src\Ant\Editor\EditorConsolePanel.h" />
+    <ClInclude Include="src\Ant\Editor\EditorPanel.h" />
+    <ClInclude Include="src\Ant\Editor\EditorResources.h" />
+    <ClInclude Include="src\Ant\Editor\FontAwesome.h" />
+    <ClInclude Include="src\Ant\Editor\MeshColliderEditor.h" />
+    <ClInclude Include="src\Ant\Editor\MeshViewerPanel.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\NodeEditorModel.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\NodeGraphAsset.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\NodeGraphEditor.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\NodeGraphEditorContext.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\Nodes.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\PropertySet.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\SoundGraph\SoundGraphEditorTypes.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\SoundGraph\SoundGraphGraphEditor.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\SoundGraph\SoundGraphNodeEditorModel.h" />
+    <ClInclude Include="src\Ant\Editor\NodeGraphEditor\SoundGraph\SoundGraphNodes.h" />
+    <ClInclude Include="src\Ant\Editor\PanelManager.h" />
     <ClInclude Include="src\Ant\Editor\SceneHierarchyPanel.h" />
+    <ClInclude Include="src\Ant\Editor\ScriptEngineDebugPanel.h" />
+    <ClInclude Include="src\Ant\Editor\SelectionManager.h" />
     <ClInclude Include="src\Ant\EntryPoint.h" />
+    <ClInclude Include="src\Ant\ImGui\Colours.h" />
+    <ClInclude Include="src\Ant\ImGui\CustomTreeNode.h" />
     <ClInclude Include="src\Ant\ImGui\ImGui.h" />
+    <ClInclude Include="src\Ant\ImGui\ImGuiFonts.h" />
     <ClInclude Include="src\Ant\ImGui\ImGuiLayer.h" />
+    <ClInclude Include="src\Ant\ImGui\ImGuiUtilities.h" />
+    <ClInclude Include="src\Ant\ImGui\ImGuiWidgets.h" />
+    <ClInclude Include="src\Ant\ImGui\ImGuizmo.h" />
+    <ClInclude Include="src\Ant\ImGui\UICore.h" />
     <ClInclude Include="src\Ant\Math\Math.h" />
-    <ClInclude Include="src\Ant\Physics\PXPhysicsWrappers.h" />
-    <ClInclude Include="src\Ant\Physics\Physics.h" />
-    <ClInclude Include="src\Ant\Physics\PhysicsActor.h" />
-    <ClInclude Include="src\Ant\Physics\PhysicsLayer.h" />
-    <ClInclude Include="src\Ant\Physics\PhysicsUtil.h" />
+    <ClInclude Include="src\Ant\Physics\2D\ContactListener2D.h" />
+    <ClInclude Include="src\Ant\Physics\2D\Physics2D.h" />
+    <ClInclude Include="src\Ant\Physics\3D\ContactListener.h" />
+    <ClInclude Include="src\Ant\Physics\3D\CookingFactory.h" />
+    <ClInclude Include="src\Ant\Physics\3D\Debug\PhysXDebugger.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysXInternal.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysXUtils.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsActor.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsActorBase.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsController.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsJoints.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsLayer.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsMeshCache.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsScene.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsSettings.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsShapes.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsSystem.h" />
+    <ClInclude Include="src\Ant\Physics\3D\PhysicsTypes.h" />
     <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLFramebuffer.h" />
     <ClInclude Include="src\Ant\Platform\OpenGL\OpenGLImGuiLayer.h" />
@@ -208,6 +335,11 @@
     <ClInclude Include="src\Ant\Platform\Vulkan\Debug\NsightAftermathGpuCrashTracker.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\Debug\NsightAftermathHelpers.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\Debug\NsightAftermathShaderDatabase.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\ShaderCompiler\ShaderPreprocessing\GlslIncluder.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\ShaderCompiler\ShaderPreprocessing\HlslIncluder.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\ShaderCompiler\ShaderPreprocessing\ShaderPreprocessor.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\ShaderCompiler\VulkanShaderCache.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\ShaderCompiler\VulkanShaderCompiler.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\Vulkan.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanAllocator.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanComputePipeline.h" />
@@ -220,50 +352,102 @@
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanIndexBuffer.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanMaterial.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanPipeline.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\VulkanRenderCommandBuffer.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanRenderPass.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanRenderer.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanShader.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\VulkanShaderResource.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\VulkanShaderUtils.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\VulkanStorageBuffer.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\VulkanStorageBufferSet.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanSwapChain.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanTexture.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\VulkanUniformBuffer.h" />
+    <ClInclude Include="src\Ant\Platform\Vulkan\VulkanUniformBufferSet.h" />
     <ClInclude Include="src\Ant\Platform\Vulkan\VulkanVertexBuffer.h" />
     <ClInclude Include="src\Ant\Platform\Windows\WindowsWindow.h" />
+    <ClInclude Include="src\Ant\Project\Project.h" />
+    <ClInclude Include="src\Ant\Project\ProjectSerializer.h" />
+    <ClInclude Include="src\Ant\Project\TieringSettings.h" />
+    <ClInclude Include="src\Ant\Project\UserPreferences.h" />
+    <ClInclude Include="src\Ant\Reflection\MetaHelpers.h" />
+    <ClInclude Include="src\Ant\Reflection\TypeDescriptor.h" />
+    <ClInclude Include="src\Ant\Reflection\TypeName.h" />
+    <ClInclude Include="src\Ant\Reflection\TypeStructures.h" />
+    <ClInclude Include="src\Ant\Reflection\TypeUtils.h" />
     <ClInclude Include="src\Ant\Renderer\Camera.h" />
+    <ClInclude Include="src\Ant\Renderer\DebugRenderer.h" />
     <ClInclude Include="src\Ant\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Ant\Renderer\Image.h" />
     <ClInclude Include="src\Ant\Renderer\IndexBuffer.h" />
     <ClInclude Include="src\Ant\Renderer\Material.h" />
+    <ClInclude Include="src\Ant\Renderer\MaterialAsset.h" />
     <ClInclude Include="src\Ant\Renderer\Mesh.h" />
     <ClInclude Include="src\Ant\Renderer\MeshFactory.h" />
     <ClInclude Include="src\Ant\Renderer\Pipeline.h" />
+    <ClInclude Include="src\Ant\Renderer\PipelineCompute.h" />
+    <ClInclude Include="src\Ant\Renderer\RenderCommandBuffer.h" />
     <ClInclude Include="src\Ant\Renderer\RenderCommandQueue.h" />
     <ClInclude Include="src\Ant\Renderer\RenderPass.h" />
     <ClInclude Include="src\Ant\Renderer\Renderer.h" />
     <ClInclude Include="src\Ant\Renderer\Renderer2D.h" />
     <ClInclude Include="src\Ant\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Ant\Renderer\RendererCapabilities.h" />
+    <ClInclude Include="src\Ant\Renderer\RendererConfig.h" />
     <ClInclude Include="src\Ant\Renderer\RendererContext.h" />
     <ClInclude Include="src\Ant\Renderer\RendererTypes.h" />
     <ClInclude Include="src\Ant\Renderer\SceneEnvironment.h" />
     <ClInclude Include="src\Ant\Renderer\SceneRenderer.h" />
     <ClInclude Include="src\Ant\Renderer\Shader.h" />
+    <ClInclude Include="src\Ant\Renderer\ShaderDefs.h" />
+    <ClInclude Include="src\Ant\Renderer\ShaderPack.h" />
     <ClInclude Include="src\Ant\Renderer\ShaderUniform.h" />
+    <ClInclude Include="src\Ant\Renderer\StorageBuffer.h" />
+    <ClInclude Include="src\Ant\Renderer\StorageBufferSet.h" />
     <ClInclude Include="src\Ant\Renderer\Texture.h" />
+    <ClInclude Include="src\Ant\Renderer\UI\Font.h" />
+    <ClInclude Include="src\Ant\Renderer\UI\MSDFData.h" />
+    <ClInclude Include="src\Ant\Renderer\UniformBuffer.h" />
+    <ClInclude Include="src\Ant\Renderer\UniformBufferSet.h" />
     <ClInclude Include="src\Ant\Renderer\VertexBuffer.h" />
     <ClInclude Include="src\Ant\Scene\Components.h" />
     <ClInclude Include="src\Ant\Scene\Entity.h" />
+    <ClInclude Include="src\Ant\Scene\Prefab.h" />
     <ClInclude Include="src\Ant\Scene\Scene.h" />
     <ClInclude Include="src\Ant\Scene\SceneCamera.h" />
     <ClInclude Include="src\Ant\Scene\SceneSerializer.h" />
+    <ClInclude Include="src\Ant\Scripts\FieldStorage.h" />
+    <ClInclude Include="src\Ant\Scripts\GCManager.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptAsset.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptBuilder.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptCache.h" />
     <ClInclude Include="src\Ant\Scripts\ScriptEngine.h" />
-    <ClInclude Include="src\Ant\Scripts\ScriptEngineRegistry.h" />
-    <ClInclude Include="src\Ant\Scripts\ScriptWrappers.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptGlue.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptProfiler.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptTypes.h" />
+    <ClInclude Include="src\Ant\Scripts\ScriptUtils.h" />
+    <ClInclude Include="src\Ant\Scripts\ValueWrapper.h" />
+    <ClInclude Include="src\Ant\Serialization\AssetPack.h" />
+    <ClInclude Include="src\Ant\Serialization\AssetPackFile.h" />
+    <ClInclude Include="src\Ant\Serialization\AssetPackSerializer.h" />
+    <ClInclude Include="src\Ant\Serialization\FileStream.h" />
+    <ClInclude Include="src\Ant\Serialization\MemoryStream.h" />
+    <ClInclude Include="src\Ant\Serialization\Serialization.h" />
+    <ClInclude Include="src\Ant\Serialization\SerializationImpl.h" />
+    <ClInclude Include="src\Ant\Serialization\ShaderPackFile.h" />
+    <ClInclude Include="src\Ant\Serialization\StreamReader.h" />
+    <ClInclude Include="src\Ant\Serialization\StreamWriter.h" />
+    <ClInclude Include="src\Ant\Serialization\TextureRuntimeSerializer.h" />
+    <ClInclude Include="src\Ant\Utilities\AssimpLogStream.h" />
+    <ClInclude Include="src\Ant\Utilities\ContainerUtils.h" />
     <ClInclude Include="src\Ant\Utilities\FileSystem.h" />
+    <ClInclude Include="src\Ant\Utilities\SerializationMacros.h" />
     <ClInclude Include="src\Ant\Utilities\StringUtils.h" />
+    <ClInclude Include="src\Ant\Utilities\TypeInfo.h" />
+    <ClInclude Include="src\Ant\Utilities\YAMLSerializationHelpers.h" />
+    <ClInclude Include="src\Ant\Vendor\imgui-node-editor\widgets.h" />
     <ClInclude Include="src\antpch.h" />
-    <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="vendor\VulkanMemoryAllocator\vk_mem_alloc.h" />
-    <ClInclude Include="vendor\imgui\examples\imgui_impl_vulkan_with_textures.h" />
-    <ClInclude Include="vendor\stb_image\stb_image.h" />
     <ClInclude Include="vendor\yaml-cpp\include\yaml-cpp\anchor.h" />
     <ClInclude Include="vendor\yaml-cpp\include\yaml-cpp\binary.h" />
     <ClInclude Include="vendor\yaml-cpp\include\yaml-cpp\contrib\anchordict.h" />
@@ -325,34 +509,125 @@
     <ClInclude Include="vendor\yaml-cpp\src\token.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Ant\Animation\Animation.cpp" />
+    <ClCompile Include="src\Ant\Animation\AnimationAssetSerializer.cpp" />
+    <ClCompile Include="src\Ant\Animation\AnimationController.cpp" />
+    <ClCompile Include="src\Ant\Animation\AnimationImporterAssimp.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Animation\Skeleton.cpp" />
     <ClCompile Include="src\Ant\Asset\AssetImporter.cpp" />
     <ClCompile Include="src\Ant\Asset\AssetManager.cpp" />
+    <ClCompile Include="src\Ant\Asset\AssetManager\EditorAssetManager.cpp" />
+    <ClCompile Include="src\Ant\Asset\AssetManager\RuntimeAssetManager.cpp" />
+    <ClCompile Include="src\Ant\Asset\AssetRegistry.cpp" />
     <ClCompile Include="src\Ant\Asset\AssetSerializer.cpp" />
+    <ClCompile Include="src\Ant\Asset\AssimpMeshImporter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Asset\GraphSerializer.cpp" />
+    <ClCompile Include="src\Ant\Asset\MeshRuntimeSerializer.cpp" />
+    <ClCompile Include="src\Ant\Asset\MeshSerializer.cpp" />
+    <ClCompile Include="src\Ant\Asset\TextureImporter.cpp" />
+    <ClCompile Include="src\Ant\Audio\Audio.cpp" />
+    <ClCompile Include="src\Ant\Audio\AudioCallback.cpp" />
+    <ClCompile Include="src\Ant\Audio\AudioComponent.cpp" />
+    <ClCompile Include="src\Ant\Audio\AudioEngine.cpp" />
+    <ClCompile Include="src\Ant\Audio\AudioEvents\AudioCommandRegistry.cpp" />
+    <ClCompile Include="src\Ant\Audio\AudioEvents\CommandID.cpp" />
+    <ClCompile Include="src\Ant\Audio\AudioEventsManager.cpp" />
+    <ClCompile Include="src\Ant\Audio\AudioFileUtils.cpp" />
+    <ClCompile Include="src\Ant\Audio\AudioObject.cpp" />
+    <ClCompile Include="src\Ant\Audio\AudioPlayback.cpp" />
+    <ClCompile Include="src\Ant\Audio\DSP\Components\allpass.cpp" />
+    <ClCompile Include="src\Ant\Audio\DSP\Components\comb.cpp" />
+    <ClCompile Include="src\Ant\Audio\DSP\Components\revmodel.cpp" />
+    <ClCompile Include="src\Ant\Audio\DSP\Filters\FilterHighPass.cpp" />
+    <ClCompile Include="src\Ant\Audio\DSP\Filters\FilterLowPass.cpp" />
+    <ClCompile Include="src\Ant\Audio\DSP\Reverb\Reverb.cpp" />
+    <ClCompile Include="src\Ant\Audio\DSP\Spatializer\Spatializer.cpp" />
+    <ClCompile Include="src\Ant\Audio\DSP\Spatializer\VBAP.cpp" />
+    <ClCompile Include="src\Ant\Audio\Editor\AudioEventsEditor.cpp" />
+    <ClCompile Include="src\Ant\Audio\Editor\OrderedVector.cpp" />
+    <ClCompile Include="src\Ant\Audio\EntityIDMaps.cpp" />
+    <ClCompile Include="src\Ant\Audio\ResourceManager.cpp" />
+    <ClCompile Include="src\Ant\Audio\Sound.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundBank.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\GraphGeneration.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\Nodes\NodeDescriptors.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\Nodes\NodeTypes.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\SoundGraph.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\SoundGraphFactory.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\SoundGraphPatchPreset.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\SoundGraphPrototype.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\SoundGraphSound.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\SoundGraphSource.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundGraph\Utils\SoundGraphCache.cpp" />
+    <ClCompile Include="src\Ant\Audio\SoundObject.cpp" />
+    <ClCompile Include="src\Ant\Audio\SourceManager.cpp" />
+    <ClCompile Include="src\Ant\Audio\VFS.cpp" />
     <ClCompile Include="src\Ant\Core\Application.cpp" />
     <ClCompile Include="src\Ant\Core\Base.cpp" />
+    <ClCompile Include="src\Ant\Core\Hash.cpp" />
+    <ClCompile Include="src\Ant\Core\HashCRC32.cpp" />
     <ClCompile Include="src\Ant\Core\Layer.cpp" />
     <ClCompile Include="src\Ant\Core\LayerStack.cpp" />
     <ClCompile Include="src\Ant\Core\Log.cpp" />
     <ClCompile Include="src\Ant\Core\Math\Mat4.cpp" />
     <ClCompile Include="src\Ant\Core\Math\Noise.cpp" />
+    <ClCompile Include="src\Ant\Core\Memory.cpp" />
+    <ClCompile Include="src\Ant\Core\Platform.cpp" />
+    <ClCompile Include="src\Ant\Core\Ref.cpp" />
+    <ClCompile Include="src\Ant\Core\RenderThread.cpp" />
+    <ClCompile Include="src\Ant\Core\TimeStep.cpp" />
     <ClCompile Include="src\Ant\Core\UUID.cpp" />
     <ClCompile Include="src\Ant\Core\Window.cpp" />
+    <ClCompile Include="src\Ant\Editor\ApplicationSettings.cpp" />
     <ClCompile Include="src\Ant\Editor\AssetEditorPanel.cpp" />
-    <ClCompile Include="src\Ant\Editor\ContentBrowserPanel.cpp" />
+    <ClCompile Include="src\Ant\Editor\AssetEditorPanelInterface.cpp" />
     <ClCompile Include="src\Ant\Editor\DefaultAssetEditors.cpp" />
+    <ClCompile Include="src\Ant\Editor\ECSDebugPanel.cpp" />
     <ClCompile Include="src\Ant\Editor\EditorCamera.cpp" />
-    <ClCompile Include="src\Ant\Editor\ObjectsPanel.cpp" />
-    <ClCompile Include="src\Ant\Editor\PhysicsSettingsWindow.cpp" />
+    <ClCompile Include="src\Ant\Editor\EditorConsolePanel.cpp" />
+    <ClCompile Include="src\Ant\Editor\MeshColliderEditor.cpp" />
+    <ClCompile Include="src\Ant\Editor\MeshViewerPanel.cpp" />
+    <ClCompile Include="src\Ant\Editor\NodeGraphEditor\NodeEditorModel.cpp" />
+    <ClCompile Include="src\Ant\Editor\NodeGraphEditor\NodeGraphEditor.cpp" />
+    <ClCompile Include="src\Ant\Editor\NodeGraphEditor\Nodes.cpp" />
+    <ClCompile Include="src\Ant\Editor\NodeGraphEditor\PropertySet.cpp" />
+    <ClCompile Include="src\Ant\Editor\NodeGraphEditor\SoundGraph\SoundGraphGraphEditor.cpp" />
+    <ClCompile Include="src\Ant\Editor\NodeGraphEditor\SoundGraph\SoundGraphNodeEditorModel.cpp" />
+    <ClCompile Include="src\Ant\Editor\NodeGraphEditor\SoundGraph\SoundGraphNodes.cpp" />
+    <ClCompile Include="src\Ant\Editor\PanelManager.cpp" />
     <ClCompile Include="src\Ant\Editor\SceneHierarchyPanel.cpp" />
+    <ClCompile Include="src\Ant\Editor\ScriptEngineDebugPanel.cpp" />
+    <ClCompile Include="src\Ant\Editor\SelectionManager.cpp" />
+    <ClCompile Include="src\Ant\ImGui\Colours.cpp" />
+    <ClCompile Include="src\Ant\ImGui\CustomTreeNode.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiBuild.cpp" />
+    <ClCompile Include="src\Ant\ImGui\ImGuiFonts.cpp" />
     <ClCompile Include="src\Ant\ImGui\ImGuiLayer.cpp" />
+    <ClCompile Include="src\Ant\ImGui\ImGuiUtilities.cpp" />
+    <ClCompile Include="src\Ant\ImGui\ImGuiWidgets.cpp" />
+    <ClCompile Include="src\Ant\ImGui\ImGuizmo.cpp" />
+    <ClCompile Include="src\Ant\ImGui\UICore.cpp" />
     <ClCompile Include="src\Ant\ImGui\VulkanImGui.cpp" />
     <ClCompile Include="src\Ant\Math\Math.cpp" />
-    <ClCompile Include="src\Ant\Physics\PXPhysicsWrappers.cpp" />
-    <ClCompile Include="src\Ant\Physics\Physics.cpp" />
-    <ClCompile Include="src\Ant\Physics\PhysicsActor.cpp" />
-    <ClCompile Include="src\Ant\Physics\PhysicsLayer.cpp" />
-    <ClCompile Include="src\Ant\Physics\PhysicsUtil.cpp" />
+    <ClCompile Include="src\Ant\Physics\2D\ContactListener2D.cpp" />
+    <ClCompile Include="src\Ant\Physics\2D\Physics2D.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\ContactListener.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\CookingFactory.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\Debug\PhysXDebugger.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysXInternal.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysXUtils.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysicsActor.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysicsController.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysicsJoints.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysicsLayer.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysicsMeshCache.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysicsScene.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysicsShapes.cpp" />
+    <ClCompile Include="src\Ant\Physics\3D\PhysicsSystem.cpp" />
     <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLFramebuffer.cpp" />
     <ClCompile Include="src\Ant\Platform\OpenGL\OpenGLImGuiLayer.cpp" />
@@ -371,6 +646,21 @@
     <ClCompile Include="src\Ant\Platform\Vulkan\Debug\NsightAftermathShaderDatabase.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\Ant\Platform\Vulkan\ShaderCompiler\ShaderPreprocessing\GlslIncluder.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\Vulkan\ShaderCompiler\ShaderPreprocessing\HlslIncluder.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\Vulkan\ShaderCompiler\ShaderPreprocessing\ShaderPreprocessor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\Vulkan\ShaderCompiler\VulkanShaderCache.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\Ant\Platform\Vulkan\ShaderCompiler\VulkanShaderCompiler.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\Ant\Platform\Vulkan\Vulkan.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanAllocator.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanComputePipeline.cpp" />
@@ -383,23 +673,36 @@
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanIndexBuffer.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanMaterial.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanPipeline.cpp" />
+    <ClCompile Include="src\Ant\Platform\Vulkan\VulkanRenderCommandBuffer.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanRenderPass.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanRenderer.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanShader.cpp" />
+    <ClCompile Include="src\Ant\Platform\Vulkan\VulkanShaderUtils.cpp" />
+    <ClCompile Include="src\Ant\Platform\Vulkan\VulkanStorageBuffer.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanSwapChain.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanTexture.cpp" />
+    <ClCompile Include="src\Ant\Platform\Vulkan\VulkanUniformBuffer.cpp" />
     <ClCompile Include="src\Ant\Platform\Vulkan\VulkanVertexBuffer.cpp" />
     <ClCompile Include="src\Ant\Platform\Windows\WindowsFileSystem.cpp" />
     <ClCompile Include="src\Ant\Platform\Windows\WindowsInput.cpp" />
+    <ClCompile Include="src\Ant\Platform\Windows\WindowsScriptBuilder.cpp" />
     <ClCompile Include="src\Ant\Platform\Windows\WindowsWindow.cpp" />
+    <ClCompile Include="src\Ant\Project\Project.cpp" />
+    <ClCompile Include="src\Ant\Project\ProjectSerializer.cpp" />
+    <ClCompile Include="src\Ant\Project\TieringSettings.cpp" />
+    <ClCompile Include="src\Ant\Project\UserPreferences.cpp" />
     <ClCompile Include="src\Ant\Renderer\Camera.cpp" />
+    <ClCompile Include="src\Ant\Renderer\DebugRenderer.cpp" />
     <ClCompile Include="src\Ant\Renderer\Framebuffer.cpp" />
     <ClCompile Include="src\Ant\Renderer\Image.cpp" />
     <ClCompile Include="src\Ant\Renderer\IndexBuffer.cpp" />
     <ClCompile Include="src\Ant\Renderer\Material.cpp" />
+    <ClCompile Include="src\Ant\Renderer\MaterialAsset.cpp" />
     <ClCompile Include="src\Ant\Renderer\Mesh.cpp" />
     <ClCompile Include="src\Ant\Renderer\MeshFactory.cpp" />
     <ClCompile Include="src\Ant\Renderer\Pipeline.cpp" />
+    <ClCompile Include="src\Ant\Renderer\PipelineCompute.cpp" />
+    <ClCompile Include="src\Ant\Renderer\RenderCommandBuffer.cpp" />
     <ClCompile Include="src\Ant\Renderer\RenderCommandQueue.cpp" />
     <ClCompile Include="src\Ant\Renderer\RenderPass.cpp" />
     <ClCompile Include="src\Ant\Renderer\Renderer.cpp" />
@@ -408,27 +711,51 @@
     <ClCompile Include="src\Ant\Renderer\SceneEnvironment.cpp" />
     <ClCompile Include="src\Ant\Renderer\SceneRenderer.cpp" />
     <ClCompile Include="src\Ant\Renderer\Shader.cpp" />
+    <ClCompile Include="src\Ant\Renderer\ShaderPack.cpp" />
+    <ClCompile Include="src\Ant\Renderer\StorageBuffer.cpp" />
+    <ClCompile Include="src\Ant\Renderer\StorageBufferSet.cpp" />
     <ClCompile Include="src\Ant\Renderer\Texture.cpp" />
+    <ClCompile Include="src\Ant\Renderer\UI\Font.cpp" />
+    <ClCompile Include="src\Ant\Renderer\UniformBuffer.cpp" />
+    <ClCompile Include="src\Ant\Renderer\UniformBufferSet.cpp" />
     <ClCompile Include="src\Ant\Renderer\VertexBuffer.cpp" />
     <ClCompile Include="src\Ant\Scene\Entity.cpp" />
+    <ClCompile Include="src\Ant\Scene\Prefab.cpp" />
     <ClCompile Include="src\Ant\Scene\Scene.cpp" />
     <ClCompile Include="src\Ant\Scene\SceneCamera.cpp" />
     <ClCompile Include="src\Ant\Scene\SceneSerializer.cpp" />
+    <ClCompile Include="src\Ant\Scripts\FieldStorage.cpp" />
+    <ClCompile Include="src\Ant\Scripts\GCManager.cpp" />
+    <ClCompile Include="src\Ant\Scripts\ScriptCache.cpp" />
     <ClCompile Include="src\Ant\Scripts\ScriptEngine.cpp" />
-    <ClCompile Include="src\Ant\Scripts\ScriptEngineRegistry.cpp" />
-    <ClCompile Include="src\Ant\Scripts\ScriptWrappers.cpp" />
+    <ClCompile Include="src\Ant\Scripts\ScriptGlue.cpp" />
+    <ClCompile Include="src\Ant\Scripts\ScriptProfiler.cpp" />
+    <ClCompile Include="src\Ant\Scripts\ScriptTypes.cpp" />
+    <ClCompile Include="src\Ant\Scripts\ScriptUtils.cpp" />
+    <ClCompile Include="src\Ant\Serialization\AssetPack.cpp" />
+    <ClCompile Include="src\Ant\Serialization\AssetPackSerializer.cpp" />
+    <ClCompile Include="src\Ant\Serialization\FileStream.cpp" />
+    <ClCompile Include="src\Ant\Serialization\MemoryStream.cpp" />
+    <ClCompile Include="src\Ant\Serialization\StreamReader.cpp" />
+    <ClCompile Include="src\Ant\Serialization\StreamWriter.cpp" />
+    <ClCompile Include="src\Ant\Serialization\TextureRuntimeSerializer.cpp" />
+    <ClCompile Include="src\Ant\Utilities\FileSystem.cpp" />
     <ClCompile Include="src\Ant\Utilities\StringUtils.cpp" />
+    <ClCompile Include="src\Ant\Vendor\imgui-node-editor\builders.cpp" />
+    <ClCompile Include="src\Ant\Vendor\imgui-node-editor\crude_json.cpp" />
+    <ClCompile Include="src\Ant\Vendor\imgui-node-editor\imgui_canvas.cpp" />
+    <ClCompile Include="src\Ant\Vendor\imgui-node-editor\imgui_node_editor.cpp" />
+    <ClCompile Include="src\Ant\Vendor\imgui-node-editor\imgui_node_editor_api.cpp" />
+    <ClCompile Include="src\Ant\Vendor\imgui-node-editor\widgets.cpp" />
+    <ClCompile Include="src\Ant\Vendor\miniaudio.cpp" />
+    <ClCompile Include="src\Ant\Vendor\stb_image.cpp" />
     <ClCompile Include="src\antpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
+    <ClCompile Include="vendor\FastNoise\FastNoise.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="vendor\VulkanMemoryAllocator\vk_mem_alloc.cpp" />
-    <ClCompile Include="vendor\imgui\examples\imgui_impl_vulkan_with_textures.cpp">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="vendor\stb_image\stb_image.cpp" />
     <ClCompile Include="vendor\yaml-cpp\src\binary.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -535,6 +862,12 @@
     </ProjectReference>
     <ProjectReference Include="vendor\Box2D\Box2D.vcxproj">
       <Project>{A434E80C-1049-10BE-D9CA-B31D459E0CEF}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vendor\Optick\Optick.vcxproj">
+      <Project>{AFAE52C8-9B50-7D9E-840B-91F2704C04EF}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vendor\msdf-atlas-gen\msdf-atlas-gen.vcxproj">
+      <Project>{38BD587B-248B-4C81-0D1F-BDA7F98B28E6}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -15,17 +15,19 @@ namespace Ant{
 		None       = BIT(0),
 		DepthTest  = BIT(1),
 		Blend      = BIT(2),
-		TwoSided   = BIT(3)
+		TwoSided   = BIT(3),
+		DisableShadowCasting = BIT(4)
 	};
 
 	class Material : public RefCounted
 	{
-		friend class Material;
 	public:
 		static Ref<Material> Create(const Ref<Shader>& shader, const std::string& name = "");
+		static Ref<Material> Copy(const Ref<Material>& other, const std::string& name = "");
 		virtual ~Material() {}
 
 		virtual void Invalidate() = 0;
+		virtual void OnShaderReloaded() = 0;
 
 		virtual void Set(const std::string& name, float value) = 0;
 		virtual void Set(const std::string& name, int value) = 0;
@@ -34,10 +36,15 @@ namespace Ant{
 		virtual void Set(const std::string& name, const glm::vec2& value) = 0;
 		virtual void Set(const std::string& name, const glm::vec3& value) = 0;
 		virtual void Set(const std::string& name, const glm::vec4& value) = 0;
+		virtual void Set(const std::string& name, const glm::ivec2& value) = 0;
+		virtual void Set(const std::string& name, const glm::ivec3& value) = 0;
+		virtual void Set(const std::string& name, const glm::ivec4& value) = 0;
+
 		virtual void Set(const std::string& name, const glm::mat3& value) = 0;
 		virtual void Set(const std::string& name, const glm::mat4& value) = 0;
 
 		virtual void Set(const std::string& name, const Ref<Texture2D>& texture) = 0;
+		virtual void Set(const std::string& name, const Ref<Texture2D>& texture, uint32_t arrayIndex) = 0;
 		virtual void Set(const std::string& name, const Ref<TextureCube>& texture) = 0;
 		virtual void Set(const std::string& name, const Ref<Image2D>& image) = 0;
 
@@ -93,6 +100,7 @@ namespace Ant{
 #endif
 
 		virtual uint32_t GetFlags() const = 0;
+		virtual void SetFlags(uint32_t flags) = 0;
 		virtual bool GetFlag(MaterialFlag flag) const = 0;
 		virtual void SetFlag(MaterialFlag flag, bool value = true) = 0;
 

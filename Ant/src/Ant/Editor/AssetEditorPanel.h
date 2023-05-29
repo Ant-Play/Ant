@@ -1,35 +1,51 @@
 ﻿#pragma once
 
 #include "Ant/ImGui/ImGui.h"
+#include "Ant/Core/TimeStep.h"
+#include "Ant/Core/Events/Event.h"
 
 namespace Ant{
 
 	class AssetEditor
 	{
 	protected:
-		AssetEditor(const char* title);
+		AssetEditor(const char* id);
 
 	public:
 		virtual ~AssetEditor() {}
 
-		void OnImGuiRender();
+		virtual void OnUpdate(Timestep ts) {}
+		virtual void OnEvent(Event& e) {}
+		virtual void SetSceneContext(const Ref<Scene>& context) {}
+		virtual void OnImGuiRender();
 		void SetOpen(bool isOpen);
 		virtual void SetAsset(const Ref<Asset>& asset) = 0;
+
+		bool IsOpen() const { return m_IsOpen; }
+
+		void SetTitle(const std::string& newTitle);
 
 	protected:
 		void SetMinSize(uint32_t width, uint32_t height);
 		void SetMaxSize(uint32_t width, uint32_t height);
 
+		virtual ImGuiWindowFlags GetWindowFlags() { return 0; }
+
+		// Subclass can optionally override these to customize window styling, e.g. window padding
+		virtual void OnWindowStylePush() {}
+		virtual void OnWindowStylePop() {}
 	private:
+		virtual void OnOpen() = 0;
 		virtual void OnClose() = 0;
 		virtual void Render() = 0;
 
-	private:
-		const char* m_Title;
+	protected:
+		std::string m_TitleAndId;  // Caches title###id to avoid computing it every frame
+		ImVec2 m_MinSize, m_MaxSize;
 		bool m_IsOpen = false;
 
-		ImGuiWindowFlags m_Flags = 0;
-		ImVec2 m_MinSize, m_MaxSize;
+	private:
+		std::string m_Id;          // Uniquely identifies the window independently of its title (e.g. for imgui.ini settings)
 	};
 
 	class AssetEditorPanel
@@ -37,6 +53,9 @@ namespace Ant{
 	public:
 		static void RegisterDefaultEditors();
 		static void UnregisterAllEditors();
+		static void OnUpdate(Timestep ts);
+		static void OnEvent(Event& e);
+		static void SetSceneContext(const Ref<Scene>& context);
 		static void OnImGuiRender();
 		static void OpenEditor(const Ref<Asset>& asset);
 
@@ -50,5 +69,6 @@ namespace Ant{
 
 	private:
 		static std::unordered_map<AssetType, Scope<AssetEditor>> s_Editors;
+		static Ref<Scene> s_SceneContext;
 	};
 }

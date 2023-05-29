@@ -6,12 +6,11 @@
 
 namespace Ant{
 
-	class Framebuffer;
-
 	struct RenderPassSpecification
 	{
 		Ref<Framebuffer> TargetFramebuffer;
 		std::string DebugName;
+		glm::vec4 MarkerColor;
 	};
 
 	class RenderPass : public RefCounted
@@ -22,6 +21,6 @@ namespace Ant{
 		virtual RenderPassSpecification& GetSpecification() = 0;
 		virtual const RenderPassSpecification& GetSpecification() const = 0;
 
-		static Ant::Ref<Ant::RenderPass> Create(const RenderPassSpecification& spec);
+		static Ref<RenderPass> Create(const RenderPassSpecification& spec);
 	};
 }

@@ -2,14 +2,35 @@
 #include "Renderer.h"
 #include "Shader.h"
 
-#include <Glad/glad.h>
+#include <map>
 
 #include "RendererAPI.h"
 #include "SceneRenderer.h"
 #include "Renderer2D.h"
+#include "ShaderPack.h"
 
-#include "Ant/Platform/OpenGL/OpenGLRenderer.h"
+#include "Ant/Core/Timer.h"
+#include "Ant/Debug/Profiler.h"
+
+#include "Ant/Platform/Vulkan/VulkanComputePipeline.h"
 #include "Ant/Platform/Vulkan/VulkanRenderer.h"
+
+#include "Ant/Platform/Vulkan/VulkanContext.h"
+
+#include "Ant/Project/Project.h"
+
+#include <filesystem>
+
+namespace std {
+	template<>
+	struct hash<Ant::WeakRef<Ant::Shader>>
+	{
+		size_t operator()(const Ant::WeakRef<Ant::Shader>& shader) const noexcept
+		{
+			return shader->GetHash();
+		}
+	};
+}
 
 namespace Ant {
 
@@ -19,10 +40,26 @@ namespace Ant {
 
 	struct ShaderDependencies
 	{
+		std::vector<Ref<PipelineCompute>> ComputePipelines;
 		std::vector<Ref<Pipeline>> Pipelines;
 		std::vector<Ref<Material>> Materials;
 	};
 	static std::unordered_map<size_t, ShaderDependencies> s_ShaderDependencies;
+
+	struct GlobalShaderInfo
+	{
+		// Macro name, set of shaders with that macro.
+		std::unordered_map<std::string, std::unordered_map<size_t, WeakRef<Shader>>> ShaderGlobalMacrosMap;
+		// Shaders waiting to be reloaded.
+		std::unordered_set<WeakRef<Shader>> DirtyShaders;
+	};
+
+	static GlobalShaderInfo s_GlobalShaderInfo;
+
+	void Renderer::RegisterShaderDependency(Ref<Shader> shader, Ref<PipelineCompute> computePipeline)
+	{
+		s_ShaderDependencies[shader->GetHash()].ComputePipelines.push_back(computePipeline);
+	}
 
 	void Renderer::RegisterShaderDependency(Ref<Shader> shader, Ref<Pipeline> pipeline)
 	{
@@ -44,39 +81,64 @@ namespace Ant {
 				pipeline->Invalidate();
 			}
 
+			for (auto& computePipeline : dependencies.ComputePipelines)
+			{
+				computePipeline.As<VulkanComputePipeline>()->CreatePipeline();
+			}
+
 			for (auto& material : dependencies.Materials)
 			{
-				material->Invalidate();
+				material->OnShaderReloaded();
 			}
 		}
+	}
+
+	uint32_t Renderer::RT_GetCurrentFrameIndex()
+	{
+		// Swapchain owns the Render Thread frame index
+		return Application::Get().GetWindow().GetSwapChain().GetCurrentBufferIndex();
+	}
+
+	uint32_t Renderer::GetCurrentFrameIndex()
+	{
+		return Application::Get().GetCurrentFrameIndex();
 	}
 
 	void RendererAPI::SetAPI(RendererAPIType api)
 	{
 		// TODO: make sure this is called at a valid time
+		ANT_CORE_VERIFY(api == RendererAPIType::Vulkan, "Vulkan is currently the only supported Renderer API");
 		s_CurrentRendererAPI = api;
 	}
 
 	struct RendererData
 	{
-		RendererConfig Config;
 
 		Ref<ShaderLibrary> m_ShaderLibrary;
 
 		Ref<Texture2D> WhiteTexture;
+		Ref<Texture2D> BlackTexture;
+		Ref<Texture2D> BRDFLutTexture;
+		Ref<Texture2D> HilbertLut;
 		Ref<TextureCube> BlackCubeTexture;
 		Ref<Environment> EmptyEnvironment;
+
+		std::unordered_map<std::string, std::string> GlobalShaderMacros;
 	};
 
+	static RendererConfig s_Config;
 	static RendererData* s_Data = nullptr;
-	static RenderCommandQueue* s_CommandQueue = nullptr;
+	constexpr static uint32_t s_RenderCommandQueueCount = 2;
+	static RenderCommandQueue* s_CommandQueue[s_RenderCommandQueueCount];
+	static std::atomic<uint32_t> s_RenderCommandQueueSubmissionIndex = 0;
+	static RenderCommandQueue s_ResourceFreeQueue[3];
 
 	static RendererAPI* InitRendererAPI()
 	{
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return new OpenGLRenderer();
-			case RendererAPIType::Vulkan: return new VulkanRenderer();
+			//case RendererAPIType::OpenGL: return anew OpenGLRenderer();
+			case RendererAPIType::Vulkan: return anew VulkanRenderer();
 		}
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;
@@ -84,49 +146,175 @@ namespace Ant {
 
 	void Renderer::Init()
 	{
-		s_Data = new RendererData();
-		s_CommandQueue = new RenderCommandQueue();
+		s_Data = anew RendererData();
+		s_CommandQueue[0] = anew RenderCommandQueue();
+		s_CommandQueue[1] = anew RenderCommandQueue();
+
+		// Make sure we don't have more frames in flight than swapchain images
+		s_Config.FramesInFlight = glm::min<uint32_t>(s_Config.FramesInFlight, Application::Get().GetWindow().GetSwapChain().GetImageCount());
+
 		s_RendererAPI = InitRendererAPI();
 
 		s_Data->m_ShaderLibrary = Ref<ShaderLibrary>::Create();
 
-		// Compute shaders
-		Renderer::GetShaderLibrary()->Load("assets/shaders/EnvironmentMipFilter.glsl");
-		Renderer::GetShaderLibrary()->Load("assets/shaders/EquirectangularToCubeMap.glsl");
-		Renderer::GetShaderLibrary()->Load("assets/shaders/EnvironmentIrradiance.glsl");
-		Renderer::GetShaderLibrary()->Load("assets/shaders/PreethamSky.glsl");
+		if (!s_Config.ShaderPackPath.empty())
+			Renderer::GetShaderLibrary()->LoadShaderPack(s_Config.ShaderPackPath);
 
-		Renderer::GetShaderLibrary()->Load("assets/shaders/Grid.glsl");
-		Renderer::GetShaderLibrary()->Load("assets/shaders/SceneComposite.glsl");
-		Renderer::GetShaderLibrary()->Load("assets/shaders/AntPBR_Static.glsl");
-		//Renderer::GetShaderLibrary()->Load("assets/shaders/AntPBR_Anim.glsl");
-		//Renderer::GetShaderLibrary()->Load("assets/shaders/Outline.glsl");
-		Renderer::GetShaderLibrary()->Load("assets/shaders/Skybox.glsl");
-		Renderer::GetShaderLibrary()->Load("assets/shaders/ShadowMap.glsl");
+		// NOTE: some shaders (compute) need to have optimization disabled because of a shaderc internal error
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/AntPBR_Static.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/AntPBR_Transparent.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/AntPBR_Anim.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Grid.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Wireframe.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Wireframe_Anim.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Skybox.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/DirShadowMap.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/DirShadowMap_Anim.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/SpotShadowMap.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/SpotShadowMap_Anim.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/HZB.glsl");
+
+		// HBAO
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Deinterleaving.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Reinterleaving.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/HBAOBlur.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/HBAO.glsl");
+
+		// GTAO
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/GTAO.hlsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/GTAO-Denoise.glsl");
+
+		// AO
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/AO-Composite.glsl");
+
+		//SSR
+		Renderer::GetShaderLibrary()->Load("Resources/shaders/Pre-Integration.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/Pre-Convolution.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/SSR.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/SSR-Composite.glsl");
+
+		// Environment compute shaders
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/EnvironmentMipFilter.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/EquirectangularToCubeMap.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/EnvironmentIrradiance.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PreethamSky.glsl");
+
+		// Post-processing
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/Bloom.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/DOF.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/EdgeDetection.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PostProcessing/SceneComposite.glsl");
+
+		// Light-culling
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PreDepth.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/PreDepth_Anim.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/LightCulling.glsl");
+
+		// Renderer2D Shaders
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Renderer2D.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Renderer2D_Line.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Renderer2D_Circle.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/Renderer2D_Text.glsl");
+
+		// Jump Flood Shaders
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/JumpFlood_Init.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/JumpFlood_Pass.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/JumpFlood_Composite.glsl");
+
+		// Misc
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/SelectedGeometry.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/SelectedGeometry_Anim.glsl");
+		Renderer::GetShaderLibrary()->Load("Resources/Shaders/TexturePass.glsl");
 
 		// Compile shaders
-		Renderer::WaitAndRender();
+		Application::Get().GetRenderThread().Pump();
 
 		uint32_t whiteTextureData = 0xffffffff;
-		s_Data->WhiteTexture = Texture2D::Create(ImageFormat::RGBA, 1, 1, &whiteTextureData);
+		TextureSpecification spec;
+		spec.Format = ImageFormat::RGBA;
+		spec.Width = 1;
+		spec.Height = 1;
 
-		uint32_t blackTextureData[6] = { 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000 };
-		s_Data->BlackCubeTexture = TextureCube::Create(ImageFormat::RGBA, 1, 1, &blackTextureData);
+		s_Data->WhiteTexture = Texture2D::Create(spec, Buffer(&whiteTextureData, sizeof(uint32_t)));
+
+		constexpr uint32_t blackTextureData = 0xff000000;
+		s_Data->BlackTexture = Texture2D::Create(spec, Buffer(&blackTextureData, sizeof(uint32_t)));
+
+		{
+			TextureSpecification spec;
+			spec.SamplerWrap = TextureWrap::Clamp;
+			s_Data->BRDFLutTexture = Texture2D::Create(spec, Buffer("Resources/Renderer/BRDF_LUT.tga"));
+		}
+
+		constexpr uint32_t blackCubeTextureData[6] = { 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000 };
+		s_Data->BlackCubeTexture = TextureCube::Create(spec, Buffer(&blackTextureData, sizeof(blackCubeTextureData)));
 
 		s_Data->EmptyEnvironment = Ref<Environment>::Create(s_Data->BlackCubeTexture, s_Data->BlackCubeTexture);
 
+		// Hilbert look-up texture! It's a 64 x 64 uint16 texture
+		{
+			TextureSpecification spec;
+			spec.Format = ImageFormat::RED16UI;
+			spec.Width = 64;
+			spec.Height = 64;
+			spec.SamplerWrap = TextureWrap::Clamp;
+			spec.SamplerFilter = TextureFilter::Nearest;
+
+			constexpr auto HilbertIndex = [](uint32_t posX, uint32_t posY)
+			{
+				uint16_t index = 0u;
+				for (uint16_t curLevel = 64 / 2u; curLevel > 0u; curLevel /= 2u)
+				{
+					const uint16_t regionX = (posX & curLevel) > 0u;
+					const uint16_t regionY = (posY & curLevel) > 0u;
+					index += curLevel * curLevel * ((3u * regionX) ^ regionY);
+					if (regionY == 0u)
+					{
+						if (regionX == 1u)
+						{
+							posX = uint16_t((64 - 1u)) - posX;
+							posY = uint16_t((64 - 1u)) - posY;
+						}
+
+						std::swap(posX, posY);
+					}
+				}
+				return index;
+			};
+
+			uint16_t* data = new uint16_t[(size_t)(64 * 64)];
+			for (int x = 0; x < 64; x++)
+			{
+				for (int y = 0; y < 64; y++)
+				{
+					const uint16_t r2index = HilbertIndex(x, y);
+					ANT_CORE_ASSERT(r2index < 65536);
+					data[x + 64 * y] = r2index;
+				}
+			}
+			s_Data->HilbertLut = Texture2D::Create(spec, Buffer(data, 1));
+			delete[] data;
+
+		}
+
 		s_RendererAPI->Init();
-		SceneRenderer::Init();
 	}
 
 	void Renderer::Shutdown()
 	{
 		s_ShaderDependencies.clear();
-		SceneRenderer::Shutdown();
 		s_RendererAPI->Shutdown();
 
 		delete s_Data;
-		delete s_CommandQueue;
+		// Resource release queue
+		for (uint32_t i = 0; i < s_Config.FramesInFlight; i++)
+		{
+			auto& queue = Renderer::GetRenderResourceReleaseQueue(i);
+			queue.Execute();
+		}
+
+		delete s_CommandQueue[0];
+		delete s_CommandQueue[1];
 	}
 
 	RendererCapabilities& Renderer::GetCapabilities()
@@ -139,21 +327,79 @@ namespace Ant {
 		return s_Data->m_ShaderLibrary;
 	}
 
-	void Renderer::WaitAndRender()
+	void Renderer::RenderThreadFunc(RenderThread* renderThread)
 	{
-		s_CommandQueue->Execute();
+		ANT_PROFILE_THREAD("Render Thread");
+
+		while (renderThread->IsRunning())
+		{
+			WaitAndRender(renderThread);
+		}
 	}
 
-	void Renderer::BeginRenderPass(Ref<RenderPass> renderPass, bool clear)
+	void Renderer::WaitAndRender(RenderThread* renderThread)
+	{
+		ANT_PROFILE_FUNC();
+		auto& performanceTimers = Application::Get().m_PerformanceTimers;
+
+		// Wait for kick, then set render thread to busy
+		{
+			ANT_PROFILE_FUNC("Wait");
+			Timer waitTimer;
+			renderThread->WaitAndSet(RenderThread::State::Kick, RenderThread::State::Busy);
+			performanceTimers.RenderThreadWaitTime = waitTimer.ElapsedMillis();
+		}
+
+		Timer workTimer;
+		s_CommandQueue[GetRenderQueueIndex()]->Execute();
+		// ExecuteRenderCommandQueue();
+
+		// Rendering has completed, set state to idle
+		renderThread->Set(RenderThread::State::Idle);
+
+		performanceTimers.RenderThreadWorkTime = workTimer.ElapsedMillis();
+	}
+
+	void Renderer::SwapQueues()
+	{
+		s_RenderCommandQueueSubmissionIndex = (s_RenderCommandQueueSubmissionIndex + 1) % s_RenderCommandQueueCount;
+	}
+
+	uint32_t Renderer::GetRenderQueueIndex()
+	{
+		return (s_RenderCommandQueueSubmissionIndex + 1) % s_RenderCommandQueueCount;
+	}
+
+	uint32_t Renderer::GetRenderQueueSubmissionIndex()
+	{
+		return s_RenderCommandQueueSubmissionIndex;
+	}
+
+	void Renderer::BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<RenderPass> renderPass, bool explicitClear)
 	{
 		ANT_CORE_ASSERT(renderPass, "Render pass cannot be null!");
 
-		s_RendererAPI->BeginRenderPass(renderPass);
+		s_RendererAPI->BeginRenderPass(renderCommandBuffer, renderPass, explicitClear);
 	}
 
-	void Renderer::EndRenderPass()
+	void Renderer::EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer)
 	{
-		s_RendererAPI->EndRenderPass();
+		s_RendererAPI->EndRenderPass(renderCommandBuffer);
+	}
+
+	void Renderer::RT_InsertGPUPerfMarker(Ref<RenderCommandBuffer> renderCommandBuffer, const std::string& label, const glm::vec4& color)
+	{
+		s_RendererAPI->RT_InsertGPUPerfMarker(renderCommandBuffer, label, color);
+	}
+
+	void Renderer::RT_BeginGPUPerfMarker(Ref<RenderCommandBuffer> renderCommandBuffer, const std::string& label, const glm::vec4& markerColor)
+	{
+		s_RendererAPI->RT_BeginGPUPerfMarker(renderCommandBuffer, label, markerColor);
+	}
+
+	void Renderer::RT_EndGPUPerfMarker(Ref<RenderCommandBuffer> renderCommandBuffer)
+	{
+		s_RendererAPI->RT_EndGPUPerfMarker(renderCommandBuffer);
 	}
 
 	void Renderer::BeginFrame()
@@ -166,9 +412,9 @@ namespace Ant {
 		s_RendererAPI->EndFrame();
 	}
 
-	void Renderer::SetSceneEnvironment(Ref<Environment> environment, Ref<Image2D> shadow)
+	void Renderer::SetSceneEnvironment(Ref<SceneRenderer> sceneRenderer, Ref<Environment> environment, Ref<Image2D> shadow, Ref<Image2D> spotShadow)
 	{
-		s_RendererAPI->SetSceneEnvironment(environment, shadow);
+		s_RendererAPI->SetSceneEnvironment(sceneRenderer, environment, shadow, spotShadow);
 	}
 
 	std::pair<Ref<TextureCube>, Ref<TextureCube>> Renderer::CreateEnvironmentMap(const std::string& filepath)
@@ -176,37 +422,70 @@ namespace Ant {
 		return s_RendererAPI->CreateEnvironmentMap(filepath);
 	}
 
+	void Renderer::LightCulling(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<PipelineCompute> computePipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<Material> material, const glm::uvec3& workGroups)
+	{
+		s_RendererAPI->LightCulling(renderCommandBuffer, computePipeline, uniformBufferSet, storageBufferSet, material, workGroups);
+	}
+
+	void Renderer::DispatchComputeShader(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<PipelineCompute> computePipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<Material> material, const glm::uvec3& workGroups, const Buffer additionalUniforms)
+	{
+		s_RendererAPI->DispatchComputeShader(renderCommandBuffer, computePipeline, uniformBufferSet, storageBufferSet, material, workGroups, additionalUniforms);
+	}
+
 	Ref<TextureCube> Renderer::CreatePreethamSky(float turbidity, float azimuth, float inclination)
 	{
 		return s_RendererAPI->CreatePreethamSky(turbidity, azimuth, inclination);
 	}
 
-	void Renderer::RenderMesh(Ref<Pipeline> pipeline, Ref<Mesh> mesh, const glm::mat4& transform)
+	void Renderer::RenderStaticMesh(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<StaticMesh> mesh, uint32_t submeshIndex, Ref<MaterialTable> materialTable, Ref<VertexBuffer> transformBuffer, uint32_t transformOffset, uint32_t instanceCount)
 	{
-		s_RendererAPI->RenderMesh(pipeline, mesh, transform);
+		s_RendererAPI->RenderStaticMesh(renderCommandBuffer, pipeline, uniformBufferSet, storageBufferSet, mesh, submeshIndex, materialTable, transformBuffer, transformOffset, instanceCount);
 	}
 
-	void Renderer::RenderMeshWithoutMaterial(Ref<Pipeline> pipeline, Ref<Mesh> mesh, const glm::mat4& transform)
+#if 0
+	void Renderer::RenderSubmesh(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<Mesh> mesh, uint32_t submeshIndex, Ref<MaterialTable> materialTable, const glm::mat4& transform)
 	{
-		s_RendererAPI->RenderMeshWithoutMaterial(pipeline, mesh, transform);
+		s_RendererAPI->RenderSubmesh(renderCommandBuffer, pipeline, uniformBufferSet, storageBufferSet, mesh, submeshIndex, materialTable, transform);
+	}
+#endif
+
+	void Renderer::RenderSubmeshInstanced(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<Mesh> mesh, uint32_t submeshIndex, Ref<MaterialTable> materialTable, Ref<VertexBuffer> transformBuffer, uint32_t transformOffset, const std::vector<Ref<StorageBuffer>>& boneTransformUBs, uint32_t boneTransformsOffset, uint32_t instanceCount)
+	{
+		s_RendererAPI->RenderSubmeshInstanced(renderCommandBuffer, pipeline, uniformBufferSet, storageBufferSet, mesh, submeshIndex, materialTable, transformBuffer, transformOffset, boneTransformUBs, boneTransformsOffset, instanceCount);
 	}
 
-	void Renderer::RenderQuad(Ref<Pipeline> pipeline, Ref<Material> material, const glm::mat4& transform)
+	void Renderer::RenderMeshWithMaterial(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<Mesh> mesh, uint32_t submeshIndex, Ref<VertexBuffer> transformBuffer, uint32_t transformOffset, const std::vector<Ref<StorageBuffer>>& boneTransformUBs, uint32_t boneTransformsOffset, uint32_t instanceCount, Ref<Material> material, Buffer additionalUniforms)
 	{
-		s_RendererAPI->RenderQuad(pipeline, material, transform);
+		s_RendererAPI->RenderMeshWithMaterial(renderCommandBuffer, pipeline, uniformBufferSet, storageBufferSet, mesh, submeshIndex, material, transformBuffer, transformOffset, boneTransformUBs, boneTransformsOffset, instanceCount, additionalUniforms);
 	}
 
-	void Renderer::SubmitQuad(Ref<Material> material, const glm::mat4& transform)
+	void Renderer::RenderStaticMeshWithMaterial(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<StaticMesh> mesh, uint32_t submeshIndex, Ref<VertexBuffer> transformBuffer, uint32_t transformOffset, uint32_t instanceCount, Ref<Material> material, Buffer additionalUniforms)
 	{
+		s_RendererAPI->RenderStaticMeshWithMaterial(renderCommandBuffer, pipeline, uniformBufferSet, storageBufferSet, mesh, submeshIndex, material, transformBuffer, transformOffset, instanceCount, additionalUniforms);
+	}
+
+	void Renderer::RenderQuad(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<Material> material, const glm::mat4& transform)
+	{
+		s_RendererAPI->RenderQuad(renderCommandBuffer, pipeline, uniformBufferSet, storageBufferSet, material, transform);
+	}
+
+	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<Material> material, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
+	{
+		s_RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, uniformBufferSet, storageBufferSet, material, vertexBuffer, indexBuffer, transform, indexCount);
+	}
+
+	void Renderer::SubmitQuad(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Material> material, const glm::mat4& transform)
+	{
+		ANT_CORE_ASSERT(false, "Not Implemented");
 		/*bool depthTest = true;
 		if (material)
 		{
-			material->Bind();
-			depthTest = material->GetFlag(MaterialFlag::DepthTest);
-			cullFace = !material->GetFlag(MaterialFlag::TwoSided);
+				material->Bind();
+				depthTest = material->GetFlag(MaterialFlag::DepthTest);
+				cullFace = !material->GetFlag(MaterialFlag::TwoSided);
 
-			auto shader = material->GetShader();
-			shader->SetUniformBuffer("Transform", &transform, sizeof(glm::mat4));
+				auto shader = material->GetShader();
+				shader->SetUniformBuffer("Transform", &transform, sizeof(glm::mat4));
 		}
 
 		s_Data->m_FullscreenQuadVertexBuffer->Bind();
@@ -215,9 +494,29 @@ namespace Ant {
 		Renderer::DrawIndexed(6, PrimitiveType::Triangles, depthTest);*/
 	}
 
-	void Renderer::SubmitFullscreenQuad(Ref<Pipeline> pipeline, Ref<Material> material)
+	void Renderer::ClearImage(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Image2D> image)
 	{
-		s_RendererAPI->SubmitFullscreenQuad(pipeline, material);
+		s_RendererAPI->ClearImage(renderCommandBuffer, image);
+	}
+
+	void Renderer::CopyImage(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Image2D> sourceImage, Ref<Image2D> destinationImage)
+	{
+		s_RendererAPI->CopyImage(renderCommandBuffer, sourceImage, destinationImage);
+	}
+
+	void Renderer::SubmitFullscreenQuad(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<Material> material)
+	{
+		s_RendererAPI->SubmitFullscreenQuad(renderCommandBuffer, pipeline, uniformBufferSet, material);
+	}
+
+	void Renderer::SubmitFullscreenQuad(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<StorageBufferSet> storageBufferSet, Ref<Material> material)
+	{
+		s_RendererAPI->SubmitFullscreenQuad(renderCommandBuffer, pipeline, uniformBufferSet, storageBufferSet, material);
+	}
+
+	void Renderer::SubmitFullscreenQuadWithOverrides(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<UniformBufferSet> uniformBufferSet, Ref<Material> material, Buffer vertexShaderOverrides, Buffer fragmentShaderOverrides)
+	{
+		s_RendererAPI->SubmitFullscreenQuadWithOverrides(renderCommandBuffer, pipeline, uniformBufferSet, material, vertexShaderOverrides, fragmentShaderOverrides);
 	}
 
 #if 0
@@ -253,47 +552,24 @@ namespace Ant {
 	}
 #endif
 
-	void Renderer::DrawAABB(Ref<Mesh> mesh, const glm::mat4& transform, const glm::vec4& color)
-	{
-		for (Submesh& submesh : mesh->m_Submeshes)
-		{
-			auto& aabb = submesh.BoundingBox;
-			auto aabbTransform = transform * submesh.Transform;
-			DrawAABB(aabb, aabbTransform);
-		}
-	}
-
-	void Renderer::DrawAABB(const AABB& aabb, const glm::mat4& transform, const glm::vec4& color /*= glm::vec4(1.0f)*/)
-	{
-		glm::vec4 min = { aabb.Min.x, aabb.Min.y, aabb.Min.z, 1.0f };
-		glm::vec4 max = { aabb.Max.x, aabb.Max.y, aabb.Max.z, 1.0f };
-
-		glm::vec4 corners[8] =
-		{
-			transform * glm::vec4 { aabb.Min.x, aabb.Min.y, aabb.Max.z, 1.0f },
-			transform * glm::vec4 { aabb.Min.x, aabb.Max.y, aabb.Max.z, 1.0f },
-			transform * glm::vec4 { aabb.Max.x, aabb.Max.y, aabb.Max.z, 1.0f },
-			transform * glm::vec4 { aabb.Max.x, aabb.Min.y, aabb.Max.z, 1.0f },
-
-			transform * glm::vec4 { aabb.Min.x, aabb.Min.y, aabb.Min.z, 1.0f },
-			transform * glm::vec4 { aabb.Min.x, aabb.Max.y, aabb.Min.z, 1.0f },
-			transform * glm::vec4 { aabb.Max.x, aabb.Max.y, aabb.Min.z, 1.0f },
-			transform * glm::vec4 { aabb.Max.x, aabb.Min.y, aabb.Min.z, 1.0f }
-		};
-
-		for (uint32_t i = 0; i < 4; i++)
-			Renderer2D::DrawLine(corners[i], corners[(i + 1) % 4], color);
-
-		for (uint32_t i = 0; i < 4; i++)
-			Renderer2D::DrawLine(corners[i + 4], corners[((i + 1) % 4) + 4], color);
-
-		for (uint32_t i = 0; i < 4; i++)
-			Renderer2D::DrawLine(corners[i], corners[i + 4], color);
-	}
-
 	Ref<Texture2D> Renderer::GetWhiteTexture()
 	{
 		return s_Data->WhiteTexture;
+	}
+
+	Ref<Texture2D> Renderer::GetBlackTexture()
+	{
+		return s_Data->BlackTexture;
+	}
+
+	Ref<Texture2D> Renderer::GetHilbertLut()
+	{
+		return s_Data->HilbertLut;
+	}
+
+	Ref<Texture2D> Renderer::GetBRDFLutTexture()
+	{
+		return s_Data->BRDFLutTexture;
 	}
 
 	Ref<TextureCube> Renderer::GetBlackCubeTexture()
@@ -309,12 +585,80 @@ namespace Ant {
 
 	RenderCommandQueue& Renderer::GetRenderCommandQueue()
 	{
-		return *s_CommandQueue;
+		return *s_CommandQueue[s_RenderCommandQueueSubmissionIndex];
+	}
+
+	RenderCommandQueue& Renderer::GetRenderResourceReleaseQueue(uint32_t index)
+	{
+		return s_ResourceFreeQueue[index];
+	}
+
+
+	const std::unordered_map<std::string, std::string>& Renderer::GetGlobalShaderMacros()
+	{
+		return s_Data->GlobalShaderMacros;
 	}
 
 	RendererConfig& Renderer::GetConfig()
 	{
-		return s_Data->Config;
+		return s_Config;
+	}
+
+	void Renderer::SetConfig(const RendererConfig& config)
+	{
+		s_Config = config;
+	}
+
+	void Renderer::AcknowledgeParsedGlobalMacros(const std::unordered_set<std::string>& macros, Ref<Shader> shader)
+	{
+		for (const std::string& macro : macros)
+		{
+			s_GlobalShaderInfo.ShaderGlobalMacrosMap[macro][shader->GetHash()] = shader;
+		}
+	}
+
+	void Renderer::SetMacroInShader(Ref<Shader> shader, const std::string& name, const std::string& value)
+	{
+		shader->SetMacro(name, value);
+		s_GlobalShaderInfo.DirtyShaders.emplace(shader.Raw());
+	}
+
+	void Renderer::SetGlobalMacroInShaders(const std::string& name, const std::string& value)
+	{
+		if (s_Data->GlobalShaderMacros.find(name) != s_Data->GlobalShaderMacros.end())
+		{
+			if (s_Data->GlobalShaderMacros.at(name) == value)
+				return;
+		}
+
+		s_Data->GlobalShaderMacros[name] = value;
+
+		if (s_GlobalShaderInfo.ShaderGlobalMacrosMap.find(name) == s_GlobalShaderInfo.ShaderGlobalMacrosMap.end())
+		{
+			ANT_CORE_WARN("No shaders with {} macro found", name);
+			return;
+		}
+
+		ANT_CORE_ASSERT(s_GlobalShaderInfo.ShaderGlobalMacrosMap.find(name) != s_GlobalShaderInfo.ShaderGlobalMacrosMap.end(), "Macro has not been passed from any shader!");
+		for (auto& [hash, shader] : s_GlobalShaderInfo.ShaderGlobalMacrosMap.at(name))
+		{
+			ANT_CORE_ASSERT(shader.IsValid(), "Shader is deleted!");
+			s_GlobalShaderInfo.DirtyShaders.emplace(shader);
+		}
+	}
+
+	bool Renderer::UpdateDirtyShaders()
+	{
+		// TODO(Yan): how is this going to work for dist?
+		const bool updatedAnyShaders = s_GlobalShaderInfo.DirtyShaders.size();
+		for (WeakRef<Shader> shader : s_GlobalShaderInfo.DirtyShaders)
+		{
+			ANT_CORE_ASSERT(shader.IsValid(), "Shader is deleted!");
+			shader->RT_Reload(true);
+		}
+		s_GlobalShaderInfo.DirtyShaders.clear();
+
+		return updatedAnyShaders;
 	}
 
 }

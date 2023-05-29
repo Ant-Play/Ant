@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stdint.h>
+#include <atomic>
+#include "Memory.h"
 
 namespace Ant{
 
@@ -9,17 +11,23 @@ namespace Ant{
 	public:
 		void IncRefCount() const
 		{
-			m_RefCount++;
+			++m_RefCount;
 		}
 		void DecRefCount() const
 		{
-			m_RefCount--;
+			--m_RefCount;
 		}
 
-		uint32_t GetRefCount() const { return m_RefCount; }
+		uint32_t GetRefCount() const { return m_RefCount.load(); }
 	private:
-		mutable uint32_t m_RefCount = 0; // TODO: atomic
+		mutable std::atomic<uint32_t> m_RefCount = 0;
 	};
+
+	namespace RefUtils{
+		void AddToLiveReferences(void* instance);
+		void RemoveFromLiveReferences(void* instance);
+		bool IsLive(void* instance);
+	}
 
 	template<typename T>
 	class Ref
@@ -55,6 +63,13 @@ namespace Ant{
 		{
 			m_Instance = (T*)other.m_Instance;
 			other.m_Instance = nullptr;
+		}
+
+		static Ref<T> CopyWithoutIncrement(const Ref<T>& other)
+		{
+			Ref<T> result = nullptr;
+			result->m_Instance = other.m_Instance;
+			return result;
 		}
 
 		~Ref()
@@ -131,7 +146,11 @@ namespace Ant{
 		template<typename... Args>
 		static Ref<T> Create(Args&&... args)
 		{
+#if ANT_TRACK_MEMORY
+			return Ref<T>(new(typeid(T).name()) T(std::forward<Args>(args)...));
+#else
 			return Ref<T>(new T(std::forward<Args>(args)...));
+#endif
 		}
 
 		bool operator==(const Ref<T>& other) const
@@ -155,7 +174,10 @@ namespace Ant{
 		void IncRef() const
 		{
 			if (m_Instance)
+			{
 				m_Instance->IncRefCount();
+				RefUtils::AddToLiveReferences((void*)m_Instance);
+			}
 		}
 
 		void DecRef() const
@@ -166,14 +188,42 @@ namespace Ant{
 				if (m_Instance->GetRefCount() == 0)
 				{
 					delete m_Instance;
+					RefUtils::RemoveFromLiveReferences((void*)m_Instance);
+					m_Instance = nullptr;
 				}
 			}
 		}
 
 		template<class T2>
 		friend class Ref;
-		T* m_Instance;
+		mutable T* m_Instance;
 	};
 
-	// TODO: WeakRef
+	template<typename T>
+	class WeakRef
+	{
+	public:
+		WeakRef() = default;
+
+		WeakRef(Ref<T> ref)
+		{
+			m_Instance = ref.Raw();
+		}
+
+		WeakRef(T* instance)
+		{
+			m_Instance = instance;
+		}
+
+		T* operator->() { return m_Instance; }
+		const T* operator->() const { return m_Instance; }
+
+		T& operator*() { return *m_Instance; }
+		const T& operator*() const { return *m_Instance; }
+
+		bool IsValid() const { return m_Instance ? RefUtils::IsLive(m_Instance) : false; }
+		operator bool() const { return IsValid(); }
+	private:
+		T* m_Instance = nullptr;
+	};
 }

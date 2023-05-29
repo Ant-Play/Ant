@@ -11,6 +11,9 @@ namespace Ant {
 		virtual void End() = 0;
 
 		void SetDarkThemeColors();
+		void SetDarkThemeV2Colors();
+
+		void AllowInputEvents(bool allowEvents);
 
 		static ImGuiLayer* Create();
 	};

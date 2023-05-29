@@ -6,18 +6,46 @@
 #include "VulkanContext.h"
 #include "VulkanTexture.h"
 #include "VulkanImage.h"
+#include "VulkanPipeline.h"
+#include "VulkanUniformBuffer.h"
+
+#include "Ant/Core/Timer.h"
 
 namespace Ant{
 
 	VulkanMaterial::VulkanMaterial(const Ref<Shader>& shader, const std::string& name)
-		: m_Shader(shader), m_Name(name)
+		: m_Shader(shader), m_Name(name),
+		m_WriteDescriptors(Renderer::GetConfig().FramesInFlight),
+		m_DirtyDescriptorSets(Renderer::GetConfig().FramesInFlight, true)
 	{
 		Init();
 		Renderer::RegisterShaderDependency(shader, this);
 	}
 
+	VulkanMaterial::VulkanMaterial(Ref<Material> material, const std::string& name)
+		: m_Shader(material->GetShader()), m_Name(name),
+		m_WriteDescriptors(Renderer::GetConfig().FramesInFlight),
+		m_DirtyDescriptorSets(Renderer::GetConfig().FramesInFlight, true)
+	{
+		if (name.empty())
+			m_Name = material->GetName();
+
+		Renderer::RegisterShaderDependency(m_Shader, this);
+
+		auto vulkanMaterial = material.As<VulkanMaterial>();
+		m_UniformStorageBuffer = Buffer::Copy(vulkanMaterial->m_UniformStorageBuffer.Data, vulkanMaterial->m_UniformStorageBuffer.Size);
+
+		m_ResidentDescriptors = vulkanMaterial->m_ResidentDescriptors;
+		m_ResidentDescriptorArrays = vulkanMaterial->m_ResidentDescriptorArrays;
+		//m_PendingDescriptors = vulkanMaterial->m_PendingDescriptors;
+		m_Textures = vulkanMaterial->m_Textures;
+		m_TextureArrays = vulkanMaterial->m_TextureArrays;
+		m_Images = vulkanMaterial->m_Images;
+	}
+
 	VulkanMaterial::~VulkanMaterial()
 	{
+		m_UniformStorageBuffer.Release();
 	}
 
 	void VulkanMaterial::Init()
@@ -27,53 +55,30 @@ namespace Ant{
 		m_MaterialFlags |= (uint32_t)MaterialFlag::DepthTest;
 		m_MaterialFlags |= (uint32_t)MaterialFlag::Blend;
 
-		// TODO: Maybe get the descriptor set from the pipeline
-		Ref<VulkanShader> vulkanShader = m_Shader.As<VulkanShader>();
-		for (uint32_t i = 0; i < vulkanShader->GetUniformBufferCount(); i++)
-		{
-			auto& uniformBuffer = vulkanShader->GetUniformBuffer(i);
-			VkWriteDescriptorSet writeDescriptorSet = {};
-			writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			writeDescriptorSet.descriptorCount = 1;
-			writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			writeDescriptorSet.pBufferInfo = &uniformBuffer.Descriptor;
-			writeDescriptorSet.dstBinding = uniformBuffer.BindingPoint;
-			m_WriteDescriptors.push_back(writeDescriptorSet);
-		}
-
+#define INVALIDATE_ON_RT 1
+#if INVALIDATE_ON_RT
 		Ref<VulkanMaterial> instance = this;
 		Renderer::Submit([instance]() mutable
 			{
-				auto shader = instance->GetShader().As<VulkanShader>();
-				const auto& shaderDescriptorSets = shader->GetShaderDescriptorSets();
-				if (!shaderDescriptorSets.empty())
-					instance->m_DescriptorSet = shader->CreateDescriptorSets();
+				instance->Invalidate();
 			});
+#else
+		Invalidate();
+#endif
 	}
 
 	void VulkanMaterial::Invalidate()
 	{
+		uint32_t framesInFlight = Renderer::GetConfig().FramesInFlight;
 		auto shader = m_Shader.As<VulkanShader>();
-		const auto& shaderDescriptorSets = shader->GetShaderDescriptorSets();
-		if (!shaderDescriptorSets.empty())
+		if (shader->HasDescriptorSet(0))
 		{
-			m_DescriptorSet = shader->CreateDescriptorSets();
-
-			Ref<VulkanShader> vulkanShader = m_Shader.As<VulkanShader>();
-			for (uint32_t i = 0; i < vulkanShader->GetUniformBufferCount(); i++)
+			const auto& shaderDescriptorSets = shader->GetShaderDescriptorSets();
+			if (!shaderDescriptorSets.empty())
 			{
-				auto& uniformBuffer = vulkanShader->GetUniformBuffer(i);
-				VkWriteDescriptorSet writeDescriptorSet = {};
-				writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				writeDescriptorSet.descriptorCount = 1;
-				writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				writeDescriptorSet.pBufferInfo = &uniformBuffer.Descriptor;
-				writeDescriptorSet.dstBinding = uniformBuffer.BindingPoint;
-				m_WriteDescriptors.push_back(writeDescriptorSet);
+				for (auto&& [binding, descriptor] : m_ResidentDescriptors)
+					m_PendingDescriptors.push_back(descriptor);
 			}
-
-			for (auto&& [binding, descriptor] : m_ResidentDescriptors)
-				m_PendingDescriptors.push_back(descriptor);
 		}
 	}
 
@@ -94,8 +99,22 @@ namespace Ant{
 
 	void VulkanMaterial::OnShaderReloaded()
 	{
-		return;
-		AllocateStorage();
+		std::unordered_map<uint32_t, std::shared_ptr<PendingDescriptor>> newDescriptors;
+		std::unordered_map<uint32_t, std::shared_ptr<PendingDescriptorArray>> newDescriptorArrays;
+		for (auto [name, resource] : m_Shader->GetResources())
+		{
+			const uint32_t binding = resource.GetRegister();
+
+			if (m_ResidentDescriptors.find(binding) != m_ResidentDescriptors.end())
+				newDescriptors[binding] = std::move(m_ResidentDescriptors.at(binding));
+			else if (m_ResidentDescriptorArrays.find(binding) != m_ResidentDescriptorArrays.end())
+				newDescriptorArrays[binding] = std::move(m_ResidentDescriptorArrays.at(binding));
+		}
+		m_ResidentDescriptors = std::move(newDescriptors);
+		m_ResidentDescriptorArrays = std::move(newDescriptorArrays);
+
+		Invalidate();
+		InvalidateDescriptorSets();
 	}
 
 	const ShaderUniform* VulkanMaterial::FindUniformDeclaration(const std::string& name)
@@ -118,11 +137,8 @@ namespace Ant{
 	const ShaderResourceDeclaration* VulkanMaterial::FindResourceDeclaration(const std::string& name)
 	{
 		auto& resources = m_Shader->GetResources();
-		for (const auto& [n, resource] : resources)
-		{
-			if (resource.GetName() == name)
-				return &resource;
-		}
+		if (resources.find(name) != resources.end())
+			return &resources.at(name);
 		return nullptr;
 	}
 
@@ -133,6 +149,7 @@ namespace Ant{
 
 		uint32_t binding = resource->GetRegister();
 		// Texture is already set
+		// TODO: Shouldn't need to check resident descriptors..
 		if (binding < m_Textures.size() && m_Textures[binding] && texture->GetHash() == m_Textures[binding]->GetHash())
 			return;
 
@@ -144,6 +161,44 @@ namespace Ant{
 		ANT_CORE_ASSERT(wds);
 		m_ResidentDescriptors[binding] = std::make_shared<PendingDescriptor>(PendingDescriptor{ PendingDescriptorType::Texture2D, *wds, {}, texture.As<Texture>(), nullptr });
 		m_PendingDescriptors.push_back(m_ResidentDescriptors.at(binding));
+
+		InvalidateDescriptorSets();
+	}
+
+	void VulkanMaterial::SetVulkanDescriptor(const std::string& name, const Ref<Texture2D>& texture, uint32_t arrayIndex)
+	{
+		const ShaderResourceDeclaration* resource = FindResourceDeclaration(name);
+		ANT_CORE_ASSERT(resource);
+
+		uint32_t binding = resource->GetRegister();
+		// Texture is already set
+		if (binding < m_TextureArrays.size() && m_TextureArrays[binding].size() < arrayIndex && texture->GetHash() == m_TextureArrays[binding][arrayIndex]->GetHash())
+			return;
+
+		if (binding >= m_TextureArrays.size())
+			m_TextureArrays.resize(binding + 1);
+
+		if (arrayIndex >= m_TextureArrays[binding].size())
+			m_TextureArrays[binding].resize(arrayIndex + 1);
+
+		m_TextureArrays[binding][arrayIndex] = texture;
+
+		const VkWriteDescriptorSet* wds = m_Shader.As<VulkanShader>()->GetDescriptorSet(name);
+		ANT_CORE_ASSERT(wds);
+		if (m_ResidentDescriptorArrays.find(binding) == m_ResidentDescriptorArrays.end())
+		{
+			m_ResidentDescriptorArrays[binding] = std::make_shared<PendingDescriptorArray>(PendingDescriptorArray{ PendingDescriptorType::Texture2D, *wds, {}, {}, {} });
+		}
+
+		auto& residentDesriptorArray = m_ResidentDescriptorArrays.at(binding);
+		if (arrayIndex >= residentDesriptorArray->Textures.size())
+			residentDesriptorArray->Textures.resize(arrayIndex + 1);
+
+		residentDesriptorArray->Textures[arrayIndex] = texture;
+
+		//m_PendingDescriptors.push_back(m_ResidentDescriptors.at(binding));
+
+		InvalidateDescriptorSets();
 	}
 
 	void VulkanMaterial::SetVulkanDescriptor(const std::string& name, const Ref<TextureCube>& texture)
@@ -153,6 +208,7 @@ namespace Ant{
 
 		uint32_t binding = resource->GetRegister();
 		// Texture is already set
+		// TODO: Shouldn't need to check resident descriptors..
 		if (binding < m_Textures.size() && m_Textures[binding] && texture->GetHash() == m_Textures[binding]->GetHash())
 			return;
 
@@ -164,45 +220,34 @@ namespace Ant{
 		ANT_CORE_ASSERT(wds);
 		m_ResidentDescriptors[binding] = std::make_shared<PendingDescriptor>(PendingDescriptor{ PendingDescriptorType::TextureCube, *wds, {}, texture.As<Texture>(), nullptr });
 		m_PendingDescriptors.push_back(m_ResidentDescriptors.at(binding));
-	}
 
-	void VulkanMaterial::SetVulkanDescriptor(const std::string& name, const VkDescriptorImageInfo& imageInfo)
-	{
-		const VkWriteDescriptorSet* wds = m_Shader.As<VulkanShader>()->GetDescriptorSet(name);
-		ANT_CORE_ASSERT(wds);
-
-		if (m_ImageInfos.find(name) != m_ImageInfos.end())
-		{
-			if (m_ImageInfos.at(name).imageView == imageInfo.imageView)
-				return;
-		}
-
-		m_ImageInfos[name] = imageInfo;
-
-		VkWriteDescriptorSet descriptorSet = *wds;
-		descriptorSet.pImageInfo = &m_ImageInfos.at(name);
-		m_WriteDescriptors.push_back(descriptorSet);
+		InvalidateDescriptorSets();
 	}
 
 	void VulkanMaterial::SetVulkanDescriptor(const std::string& name, const Ref<Image2D>& image)
 	{
+		ANT_CORE_VERIFY(image);
+		ANT_CORE_ASSERT(image.As<VulkanImage2D>()->GetImageInfo().ImageView, "ImageView is null");
+
 		const ShaderResourceDeclaration* resource = FindResourceDeclaration(name);
-		ANT_CORE_ASSERT(resource);
+		ANT_CORE_VERIFY(resource);
 
 		uint32_t binding = resource->GetRegister();
-		// TODO: replace with set/map
-		if (binding < m_Images.size() && m_Images[binding] && m_ImageHashes.at(binding) == image->GetHash())
+		// Image is already set
+		// TODO: Shouldn't need to check resident descriptors..
+		if (binding < m_Images.size() && m_Images[binding] && m_ResidentDescriptors.find(binding) != m_ResidentDescriptors.end())
 			return;
 
 		if (resource->GetRegister() >= m_Images.size())
 			m_Images.resize(resource->GetRegister() + 1);
 		m_Images[resource->GetRegister()] = image;
-		m_ImageHashes[resource->GetRegister()] = image->GetHash();
 
 		const VkWriteDescriptorSet* wds = m_Shader.As<VulkanShader>()->GetDescriptorSet(name);
 		ANT_CORE_ASSERT(wds);
 		m_ResidentDescriptors[binding] = std::make_shared<PendingDescriptor>(PendingDescriptor{ PendingDescriptorType::Image2D, *wds, {}, nullptr, image.As<Image>() });
 		m_PendingDescriptors.push_back(m_ResidentDescriptors.at(binding));
+
+		InvalidateDescriptorSets();
 	}
 
 	void VulkanMaterial::Set(const std::string& name, float value)
@@ -224,6 +269,21 @@ namespace Ant{
 	{
 		// Bools are 4-byte ints
 		Set<int>(name, (int)value);
+	}
+
+	void VulkanMaterial::Set(const std::string& name, const glm::ivec2& value)
+	{
+		Set<glm::ivec2>(name, value);
+	}
+
+	void VulkanMaterial::Set(const std::string& name, const glm::ivec3& value)
+	{
+		Set<glm::ivec3>(name, value);
+	}
+
+	void VulkanMaterial::Set(const std::string& name, const glm::ivec4& value)
+	{
+		Set<glm::ivec4>(name, value);
 	}
 
 	void VulkanMaterial::Set(const std::string& name, const glm::vec2& value)
@@ -254,6 +314,11 @@ namespace Ant{
 	void VulkanMaterial::Set(const std::string& name, const Ref<Texture2D>& texture)
 	{
 		SetVulkanDescriptor(name, texture);
+	}
+
+	void VulkanMaterial::Set(const std::string& name, const Ref<Texture2D>& texture, uint32_t arrayIndex)
+	{
+		SetVulkanDescriptor(name, texture, arrayIndex);
 	}
 
 	void VulkanMaterial::Set(const std::string& name, const Ref<TextureCube>& texture)
@@ -331,120 +396,188 @@ namespace Ant{
 		return GetResource<TextureCube>(name);
 	}
 
-	void VulkanMaterial::UpdateForRendering()
+	void VulkanMaterial::RT_UpdateForRendering(const std::vector<std::vector<VkWriteDescriptorSet>>& uniformBufferWriteDescriptors)
 	{
-		Ref<VulkanMaterial> instance = this;
-		std::vector<VkWriteDescriptorSet>& writeDescriptors = m_WriteDescriptors;
-		auto& pendingDescriptors = m_PendingDescriptors;
-		auto& residentDescriptors = m_ResidentDescriptors;
-
-#if COPY
-		Renderer::Submit([instance, writeDescriptors, residentDescriptors, pendingDescriptors]() mutable
+		ANT_SCOPE_PERF("VulkanMaterial::RT_UpdateForRendering");
+		auto vulkanDevice = VulkanContext::GetCurrentDevice()->GetVulkanDevice();
+		for (auto&& [binding, descriptor] : m_ResidentDescriptors)
+		{
+			if (descriptor->Type == PendingDescriptorType::Image2D)
 			{
-				auto vulkanDevice = VulkanContext::GetCurrentDevice()->GetVulkanDevice();
-
-				for (auto& descriptor : residentDescriptors)
+				Ref<VulkanImage2D> image = descriptor->Image.As<VulkanImage2D>();
+				ANT_CORE_ASSERT(image->GetImageInfo().ImageView, "ImageView is null");
+				if (descriptor->WDS.pImageInfo && image->GetImageInfo().ImageView != descriptor->WDS.pImageInfo->imageView)
 				{
-					if (descriptor->Type == PendingDescriptorType::Image2D)
-					{
-						Ref<VulkanImage2D> image = descriptor->Image.As<VulkanImage2D>();
-						if (descriptor->WDS.pImageInfo && image->GetImageInfo().ImageView != descriptor->WDS.pImageInfo->imageView)
-						{
-							ANT_CORE_WARN("Found out of date Image2D descriptor ({0} vs. {1})", (void*)image->GetImageInfo().ImageView, (void*)descriptor->WDS.pImageInfo->imageView);
-							pendingDescriptors.emplace_back(descriptor);
-						}
-					}
+					// ANT_CORE_WARN("Found out of date Image2D descriptor ({0} vs. {1})", (void*)image->GetImageInfo().ImageView, (void*)descriptor->WDS.pImageInfo->imageView);
+					m_PendingDescriptors.emplace_back(descriptor);
+					InvalidateDescriptorSets();
 				}
+			}
+		}
 
-				for (auto& pd : pendingDescriptors)
-				{
-					if (pd->Type == PendingDescriptorType::Texture2D)
-					{
-						Ref<VulkanTexture2D> texture = pd->Texture.As<VulkanTexture2D>();
-						pd->ImageInfo = texture->GetVulkanDescriptorInfo();
-						pd->WDS.pImageInfo = &pd->ImageInfo;
-					}
-					else if (pd->Type == PendingDescriptorType::TextureCube)
-					{
-						Ref<VulkanTextureCube> texture = pd->Texture.As<VulkanTextureCube>();
-						pd->ImageInfo = texture->GetVulkanDescriptorInfo();
-						pd->WDS.pImageInfo = &pd->ImageInfo;
-					}
-					else if (pd->Type == PendingDescriptorType::Image2D)
-					{
-						Ref<VulkanImage2D> image = pd->Image.As<VulkanImage2D>();
-						pd->ImageInfo = image->GetDescriptor();
-						pd->WDS.pImageInfo = &pd->ImageInfo;
-					}
+		std::vector<VkDescriptorImageInfo> arrayImageInfos;
 
-					writeDescriptors.push_back(pd->WDS);
-				}
+		uint32_t frameIndex = Renderer::RT_GetCurrentFrameIndex();
+		// NOTE: we can't cache the results atm because we might render the same material in different viewports,
+		//       and so we can't bind to the same uniform buffers
+		if (m_DirtyDescriptorSets[frameIndex])
+		{
+			m_DirtyDescriptorSets[frameIndex] = false;
+			m_WriteDescriptors[frameIndex].clear();
 
-				if (writeDescriptors.size())
-				{
-					for (auto& writeDescriptor : writeDescriptors)
-						writeDescriptor.dstSet = instance->m_DescriptorSet.DescriptorSets[0];
-
-					ANT_CORE_WARN("Updating {0} descriptor sets", writeDescriptors.size());
-					vkUpdateDescriptorSets(vulkanDevice, writeDescriptors.size(), writeDescriptors.data(), 0, nullptr);
-				}
-			});
-		pendingDescriptors.clear();
-		writeDescriptors.clear();
-#else
-		Renderer::Submit([instance]() mutable
+			if (!uniformBufferWriteDescriptors.empty())
 			{
-				auto vulkanDevice = VulkanContext::GetCurrentDevice()->GetVulkanDevice();
+				for (auto& wd : uniformBufferWriteDescriptors[frameIndex])
+					m_WriteDescriptors[frameIndex].push_back(wd);
+			}
 
-				for (auto&& [binding, descriptor] : instance->m_ResidentDescriptors)
+			for (auto&& [binding, pd] : m_ResidentDescriptors)
+			{
+				if (pd->Type == PendingDescriptorType::Texture2D)
 				{
-					if (descriptor->Type == PendingDescriptorType::Image2D)
-					{
-						Ref<VulkanImage2D> image = descriptor->Image.As<VulkanImage2D>();
-						if (descriptor->WDS.pImageInfo && image->GetImageInfo().ImageView != descriptor->WDS.pImageInfo->imageView)
-						{
-							ANT_CORE_WARN("Found out of date Image2D descriptor ({0} vs. {1})", (void*)image->GetImageInfo().ImageView, (void*)descriptor->WDS.pImageInfo->imageView);
-							instance->m_PendingDescriptors.emplace_back(descriptor);
-						}
-					}
+					Ref<VulkanTexture2D> texture = pd->Texture.As<VulkanTexture2D>();
+					pd->ImageInfo = texture->GetVulkanDescriptorInfo();
+					pd->WDS.pImageInfo = &pd->ImageInfo;
+				}
+				else if (pd->Type == PendingDescriptorType::TextureCube)
+				{
+					Ref<VulkanTextureCube> texture = pd->Texture.As<VulkanTextureCube>();
+					pd->ImageInfo = texture->GetVulkanDescriptorInfo();
+					pd->WDS.pImageInfo = &pd->ImageInfo;
+				}
+				else if (pd->Type == PendingDescriptorType::Image2D)
+				{
+					Ref<VulkanImage2D> image = pd->Image.As<VulkanImage2D>();
+					pd->ImageInfo = image->GetDescriptorInfo();
+					pd->WDS.pImageInfo = &pd->ImageInfo;
 				}
 
-				for (auto& pd : instance->m_PendingDescriptors)
-				{
-					if (pd->Type == PendingDescriptorType::Texture2D)
-					{
-						Ref<VulkanTexture2D> texture = pd->Texture.As<VulkanTexture2D>();
-						pd->ImageInfo = texture->GetVulkanDescriptorInfo();
-						pd->WDS.pImageInfo = &pd->ImageInfo;
-					}
-					else if (pd->Type == PendingDescriptorType::TextureCube)
-					{
-						Ref<VulkanTextureCube> texture = pd->Texture.As<VulkanTextureCube>();
-						pd->ImageInfo = texture->GetVulkanDescriptorInfo();
-						pd->WDS.pImageInfo = &pd->ImageInfo;
-					}
-					else if (pd->Type == PendingDescriptorType::Image2D)
-					{
-						Ref<VulkanImage2D> image = pd->Image.As<VulkanImage2D>();
-						pd->ImageInfo = image->GetDescriptor();
-						pd->WDS.pImageInfo = &pd->ImageInfo;
-					}
+				m_WriteDescriptors[frameIndex].push_back(pd->WDS);
+			}
 
-					instance->m_WriteDescriptors.push_back(pd->WDS);
+			for (auto&& [binding, pd] : m_ResidentDescriptorArrays)
+			{
+				if (pd->Type == PendingDescriptorType::Texture2D)
+				{
+					for (auto tex : pd->Textures)
+					{
+						Ref<VulkanTexture2D> texture = tex.As<VulkanTexture2D>();
+						arrayImageInfos.emplace_back(texture->GetVulkanDescriptorInfo());
+					}
+				}
+				pd->WDS.pImageInfo = arrayImageInfos.data();
+				pd->WDS.descriptorCount = (uint32_t)arrayImageInfos.size();
+				m_WriteDescriptors[frameIndex].push_back(pd->WDS);
+			}
+
+		}
+
+		auto vulkanShader = m_Shader.As<VulkanShader>();
+		auto descriptorSet = vulkanShader->AllocateDescriptorSet();
+		m_DescriptorSets[frameIndex] = descriptorSet;
+		for (auto& writeDescriptor : m_WriteDescriptors[frameIndex])
+			writeDescriptor.dstSet = descriptorSet.DescriptorSets[0];
+
+		vkUpdateDescriptorSets(vulkanDevice, (uint32_t)m_WriteDescriptors[frameIndex].size(), m_WriteDescriptors[frameIndex].data(), 0, nullptr);
+		m_PendingDescriptors.clear();
+	}
+
+	void VulkanMaterial::RT_UpdateForRendering(const std::vector<std::vector<VkWriteDescriptorSet>>& uniformBufferWriteDescriptors, const std::vector<std::vector<VkWriteDescriptorSet>>& storageBufferWriteDescriptors)
+	{
+		ANT_SCOPE_PERF("VulkanMaterial::RT_UpdateForRendering");
+		auto vulkanDevice = VulkanContext::GetCurrentDevice()->GetVulkanDevice();
+		for (auto&& [binding, descriptor] : m_ResidentDescriptors)
+		{
+			if (descriptor->Type == PendingDescriptorType::Image2D)
+			{
+				Ref<VulkanImage2D> image = descriptor->Image.As<VulkanImage2D>();
+				ANT_CORE_ASSERT(image->GetImageInfo().ImageView, "ImageView is null");
+				if (descriptor->WDS.pImageInfo && image->GetImageInfo().ImageView != descriptor->WDS.pImageInfo->imageView)
+				{
+					// ANT_CORE_WARN("Found out of date Image2D descriptor ({0} vs. {1})", (void*)image->GetImageInfo().ImageView, (void*)descriptor->WDS.pImageInfo->imageView);
+					m_PendingDescriptors.emplace_back(descriptor);
+					InvalidateDescriptorSets();
+				}
+			}
+		}
+
+		std::vector<VkDescriptorImageInfo> arrayImageInfos;
+
+		uint32_t frameIndex = Renderer::RT_GetCurrentFrameIndex();
+		// NOTE: we can't cache the results atm because we might render the same material in different viewports,
+		//       and so we can't bind to the same uniform buffers
+		if (m_DirtyDescriptorSets[frameIndex])
+		{
+			m_DirtyDescriptorSets[frameIndex] = false;
+			m_WriteDescriptors[frameIndex].clear();
+
+			if (!uniformBufferWriteDescriptors.empty())
+			{
+				for (auto& wd : uniformBufferWriteDescriptors[frameIndex])
+					m_WriteDescriptors[frameIndex].push_back(wd);
+			}
+
+			if (!storageBufferWriteDescriptors.empty())
+			{
+				for (auto& wd : storageBufferWriteDescriptors[frameIndex])
+					m_WriteDescriptors[frameIndex].push_back(wd);
+			}
+
+			for (auto&& [binding, pd] : m_ResidentDescriptors)
+			{
+				if (pd->Type == PendingDescriptorType::Texture2D)
+				{
+					Ref<VulkanTexture2D> texture = pd->Texture.As<VulkanTexture2D>();
+					pd->ImageInfo = texture->GetVulkanDescriptorInfo();
+					pd->WDS.pImageInfo = &pd->ImageInfo;
+				}
+				else if (pd->Type == PendingDescriptorType::TextureCube)
+				{
+					Ref<VulkanTextureCube> texture = pd->Texture.As<VulkanTextureCube>();
+					pd->ImageInfo = texture->GetVulkanDescriptorInfo();
+					pd->WDS.pImageInfo = &pd->ImageInfo;
+				}
+				else if (pd->Type == PendingDescriptorType::Image2D)
+				{
+					Ref<VulkanImage2D> image = pd->Image.As<VulkanImage2D>();
+					pd->ImageInfo = image->GetDescriptorInfo();
+					pd->WDS.pImageInfo = &pd->ImageInfo;
 				}
 
-				if (instance->m_WriteDescriptors.size())
+				m_WriteDescriptors[frameIndex].push_back(pd->WDS);
+			}
+
+			for (auto&& [binding, pd] : m_ResidentDescriptorArrays)
+			{
+				if (pd->Type == PendingDescriptorType::Texture2D)
 				{
-					for (auto& writeDescriptor : instance->m_WriteDescriptors)
-						writeDescriptor.dstSet = instance->m_DescriptorSet.DescriptorSets[0];
-
-					ANT_CORE_WARN("VulkanMaterial - Updating {0} descriptor sets", instance->m_WriteDescriptors.size());
-					vkUpdateDescriptorSets(vulkanDevice, instance->m_WriteDescriptors.size(), instance->m_WriteDescriptors.data(), 0, nullptr);
+					for (auto tex : pd->Textures)
+					{
+						Ref<VulkanTexture2D> texture = tex.As<VulkanTexture2D>();
+						arrayImageInfos.emplace_back(texture->GetVulkanDescriptorInfo());
+					}
 				}
+				pd->WDS.pImageInfo = arrayImageInfos.data();
+				pd->WDS.descriptorCount = (uint32_t)arrayImageInfos.size();
+				m_WriteDescriptors[frameIndex].push_back(pd->WDS);
+			}
 
-				instance->m_PendingDescriptors.clear();
-				instance->m_WriteDescriptors.clear();
-			});
-#endif
+		}
+
+		auto vulkanShader = m_Shader.As<VulkanShader>();
+		auto descriptorSet = vulkanShader->AllocateDescriptorSet();
+		m_DescriptorSets[frameIndex] = descriptorSet;
+		for (auto& writeDescriptor : m_WriteDescriptors[frameIndex])
+			writeDescriptor.dstSet = descriptorSet.DescriptorSets[0];
+
+		vkUpdateDescriptorSets(vulkanDevice, (uint32_t)m_WriteDescriptors[frameIndex].size(), m_WriteDescriptors[frameIndex].data(), 0, nullptr);
+		m_PendingDescriptors.clear();
+	}
+
+	void VulkanMaterial::InvalidateDescriptorSets()
+	{
+		const uint32_t framesInFlight = Renderer::GetConfig().FramesInFlight;
+		for (uint32_t i = 0; i < framesInFlight; i++)
+			m_DirtyDescriptorSets[i] = true;
 	}
 }

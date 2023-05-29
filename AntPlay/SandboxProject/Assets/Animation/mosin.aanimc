@@ -1,0 +1,5 @@
+AnimationController:
+  SkeletonAsset: 17981031291280368062
+  States:
+    - Name: idle
+      AnimationAsset: 6063903752390204307

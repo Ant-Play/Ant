@@ -1,906 +1,1036 @@
 #include "antpch.h"
 #include "ScriptEngine.h"
+#include "ScriptUtils.h"
+#include "Ant/Utilities/StringUtils.h"
+#include "Ant/Scene/Entity.h"
+#include "Ant/Core/Hash.h"
+#include "ScriptGlue.h"
+#include "ScriptCache.h"
+#include "ScriptProfiler.h"
+#include "ScriptBuilder.h"
+#include "Ant/Editor/EditorConsolePanel.h"
+#include "Ant/Asset/AssetManager.h"
+#include "Ant/Scene/Prefab.h"
+#include "Ant/Renderer/SceneRenderer.h"
+#include "Ant/Editor/ApplicationSettings.h"
 
+#include "Ant/Debug/Profiler.h"
 
 #include <mono/jit/jit.h>
+#include <mono/metadata/appdomain.h>
 #include <mono/metadata/assembly.h>
-#include <mono/metadata/debug-helpers.h>
-#include <mono/metadata/attrdefs.h>
+#include <mono/metadata/exception.h>
+#include <mono/metadata/mono-debug.h>
+#include <mono/metadata/threads.h>
 
-
-#include <iostream>
-#include <chrono>
-#include <thread>
-
-#include "Ant/Scripts/ScriptEngineRegistry.h"
-
-#include "Ant/Scene/Scene.h"
-
-#include <imgui.h>
+#include <stack>
 
 namespace Ant {
 
-	static MonoDomain* s_MonoDomain = nullptr;
-	static std::string s_AssemblyPath;
-	static Ref<Scene> s_SceneContext;
-
-	// Assembly images
-	MonoImage* s_AppAssemblyImage = nullptr;
-	MonoImage* s_CoreAssemblyImage = nullptr;
-
-	static EntityInstanceMap s_EntityInstanceMap;
-
-	static MonoMethod* GetMethod(MonoImage* image, const std::string& methodDesc);
-
-	struct EntityScriptClass
+	struct ScriptEngineState
 	{
-		std::string FullName;
-		std::string ClassName;
-		std::string NamespaceName;
+		MonoDomain* RootDomain = nullptr;
+		MonoDomain* ScriptsDomain = nullptr;
+		MonoDomain* NewScriptsDomain = nullptr;
 
-		MonoClass* Class = nullptr;
-		MonoMethod* Constructor = nullptr;
-		MonoMethod* OnCreateMethod = nullptr;
-		MonoMethod* OnDestroyMethod = nullptr;
-		MonoMethod* OnUpdateMethod = nullptr;
-		MonoMethod* OnPhysicsUpdateMethod = nullptr;
+		Ref<AssemblyInfo> CoreAssemblyInfo = nullptr;
+		Ref<AssemblyInfo> AppAssemblyInfo = nullptr;
+		MonoAssembly* OldCoreAssembly = nullptr;
 
-		// Physics
-		MonoMethod* OnCollisionBeginMethod = nullptr;
-		MonoMethod* OnCollisionEndMethod = nullptr;
-		MonoMethod* OnTriggerBeginMethod = nullptr;
-		MonoMethod* OnTriggerEndMethod = nullptr;
-		MonoMethod* OnCollision2DBeginMethod = nullptr;
-		MonoMethod* OnCollision2DEndMethod = nullptr;
+		std::unordered_map<AssemblyMetadata, MonoAssembly*> ReferencedAssemblies;
 
-		void InitClassMethods(MonoImage* image)
-		{
-			Constructor = GetMethod(s_CoreAssemblyImage, "Ant.Entity:.ctor(ulong)");
-			OnCreateMethod = GetMethod(image, FullName + ":OnCreate()");
-			OnUpdateMethod = GetMethod(image, FullName + ":OnUpdate(single)");
-			OnPhysicsUpdateMethod = GetMethod(image, FullName + ":OnPhysicsUpdate(single)");
+		bool IsMonoInitialized = false;
+		bool PostLoadCleanup = false;
+		ScriptEngineConfig Config;
 
-			// Physics (Entity class)
-			OnCollisionBeginMethod = GetMethod(s_CoreAssemblyImage, "Ant.Entity:OnCollisionBegin(single)");
-			OnCollisionEndMethod = GetMethod(s_CoreAssemblyImage, "Ant.Entity:OnCollisionEnd(single)");
-			OnTriggerBeginMethod = GetMethod(s_CoreAssemblyImage, "Ant.Entity:OnTriggerBegin(single)");
-			OnTriggerEndMethod = GetMethod(s_CoreAssemblyImage, "Ant.Entity:OnTriggerEnd(single)");
-			OnCollision2DBeginMethod = GetMethod(s_CoreAssemblyImage, "Ant.Entity:OnCollision2DBegin(single)");
-			OnCollision2DEndMethod = GetMethod(s_CoreAssemblyImage, "Ant.Entity:OnCollision2DEnd(single)");
-		}
+		Ref<Scene> SceneContext = nullptr;
+		Ref<SceneRenderer> ActiveSceneRenderer = nullptr;
+		ScriptEntityMap ScriptEntities;
+		ScriptInstanceMap ScriptInstances;
+		std::stack<Entity> RuntimeDuplicatedScriptEntities;
+		bool ReloadAppAssembly = false;
+
+		std::unordered_map<UUID, std::unordered_map<uint32_t, Ref<FieldStorageBase>>> FieldMap;
 	};
 
-	MonoObject* EntityInstance::GetInstance()
+	static ScriptEngineState* s_State = nullptr;
+	void ScriptEngine::Init(const ScriptEngineConfig& config)
 	{
-		ANT_CORE_ASSERT(Handle, "Entity has not been instantiated!");
-		return mono_gchandle_get_target(Handle);
-	}
+		ANT_CORE_ASSERT(!s_State, "[ScriptEngine]: Trying to call ScriptEngine::Init multiple times!");
+		s_State = anew ScriptEngineState();
+		s_State->Config = config;
+		s_State->CoreAssemblyInfo = Ref<AssemblyInfo>::Create();
+		s_State->AppAssemblyInfo = Ref<AssemblyInfo>::Create();
 
-	static std::unordered_map<std::string, EntityScriptClass> s_EntityClassMap;
+		FileSystem::AddFileSystemChangedCallback(ScriptEngine::OnFileSystemChanged);
 
-	MonoAssembly* LoadAssemblyFromFile(const char* filepath)
-	{
-		if (filepath == NULL)
-		{
-			return NULL;
-		}
-
-		HANDLE file = CreateFileA(filepath, FILE_READ_ACCESS, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (file == INVALID_HANDLE_VALUE)
-		{
-			return NULL;
-		}
-
-		DWORD file_size = GetFileSize(file, NULL);
-		if (file_size == INVALID_FILE_SIZE)
-		{
-			CloseHandle(file);
-			return NULL;
-		}
-
-		void* file_data = malloc(file_size);
-		if (file_data == NULL)
-		{
-			CloseHandle(file);
-			return NULL;
-		}
-
-		DWORD read = 0;
-		ReadFile(file, file_data, file_size, &read, NULL);
-		if (file_size != read)
-		{
-			free(file_data);
-			CloseHandle(file);
-			return NULL;
-		}
-
-		MonoImageOpenStatus status;
-		MonoImage* image = mono_image_open_from_data_full(reinterpret_cast<char*>(file_data), file_size, 1, &status, 0);
-		if (status != MONO_IMAGE_OK)
-		{
-			return NULL;
-		}
-		auto assemb = mono_assembly_load_from_full(image, filepath, &status, 0);
-		free(file_data);
-		CloseHandle(file);
-		mono_image_close(image);
-		return assemb;
-	}
-
-	static void InitMono()
-	{
-		if (!s_MonoDomain)
-		{
-			mono_set_assemblies_path("mono/lib");
-			// mono_jit_set_trace_options("--verbose");
-			auto domain = mono_jit_init("Ant");
-
-			char* name = (char*)"AntRuntime";
-			s_MonoDomain = mono_domain_create_appdomain(name, nullptr);
-		}
-	}
-
-	static void ShutdownMono()
-	{
-
-		// Apparently according to https://www.mono-project.com/docs/advanced/embedding/
-		// we can't do mono_jit_init in the same process after mono_jit_cleanup...
-		// so don't do this
-		// mono_jit_cleanup(s_MonoDomain);
-	}
-
-	static MonoAssembly* LoadAssembly(const std::string& path)
-	{
-		MonoAssembly* assembly = LoadAssemblyFromFile(path.c_str());
-
-		if (!assembly)
-			std::cout << "Could not load assembly: " << path << std::endl;
-		else
-			std::cout << "Successfully loaded assembly: " << path << std::endl;
-
-		return assembly;
-	}
-
-	static MonoImage* GetAssemblyImage(MonoAssembly* assembly)
-	{
-		MonoImage* image = mono_assembly_get_image(assembly);
-		if (!image)
-			std::cout << "mono_assembly_get_image failed" << std::endl;
-
-		return image;
-	}
-
-	static MonoClass* GetClass(MonoImage* image, const EntityScriptClass& scriptClass)
-	{
-		MonoClass* monoClass = mono_class_from_name(image, scriptClass.NamespaceName.c_str(), scriptClass.ClassName.c_str());
-		if (!monoClass)
-			std::cout << "mono_class_from_name failed" << std::endl;
-
-		return monoClass;
-	}
-
-	static uint32_t Instantiate(EntityScriptClass& scriptClass)
-	{
-		MonoObject* instance = mono_object_new(s_MonoDomain, scriptClass.Class);
-		if (!instance)
-			std::cout << "mono_object_new failed" << std::endl;
-
-		mono_runtime_object_init(instance);
-		uint32_t handle = mono_gchandle_new(instance, false);
-		return handle;
-	}
-
-	static MonoMethod* GetMethod(MonoImage* image, const std::string& methodDesc)
-	{
-		MonoMethodDesc* desc = mono_method_desc_new(methodDesc.c_str(), NULL);
-		if (!desc)
-			std::cout << "mono_method_desc_new failed" << std::endl;
-
-		MonoMethod* method = mono_method_desc_search_in_image(desc, image);
-		if (!method)
-			std::cout << "mono_method_desc_search_in_image failed" << std::endl;
-
-		return method;
-	}
-
-	static MonoObject* CallMethod(MonoObject* object, MonoMethod* method, void** params = nullptr)
-	{
-		MonoObject* pException = NULL;
-		MonoObject* result = mono_runtime_invoke(method, object, params, &pException);
-		return result;
-	}
-
-	static void PrintClassMethods(MonoClass* monoClass)
-	{
-		MonoMethod* iter;
-		void* ptr = 0;
-		while ((iter = mono_class_get_methods(monoClass, &ptr)) != NULL)
-		{
-			printf("--------------------------------\n");
-			const char* name = mono_method_get_name(iter);
-			MonoMethodDesc* methodDesc = mono_method_desc_from_method(iter);
-
-			const char* paramNames = "";
-			mono_method_get_param_names(iter, &paramNames);
-
-			printf("Name: %s\n", name);
-			printf("Full name: %s\n", mono_method_full_name(iter, true));
-		}
-	}
-
-	static void PrintClassProperties(MonoClass* monoClass)
-	{
-		MonoProperty* iter;
-		void* ptr = 0;
-		while ((iter = mono_class_get_properties(monoClass, &ptr)) != NULL)
-		{
-			printf("--------------------------------\n");
-			const char* name = mono_property_get_name(iter);
-
-			printf("Name: %s\n", name);
-		}
-	}
-
-	static MonoAssembly* s_AppAssembly = nullptr;
-	static MonoAssembly* s_CoreAssembly = nullptr;
-
-	static MonoString* GetName()
-	{
-		return mono_string_new(s_MonoDomain, "Hello!");
-	}
-
-	void ScriptEngine::LoadAntRuntimeAssembly(const std::string& path)
-	{
-		MonoDomain* domain = nullptr;
-		bool cleanup = false;
-		if (s_MonoDomain)
-		{
-			domain = mono_domain_create_appdomain("Ant Runtime", nullptr);
-			mono_domain_set(domain, false);
-
-			cleanup = true;
-		}
-
-		s_CoreAssembly = LoadAssembly("assets/scripts/Ant-ScriptCore.dll");
-		s_CoreAssemblyImage = GetAssemblyImage(s_CoreAssembly);
-
-		auto appAssembly = LoadAssembly(path);
-		auto appAssemblyImage = GetAssemblyImage(appAssembly);
-		ScriptEngineRegistry::RegisterAll();
-
-		if (cleanup)
-		{
-			mono_domain_unload(s_MonoDomain);
-			s_MonoDomain = domain;
-		}
-
-		s_AppAssembly = appAssembly;
-		s_AppAssemblyImage = appAssemblyImage;
-	}
-
-	void ScriptEngine::ReloadAssembly(const std::string& path)
-	{
-		LoadAntRuntimeAssembly(path);
-		if (s_EntityInstanceMap.size())
-		{
-			Ref<Scene> scene = ScriptEngine::GetCurrentSceneContext();
-			ANT_CORE_ASSERT(scene, "No active scene!");
-			if (s_EntityInstanceMap.find(scene->GetUUID()) != s_EntityInstanceMap.end())
-			{
-				auto& entityMap = s_EntityInstanceMap.at(scene->GetUUID());
-				for (auto& [entityID, entityInstanceData] : entityMap)
-				{
-					const auto& entityMap = scene->GetEntityMap();
-					ANT_CORE_ASSERT(entityMap.find(entityID) != entityMap.end(), "Invalid entity ID or entity doesn't exist in scene!");
-					InitScriptEntity(entityMap.at(entityID));
-				}
-			}
-		}
-	}
-
-	void ScriptEngine::Init(const std::string& assemblyPath)
-	{
-		s_AssemblyPath = assemblyPath;
-
+		ScriptProfiler::Init();
 		InitMono();
+		GCManager::Init();
 
-		LoadAntRuntimeAssembly(s_AssemblyPath);
+		if (!LoadCoreAssembly())
+		{
+			// NOTE: In theory this should work for all Visual Studio 2022 instances as long as it's installed in the default location!
+			ANT_CORE_INFO_TAG("ScriptEngine", "Failed to load Ants C# core, attempting to build automatically using MSBuild");
+
+			auto scriptCoreAssemblyFile = std::filesystem::current_path().parent_path() / "Ant-ScriptCore" / "Ant-ScriptCore.csproj";
+			ScriptBuilder::BuildCSProject(scriptCoreAssemblyFile);
+
+			if (!LoadCoreAssembly())
+				ANT_CORE_FATAL_TAG("ScriptEngine", "Failed to build Ant-ScriptCore! Most likely there were compile errors!");
+		}
 	}
 
 	void ScriptEngine::Shutdown()
 	{
+		for (auto& [sceneID, entityInstances] : s_State->ScriptEntities)
+		{
+			auto scene = Scene::GetScene(sceneID);
+
+			if (!scene)
+				continue;
+
+			for (auto& entityID : entityInstances)
+				ShutdownScriptEntity(scene->TryGetEntityWithUUID(entityID));
+
+			entityInstances.clear();
+		}
+		s_State->ScriptEntities.clear();
+		s_State->FieldMap.clear();
+
+		s_State->SceneContext = nullptr;
+
 		ShutdownMono();
-		s_SceneContext = nullptr;
-		s_EntityInstanceMap.clear();
+		ScriptProfiler::Shutdown();
+
+		adelete s_State;
+		s_State = nullptr;
 	}
 
-	void ScriptEngine::OnSceneDestruct(UUID sceneID)
+	void ScriptEngine::InitializeRuntime()
 	{
-		if (s_EntityInstanceMap.find(sceneID) != s_EntityInstanceMap.end())
+		ANT_PROFILE_FUNC();
+		ANT_CORE_ASSERT(s_State->SceneContext, "Tring to initialize script runtime without setting the scene context!");
+		ANT_CORE_ASSERT(s_State->SceneContext->IsPlaying(), "Don't call ScriptEngine::InitializeRuntime if the scene isn't being played!");
+
+		auto view = s_State->SceneContext->GetAllEntitiesWith<IDComponent, ScriptComponent>();
+		for (auto enttID : view)
 		{
-			s_EntityInstanceMap.at(sceneID).clear();
-			s_EntityInstanceMap.erase(sceneID);
+			Entity entity = s_State->SceneContext->GetEntityWithUUID(view.get<IDComponent>(enttID).ID);
+			RuntimeInitializeScriptEntity(entity);
 		}
 	}
 
-	void ScriptEngine::SetSceneContext(const Ref<Scene>& scene)
+	void ScriptEngine::ShutdownRuntime()
 	{
-		s_SceneContext = scene;
-	}
+		ANT_PROFILE_FUNC();
 
-	const Ref<Scene>& ScriptEngine::GetCurrentSceneContext()
-	{
-		return s_SceneContext;
-	}
+		UUID runtimeSceneID = s_State->SceneContext->GetUUID();
+		ANT_CORE_INFO_TAG("ScriptEngine", "Shutting down runtime scene {0}, with {1} scripts active.", runtimeSceneID, s_State->ScriptInstances.size());
 
-	void ScriptEngine::CopyEntityScriptData(UUID dst, UUID src)
-	{
-		ANT_CORE_ASSERT(s_EntityInstanceMap.find(dst) != s_EntityInstanceMap.end());
-		ANT_CORE_ASSERT(s_EntityInstanceMap.find(src) != s_EntityInstanceMap.end());
-
-		auto& dstEntityMap = s_EntityInstanceMap.at(dst);
-		auto& srcEntityMap = s_EntityInstanceMap.at(src);
-
-		for (auto& [entityID, entityInstanceData] : srcEntityMap)
+		for (auto it = s_State->ScriptInstances.begin(); it != s_State->ScriptInstances.end(); )
 		{
-			for (auto& [moduleName, srcFieldMap] : srcEntityMap[entityID].ModuleFieldMap)
+			Entity entity = s_State->SceneContext->TryGetEntityWithUUID(it->first);
+
+			if (!entity)
 			{
-				auto& dstModuleFieldMap = dstEntityMap[entityID].ModuleFieldMap;
-				for (auto& [fieldName, field] : srcFieldMap)
+				it++;
+				continue;
+			}
+
+			ShutdownRuntimeInstance(entity);
+
+			it = s_State->ScriptInstances.erase(it);
+		}
+
+		// Why no clear for stack?
+		while (s_State->RuntimeDuplicatedScriptEntities.size() > 0)
+			s_State->RuntimeDuplicatedScriptEntities.pop();
+
+		GCManager::CollectGarbage();
+	}
+
+	void ScriptEngine::ShutdownRuntimeInstance(Entity entity)
+	{
+		if (!entity.HasComponent<ScriptComponent>())
+			return;
+
+		const auto scriptComponent = entity.GetComponent<ScriptComponent>();
+
+		CallMethod(scriptComponent.ManagedInstance, "OnDestroyInternal");
+
+		for (auto fieldID : scriptComponent.FieldIDs)
+		{
+			Ref<FieldStorageBase> fieldStorage = s_State->FieldMap[entity.GetUUID()][fieldID];
+			fieldStorage->SetRuntimeInstance(nullptr);
+		}
+
+		GCManager::ReleaseObjectReference(scriptComponent.ManagedInstance);
+		entity.GetComponent<ScriptComponent>().ManagedInstance = nullptr;
+		entity.GetComponent<ScriptComponent>().IsRuntimeInitialized = false;
+	}
+
+	bool ScriptEngine::ReloadAppAssembly(const bool scheduleReload)
+	{
+		ANT_PROFILE_FUNC();
+
+		if (scheduleReload)
+		{
+			s_State->ReloadAppAssembly = true;
+			return false;
+		}
+
+		ANT_CORE_INFO_TAG("ScriptEngine", "Reloading {0}", Project::GetScriptModuleFilePath());
+
+		// Cache old field values and destroy all previous script instances
+		std::unordered_map<UUID, std::unordered_map<UUID, std::unordered_map<uint32_t, Buffer>>> oldFieldValues;
+		for (auto& [sceneID, entityMap] : s_State->ScriptEntities)
+		{
+			auto scene = Scene::GetScene(sceneID);
+
+			if (!scene)
+				continue;
+
+			for (const auto& entityID : entityMap)
+			{
+				Entity entity = scene->TryGetEntityWithUUID(entityID);
+
+				if (!entity.HasComponent<ScriptComponent>())
+					continue;
+
+				const auto sc = entity.GetComponent<ScriptComponent>();
+				ManagedClass* managedClass = ScriptCache::GetManagedClassByID(GetScriptClassIDFromComponent(sc));
+				oldFieldValues[sceneID][entityID] = std::unordered_map<uint32_t, Buffer>();
+
+				for (auto fieldID : sc.FieldIDs)
 				{
-					ANT_CORE_ASSERT(dstModuleFieldMap.find(moduleName) != dstModuleFieldMap.end());
-					auto& fieldMap = dstModuleFieldMap.at(moduleName);
-					ANT_CORE_ASSERT(fieldMap.find(fieldName) != fieldMap.end());
-					fieldMap.at(fieldName).SetStoredValueRaw(field.m_StoredValueBuffer);
+					Ref<FieldStorageBase> storage = s_State->FieldMap[entityID][fieldID];
+
+					if (!storage)
+						continue;
+
+					const FieldInfo* fieldInfo = storage->GetFieldInfo();
+
+					if (!fieldInfo->IsWritable())
+						continue;
+
+					oldFieldValues[sceneID][entityID][fieldID] = Buffer::Copy(storage->GetValueBuffer());
+				}
+
+				ShutdownScriptEntity(entity, false);
+
+				entity.GetComponent<ScriptComponent>().FieldIDs.clear();
+			}
+
+			entityMap.clear();
+		}
+		s_State->ScriptEntities.clear();
+
+		bool loaded = LoadAppAssembly();
+
+		for (const auto& [sceneID, entityFieldMap] : oldFieldValues)
+		{
+			auto scene = Scene::GetScene(sceneID);
+
+			for (const auto& [entityID, fieldMap] : entityFieldMap)
+			{
+				Entity entity = scene->GetEntityWithUUID(entityID);
+				InitializeScriptEntity(entity);
+
+				const auto& sc = entity.GetComponent<ScriptComponent>();
+
+				for (const auto& [fieldID, fieldValue] : fieldMap)
+				{
+					Ref<FieldStorageBase> storage = s_State->FieldMap[entityID][fieldID];
+
+					if (!storage)
+						continue;
+
+					storage->SetValueBuffer(fieldValue);
 				}
 			}
 		}
+
+		GCManager::CollectGarbage();
+		ANT_CORE_INFO_TAG("ScriptEngine", "Done!");
+
+		s_State->ReloadAppAssembly = false;
+		return loaded;
 	}
 
-	void ScriptEngine::OnCreateEntity(Entity entity)
+	bool ScriptEngine::ShouldReloadAppAssembly() { return s_State->ReloadAppAssembly; }
+
+	void ScriptEngine::UnloadAppAssembly()
 	{
-		EntityInstance& entityInstance = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID()).Instance;
-		if (entityInstance.ScriptClass->OnCreateMethod)
-			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnCreateMethod);
+		ANT_PROFILE_FUNC();
+
+		for (auto& [sceneID, entityInstances] : s_State->ScriptEntities)
+		{
+			auto scene = Scene::GetScene(sceneID);
+
+			if (!scene)
+				continue;
+
+			for (auto& entityID : entityInstances)
+				ShutdownScriptEntity(scene->TryGetEntityWithUUID(entityID));
+
+			entityInstances.clear();
+		}
+		s_State->ScriptInstances.clear();
+
+		ScriptCache::ClearCache();
+		UnloadAssembly(s_State->AppAssemblyInfo);
+		ScriptCache::CacheCoreClasses();
+		GCManager::CollectGarbage();
 	}
 
-	void ScriptEngine::OnUpdateEntity(Entity entity, Timestep ts)
+	bool ScriptEngine::LoadAppAssembly()
 	{
-		EntityInstance& entityInstance = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID()).Instance;
-		if (entityInstance.ScriptClass->OnUpdateMethod)
+		if (!FileSystem::Exists(Project::GetScriptModuleFilePath()))
 		{
-			void* args[] = { &ts };
-			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnUpdateMethod, args);
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to load app assembly! Invalid filepath");
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Filepath = {}", Project::GetScriptModuleFilePath());
+			return false;
 		}
+
+		if (s_State->AppAssemblyInfo->Assembly)
+		{
+			s_State->AppAssemblyInfo->ReferencedAssemblies.clear();
+			s_State->AppAssemblyInfo->Assembly = nullptr;
+			s_State->AppAssemblyInfo->AssemblyImage = nullptr;
+
+			s_State->ReferencedAssemblies.clear();
+
+			if (!LoadCoreAssembly())
+				return false;
+		}
+
+		auto appAssembly = LoadMonoAssembly(Project::GetScriptModuleFilePath());
+
+		if (appAssembly == nullptr)
+		{
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to load app assembly!");
+			return false;
+		}
+
+		s_State->AppAssemblyInfo->FilePath = Project::GetScriptModuleFilePath();
+		s_State->AppAssemblyInfo->Assembly = appAssembly;
+		s_State->AppAssemblyInfo->AssemblyImage = mono_assembly_get_image(s_State->AppAssemblyInfo->Assembly);
+		s_State->AppAssemblyInfo->Classes.clear();
+		s_State->AppAssemblyInfo->IsCoreAssembly = false;
+		s_State->AppAssemblyInfo->Metadata = GetMetadataForImage(s_State->AppAssemblyInfo->AssemblyImage);
+
+		if (s_State->PostLoadCleanup)
+		{
+			mono_domain_unload(s_State->ScriptsDomain);
+
+			if (s_State->OldCoreAssembly)
+				s_State->OldCoreAssembly = nullptr;
+
+			s_State->ScriptsDomain = s_State->NewScriptsDomain;
+			s_State->NewScriptsDomain = nullptr;
+			s_State->PostLoadCleanup = false;
+		}
+
+		s_State->AppAssemblyInfo->ReferencedAssemblies = GetReferencedAssembliesMetadata(s_State->AppAssemblyInfo->AssemblyImage);
+
+		// Check that the referenced Script Core version matches the loaded script core version
+		auto coreMetadataIt = std::find_if(s_State->AppAssemblyInfo->ReferencedAssemblies.begin(), s_State->AppAssemblyInfo->ReferencedAssemblies.end(), [](const AssemblyMetadata& metadata)
+			{
+				return metadata.Name == "Ant-ScriptCore";
+			});
+
+		if (coreMetadataIt == s_State->AppAssemblyInfo->ReferencedAssemblies.end())
+		{
+			ANT_CONSOLE_LOG_ERROR("C# project doesn't reference Ant-ScriptCore?");
+			return false;
+		}
+
+		const auto& coreMetadata = s_State->CoreAssemblyInfo->Metadata;
+
+		if (coreMetadataIt->MajorVersion != coreMetadata.MajorVersion || coreMetadataIt->MinorVersion != coreMetadata.MinorVersion)
+		{
+			ANT_CONSOLE_LOG_ERROR("C# project referencing an incompatible script core version!");
+			ANT_CONSOLE_LOG_ERROR("Expected version: {0}.{1}, referenced version: {2}.{3}",
+				coreMetadata.MajorVersion, coreMetadata.MinorVersion, coreMetadataIt->MajorVersion, coreMetadataIt->MinorVersion);
+
+			return false;
+		}
+
+		LoadReferencedAssemblies(s_State->AppAssemblyInfo);
+
+		ANT_CORE_INFO_TAG("ScriptEngine", "Successfully loaded app assembly from: {0}", s_State->AppAssemblyInfo->FilePath);
+
+		ScriptGlue::RegisterGlue();
+		ScriptCache::GenerateCacheForAssembly(s_State->AppAssemblyInfo);
+		return true;
 	}
 
-	void ScriptEngine::OnPhysicsUpdateEntity(Entity entity, float fixedTimeStep)
+	bool ScriptEngine::LoadAppAssemblyRuntime(Buffer appAssemblyData)
 	{
-		EntityInstance& entityInstance = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID()).Instance;
-		if (entityInstance.ScriptClass->OnPhysicsUpdateMethod)
+		if (s_State->AppAssemblyInfo->Assembly)
 		{
-			void* args[] = { &fixedTimeStep };
-			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnPhysicsUpdateMethod, args);
+			s_State->AppAssemblyInfo->ReferencedAssemblies.clear();
+			s_State->AppAssemblyInfo->Assembly = nullptr;
+			s_State->AppAssemblyInfo->AssemblyImage = nullptr;
+
+			s_State->ReferencedAssemblies.clear();
+
+			if (!LoadCoreAssembly())
+				return false;
 		}
+
+		auto appAssembly = LoadMonoAssemblyRuntime(appAssemblyData);
+		if (appAssembly == nullptr)
+		{
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to load app assembly!");
+			return false;
+		}
+
+		s_State->AppAssemblyInfo->FilePath = Project::GetScriptModuleFilePath();
+		s_State->AppAssemblyInfo->Assembly = appAssembly;
+		s_State->AppAssemblyInfo->AssemblyImage = mono_assembly_get_image(s_State->AppAssemblyInfo->Assembly);
+		s_State->AppAssemblyInfo->Classes.clear();
+		s_State->AppAssemblyInfo->IsCoreAssembly = false;
+		s_State->AppAssemblyInfo->Metadata = GetMetadataForImage(s_State->AppAssemblyInfo->AssemblyImage);
+
+		if (s_State->PostLoadCleanup)
+		{
+			mono_domain_unload(s_State->ScriptsDomain);
+
+			if (s_State->OldCoreAssembly)
+				s_State->OldCoreAssembly = nullptr;
+
+			s_State->ScriptsDomain = s_State->NewScriptsDomain;
+			s_State->NewScriptsDomain = nullptr;
+			s_State->PostLoadCleanup = false;
+		}
+
+		s_State->AppAssemblyInfo->ReferencedAssemblies = GetReferencedAssembliesMetadata(s_State->AppAssemblyInfo->AssemblyImage);
+
+		// Check that the referenced Script Core version matches the loaded script core version
+		auto coreMetadataIt = std::find_if(s_State->AppAssemblyInfo->ReferencedAssemblies.begin(), s_State->AppAssemblyInfo->ReferencedAssemblies.end(), [](const AssemblyMetadata& metadata)
+			{
+				return metadata.Name == "Ant-ScriptCore";
+			});
+
+		if (coreMetadataIt == s_State->AppAssemblyInfo->ReferencedAssemblies.end())
+		{
+			ANT_CONSOLE_LOG_ERROR("C# project doesn't reference Ant-ScriptCore?");
+			return false;
+		}
+
+		const auto& coreMetadata = s_State->CoreAssemblyInfo->Metadata;
+
+		if (coreMetadataIt->MajorVersion != coreMetadata.MajorVersion || coreMetadataIt->MinorVersion != coreMetadata.MinorVersion)
+		{
+			ANT_CONSOLE_LOG_ERROR("C# project referencing an incompatible script core version!");
+			ANT_CONSOLE_LOG_ERROR("Expected version: {0}.{1}, referenced version: {2}.{3}",
+				coreMetadata.MajorVersion, coreMetadata.MinorVersion, coreMetadataIt->MajorVersion, coreMetadataIt->MinorVersion);
+
+			return false;
+		}
+
+		LoadReferencedAssemblies(s_State->AppAssemblyInfo);
+
+		ANT_CORE_INFO_TAG("ScriptEngine", "Successfully loaded app assembly from: {0}", s_State->AppAssemblyInfo->FilePath);
+
+		ScriptGlue::RegisterGlue();
+		ScriptCache::GenerateCacheForAssembly(s_State->AppAssemblyInfo);
+		return true;
 	}
 
-	void ScriptEngine::OnCollision2DBegin(Entity entity)
+	void ScriptEngine::SetSceneContext(const Ref<Scene>& scene, const Ref<SceneRenderer>& sceneRenderer)
 	{
-		EntityInstance& entityInstance = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID()).Instance;
-		if (entityInstance.ScriptClass->OnCollision2DBeginMethod)
-		{
-			float value = 5.0f;
-			void* args[] = { &value };
-			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnCollision2DBeginMethod, args);
-		}
+		s_State->SceneContext = scene;
+		s_State->ActiveSceneRenderer = sceneRenderer;
 	}
 
-	void ScriptEngine::OnCollision2DEnd(Entity entity)
+	Ref<Scene> ScriptEngine::GetSceneContext() { return s_State->SceneContext; }
+	Ref<SceneRenderer> ScriptEngine::GetSceneRenderer() { return s_State->ActiveSceneRenderer; }
+
+	void ScriptEngine::InitializeScriptEntity(Entity entity)
 	{
-		EntityInstance& entityInstance = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID()).Instance;
-		if (entityInstance.ScriptClass->OnCollision2DEndMethod)
-		{
-			float value = 5.0f;
-			void* args[] = { &value };
-			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnCollision2DEndMethod, args);
-		}
-	}
+		ANT_PROFILE_FUNC();
 
-	void ScriptEngine::OnCollisionBegin(Entity entity)
-	{
-		EntityInstance& entityInstance = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID()).Instance;
-		if (entityInstance.ScriptClass->OnCollisionBeginMethod)
-		{
-			float value = 5.0f;
-			void* args[] = { &value };
-			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnCollisionBeginMethod, args);
-		}
-	}
-
-	void ScriptEngine::OnCollisionEnd(Entity entity)
-	{
-		EntityInstance& entityInstance = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID()).Instance;
-		if (entityInstance.ScriptClass->OnCollisionEndMethod)
-		{
-			float value = 5.0f;
-			void* args[] = { &value };
-			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnCollisionEndMethod, args);
-		}
-	}
-
-	void ScriptEngine::OnTriggerBegin(Entity entity)
-	{
-		EntityInstance& entityInstance = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID()).Instance;
-		if (entityInstance.ScriptClass->OnTriggerBeginMethod)
-		{
-			float value = 5.0f;
-			void* args[] = { &value };
-			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnTriggerBeginMethod, args);
-		}
-	}
-
-	void ScriptEngine::OnTriggerEnd(Entity entity)
-	{
-		EntityInstance& entityInstance = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID()).Instance;
-		if (entityInstance.ScriptClass->OnTriggerEndMethod)
-		{
-			float value = 5.0f;
-			void* args[] = { &value };
-			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->OnTriggerEndMethod, args);
-		}
-	}
-
-	MonoObject* ScriptEngine::Construct(const std::string& fullName, bool callConstructor, void** parameters)
-	{
-		std::string namespaceName;
-		std::string className;
-		std::string parameterList;
-
-		if (fullName.find(".") != std::string::npos)
-		{
-			namespaceName = fullName.substr(0, fullName.find_first_of('.'));
-			className = fullName.substr(fullName.find_first_of('.') + 1, (fullName.find_first_of(':') - fullName.find_first_of('.')) - 1);
-
-		}
-
-		if (fullName.find(":") != std::string::npos)
-		{
-			parameterList = fullName.substr(fullName.find_first_of(':'));
-		}
-
-		MonoClass* clazz = mono_class_from_name(s_CoreAssemblyImage, namespaceName.c_str(), className.c_str());
-		MonoObject* obj = mono_object_new(mono_domain_get(), clazz);
-
-		if (callConstructor)
-		{
-			MonoMethodDesc* desc = mono_method_desc_new(parameterList.c_str(), NULL);
-			MonoMethod* constructor = mono_method_desc_search_in_class(desc, clazz);
-			MonoObject* exception = nullptr;
-			mono_runtime_invoke(constructor, obj, parameters, &exception);
-		}
-
-		return obj;
-	}
-
-	static std::unordered_map<std::string, MonoClass*> s_Classes;
-	MonoClass* ScriptEngine::GetCoreClass(const std::string& fullName)
-	{
-		if (s_Classes.find(fullName) != s_Classes.end())
-			return s_Classes[fullName];
-
-		std::string namespaceName = "";
-		std::string className;
-
-		if (fullName.find('.') != std::string::npos)
-		{
-			namespaceName = fullName.substr(0, fullName.find_last_of('.'));
-			className = fullName.substr(fullName.find_last_of('.') + 1);
-		}
-		else
-		{
-			className = fullName;
-		}
-
-		MonoClass* monoClass = mono_class_from_name(s_CoreAssemblyImage, namespaceName.c_str(), className.c_str());
-		if (!monoClass)
-			std::cout << "mono_class_from_name failed" << std::endl;
-
-		s_Classes[fullName] = monoClass;
-
-		return monoClass;
-	}
-
-	bool ScriptEngine::IsEntityModuleValid(Entity entity)
-	{
-		return entity.HasComponent<ScriptComponent>() && ModuleExists(entity.GetComponent<ScriptComponent>().ModuleName);
-	}
-
-	void ScriptEngine::OnScriptComponentDestroyed(UUID sceneID, UUID entityID)
-	{
-		ANT_CORE_ASSERT(s_EntityInstanceMap.find(sceneID) != s_EntityInstanceMap.end());
-		auto& entityMap = s_EntityInstanceMap.at(sceneID);
-		ANT_CORE_ASSERT(entityMap.find(entityID) != entityMap.end());
-		entityMap.erase(entityID);
-	}
-
-	bool ScriptEngine::ModuleExists(const std::string& moduleName)
-	{
-		std::string NamespaceName, ClassName;
-		if (moduleName.find('.') != std::string::npos)
-		{
-			NamespaceName = moduleName.substr(0, moduleName.find_last_of('.'));
-			ClassName = moduleName.substr(moduleName.find_last_of('.') + 1);
-		}
-		else
-		{
-			ClassName = moduleName;
-		}
-
-		MonoClass* monoClass = mono_class_from_name(s_AppAssemblyImage, NamespaceName.c_str(), ClassName.c_str());
-		return monoClass != nullptr;
-	}
-
-	static FieldType GetAntFieldType(MonoType* monoType)
-	{
-		int type = mono_type_get_type(monoType);
-		switch (type)
-		{
-		case MONO_TYPE_R4: return FieldType::Float;
-		case MONO_TYPE_I4: return FieldType::Int;
-		case MONO_TYPE_U4: return FieldType::UnsignedInt;
-		case MONO_TYPE_STRING: return FieldType::String;
-		case MONO_TYPE_CLASS: return FieldType::ClassReference;
-		case MONO_TYPE_VALUETYPE:
-		{
-			char* name = mono_type_get_name(monoType);
-			if (strcmp(name, "Ant.Vector2") == 0) return FieldType::Vec2;
-			if (strcmp(name, "Ant.Vector3") == 0) return FieldType::Vec3;
-			if (strcmp(name, "Ant.Vector4") == 0) return FieldType::Vec4;
-		}
-		}
-		return FieldType::None;
-	}
-
-	const char* FieldTypeToString(FieldType type)
-	{
-		switch (type)
-		{
-		case FieldType::Float:       return "Float";
-		case FieldType::Int:         return "Int";
-		case FieldType::UnsignedInt: return "UnsignedInt";
-		case FieldType::String:      return "String";
-		case FieldType::Vec2:        return "Vec2";
-		case FieldType::Vec3:        return "Vec3";
-		case FieldType::Vec4:        return "Vec4";
-		}
-		return "Unknown";
-	}
-
-	void ScriptEngine::InitScriptEntity(Entity entity)
-	{
-		Scene* scene = entity.m_Scene;
-		UUID id = entity.GetComponent<IDComponent>().ID;
-		auto& moduleName = entity.GetComponent<ScriptComponent>().ModuleName;
-		if (moduleName.empty())
+		if (!entity.HasComponent<ScriptComponent>())
 			return;
 
-		if (!ModuleExists(moduleName))
+		auto& sc = entity.GetComponent<ScriptComponent>();
+		if (!IsModuleValid(sc.ScriptClassHandle))
 		{
-			ANT_CORE_ERROR("Entity references non-existent script module '{0}'", moduleName);
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Tried to initialize script entity with an invalid script!");
 			return;
 		}
 
-		EntityScriptClass& scriptClass = s_EntityClassMap[moduleName];
-		scriptClass.FullName = moduleName;
-		if (moduleName.find('.') != std::string::npos)
+		UUID sceneID = entity.GetSceneUUID();
+		UUID entityID = entity.GetUUID();
+
+		sc.FieldIDs.clear();
+
+		ManagedClass* managedClass = ScriptCache::GetManagedClassByID(GetScriptClassIDFromComponent(sc));
+		if (!managedClass)
+			return;
+
+		for (auto fieldID : managedClass->Fields)
 		{
-			scriptClass.NamespaceName = moduleName.substr(0, moduleName.find_last_of('.'));
-			scriptClass.ClassName = moduleName.substr(moduleName.find_last_of('.') + 1);
+			FieldInfo* fieldInfo = ScriptCache::GetFieldByID(fieldID);
+
+			if (!fieldInfo->HasFlag(FieldFlag::Public))
+				continue;
+
+			if (fieldInfo->IsArray())
+				s_State->FieldMap[entityID][fieldID] = Ref<ArrayFieldStorage>::Create(fieldInfo);
+			else
+				s_State->FieldMap[entityID][fieldID] = Ref<FieldStorage>::Create(fieldInfo);
+
+			sc.FieldIDs.push_back(fieldID);
 		}
-		else
+
+		if (s_State->ScriptEntities.find(sceneID) == s_State->ScriptEntities.end())
+			s_State->ScriptEntities[sceneID] = std::vector<UUID>();
+
+		s_State->ScriptEntities[sceneID].push_back(entityID);
+	}
+
+	void ScriptEngine::RuntimeInitializeScriptEntity(Entity entity)
+	{
+		ANT_PROFILE_FUNC();
+
+		// NOTE(Peter): Intentional copy
+		auto scriptComponent = entity.GetComponent<ScriptComponent>();
+
+		if (scriptComponent.IsRuntimeInitialized)
+			return;
+
+		if (!IsModuleValid(scriptComponent.ScriptClassHandle))
 		{
-			scriptClass.ClassName = moduleName;
+			const auto managedClass = ScriptCache::GetManagedClassByID(GetScriptClassIDFromComponent(scriptComponent));
+
+			std::string className = "Unknown Script";
+			if (managedClass != nullptr)
+				className = managedClass->FullName;
+
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Tried to instantiate an entity with an invalid C# class '{0}'!", className);
+			ANT_CONSOLE_LOG_ERROR("Tried to instantiate an entity with an invalid C# class '{0}'!", className);
+			return;
 		}
 
-		scriptClass.Class = GetClass(s_AppAssemblyImage, scriptClass);
-		scriptClass.InitClassMethods(s_AppAssemblyImage);
+		MonoObject* runtimeInstance = CreateManagedObject(GetScriptClassIDFromComponent(scriptComponent), entity.GetUUID());
+		GCHandle instanceHandle = GCManager::CreateObjectReference(runtimeInstance, false);
+		entity.GetComponent<ScriptComponent>().ManagedInstance = instanceHandle;
+		s_State->ScriptInstances[entity.GetUUID()] = instanceHandle;
 
-		EntityInstanceData& entityInstanceData = s_EntityInstanceMap[scene->GetUUID()][id];
-		EntityInstance& entityInstance = entityInstanceData.Instance;
-		entityInstance.ScriptClass = &scriptClass;
-		ScriptModuleFieldMap& moduleFieldMap = entityInstanceData.ModuleFieldMap;
-		auto& fieldMap = moduleFieldMap[moduleName];
-
-		// Save old fields
-		std::unordered_map<std::string, PublicField> oldFields;
-		oldFields.reserve(fieldMap.size());
-		for (auto& [fieldName, field] : fieldMap)
-			oldFields.emplace(fieldName, std::move(field));
-		fieldMap.clear();
-
-		// Retrieve public fields (TODO: cache these fields if the module is used more than once)
+		for (auto fieldID : scriptComponent.FieldIDs)
 		{
-			MonoClassField* iter;
-			void* ptr = 0;
-			while ((iter = mono_class_get_fields(scriptClass.Class, &ptr)) != NULL)
+			UUID entityID = entity.GetUUID();
+
+			if (s_State->FieldMap.find(entityID) != s_State->FieldMap.end())
+				s_State->FieldMap[entityID][fieldID]->SetRuntimeInstance(instanceHandle);
+		}
+
+		CallMethod(instanceHandle, "OnCreate");
+
+		// NOTE: Don't use scriptComponent as a reference and modify it here
+		//		 If OnCreate spawns a lot of entities we would loose our reference
+		//		 to the script component...
+		entity.GetComponent<ScriptComponent>().IsRuntimeInitialized = true;
+	}
+
+	void ScriptEngine::DuplicateScriptInstance(Entity entity, Entity targetEntity)
+	{
+		ANT_PROFILE_FUNC();
+
+		if (!entity.HasComponent<ScriptComponent>() || !targetEntity.HasComponent<ScriptComponent>())
+			return;
+
+		const auto& srcScriptComp = entity.GetComponent<ScriptComponent>();
+		auto& dstScriptComp = targetEntity.GetComponent<ScriptComponent>();
+
+		if (srcScriptComp.ScriptClassHandle != dstScriptComp.ScriptClassHandle)
+		{
+			const auto srcClass = ScriptCache::GetManagedClassByID(GetScriptClassIDFromComponent(srcScriptComp));
+			const auto dstClass = ScriptCache::GetManagedClassByID(GetScriptClassIDFromComponent(dstScriptComp));
+			ANT_CORE_WARN_TAG("ScriptEngine", "Attempting to duplicate instance of: {0} to an instance of: {1}", srcClass->FullName, dstClass->FullName);
+			return;
+		}
+
+		ShutdownScriptEntity(targetEntity);
+		InitializeScriptEntity(targetEntity);
+
+		UUID targetEntityID = targetEntity.GetUUID();
+		UUID srcEntityID = entity.GetUUID();
+
+		for (auto fieldID : srcScriptComp.FieldIDs)
+		{
+			if (s_State->FieldMap.find(srcEntityID) == s_State->FieldMap.end())
+				break;
+
+			if (s_State->FieldMap.at(srcEntityID).find(fieldID) == s_State->FieldMap.at(srcEntityID).end())
+				continue;
+
+			s_State->FieldMap[targetEntityID][fieldID]->CopyFrom(s_State->FieldMap[srcEntityID][fieldID]);
+		}
+
+		// NOTE: Ugly hack around prefab script entities referencing the wrong entity instances
+		/*const auto& children = entity.Children();
+		if (children.size() > 0)
+		{
+			for (auto fieldID : dstScriptComp.FieldIDs)
 			{
-				const char* name = mono_field_get_name(iter);
-				uint32_t flags = mono_field_get_flags(iter);
-				if ((flags & MONO_FIELD_ATTR_PUBLIC) == 0)
+				auto storage = ScriptCache::GetFieldStorage(fieldID);
+
+				if (storage->GetField()->Type.NativeType != UnmanagedType::Entity)
 					continue;
 
-				MonoType* fieldType = mono_field_get_type(iter);
-				FieldType antFieldType = GetAntFieldType(fieldType);
-
-				if (antFieldType == FieldType::ClassReference)
-					continue;
-
-				// TODO: Attributes
-				MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(scriptClass.Class, iter);
-
-				char* typeName = mono_type_get_name(fieldType);
-
-				if (oldFields.find(name) != oldFields.end())
+				for (size_t i = 0; i < children.size(); i++)
 				{
-					fieldMap.emplace(name, std::move(oldFields.at(name)));
-				}
-				else
-				{
-					PublicField field = { name, typeName, antFieldType };
-					field.m_EntityInstance = &entityInstance;
-					field.m_MonoClassField = iter;
-
-					/*if (field.Type == FieldType::ClassReference)
+					if (storage->IsArray())
 					{
-						Asset* rawAsset = new Asset();
-						Ref<Asset>* asset = new Ref<Asset>(rawAsset);
-						field.SetStoredValueRaw(asset);
-					}*/
-					fieldMap.emplace(name, std::move(field));
-				}
-			}
-		}
-	}
+						auto arrayStorage = storage.As<ArrayFieldStorage>();
 
-	void ScriptEngine::ShutdownScriptEntity(Entity entity, const std::string& moduleName)
-	{
-		EntityInstanceData& entityInstanceData = GetEntityInstanceData(entity.GetSceneUUID(), entity.GetUUID());
-		ScriptModuleFieldMap& moduleFieldMap = entityInstanceData.ModuleFieldMap;
-		if (moduleFieldMap.find(moduleName) != moduleFieldMap.end())
-			moduleFieldMap.erase(moduleName);
-	}
-
-	void ScriptEngine::InstantiateEntityClass(Entity entity)
-	{
-		Scene* scene = entity.m_Scene;
-		UUID id = entity.GetComponent<IDComponent>().ID;
-		auto& moduleName = entity.GetComponent<ScriptComponent>().ModuleName;
-
-		EntityInstanceData& entityInstanceData = GetEntityInstanceData(scene->GetUUID(), id);
-		EntityInstance& entityInstance = entityInstanceData.Instance;
-		ANT_CORE_ASSERT(entityInstance.ScriptClass);
-		entityInstance.Handle = Instantiate(*entityInstance.ScriptClass);
-
-		void* param[] = { &id };
-		CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->Constructor, param);
-
-		// Set all public fields to appropriate values
-		ScriptModuleFieldMap& moduleFieldMap = entityInstanceData.ModuleFieldMap;
-		if (moduleFieldMap.find(moduleName) != moduleFieldMap.end())
-		{
-			auto& publicFields = moduleFieldMap.at(moduleName);
-			for (auto& [name, field] : publicFields)
-				field.CopyStoredValueToRuntime();
-		}
-
-		// Call OnCreate function (if exists)
-		OnCreateEntity(entity);
-	}
-
-	EntityInstanceData& ScriptEngine::GetEntityInstanceData(UUID sceneID, UUID entityID)
-	{
-		ANT_CORE_ASSERT(s_EntityInstanceMap.find(sceneID) != s_EntityInstanceMap.end(), "Invalid scene ID!");
-		auto& entityIDMap = s_EntityInstanceMap.at(sceneID);
-		ANT_CORE_ASSERT(entityIDMap.find(entityID) != entityIDMap.end(), "Invalid entity ID!");
-		return entityIDMap.at(entityID);
-	}
-
-	EntityInstanceMap& ScriptEngine::GetEntityInstanceMap()
-	{
-		return s_EntityInstanceMap;
-	}
-
-	static uint32_t GetFieldSize(FieldType type)
-	{
-		switch (type)
-		{
-			case FieldType::Float:       return 4;
-			case FieldType::Int:         return 4;
-			case FieldType::UnsignedInt: return 4;
-				// case FieldType::String:   return 8; // TODO
-			case FieldType::Vec2:        return 4 * 2;
-			case FieldType::Vec3:        return 4 * 3;
-			case FieldType::Vec4:        return 4 * 4;
-			case FieldType::ClassReference: return 4;
-		}
-		ANT_CORE_ASSERT(false, "Unknown field type!");
-		return 0;
-	}
-
-	PublicField::PublicField(const std::string& name, const std::string& typeName, FieldType type)
-		: Name(name), TypeName(typeName), Type(type)
-	{
-		m_StoredValueBuffer = AllocateBuffer(type);
-	}
-
-	PublicField::PublicField(PublicField&& other)
-	{
-		Name = std::move(other.Name);
-		TypeName = std::move(other.TypeName);
-		Type = other.Type;
-		m_EntityInstance = other.m_EntityInstance;
-		m_MonoClassField = other.m_MonoClassField;
-		m_StoredValueBuffer = other.m_StoredValueBuffer;
-
-		other.m_EntityInstance = nullptr;
-		other.m_MonoClassField = nullptr;
-		other.m_StoredValueBuffer = nullptr;
-	}
-
-	PublicField::~PublicField()
-	{
-		delete[] m_StoredValueBuffer;
-	}
-
-	void PublicField::CopyStoredValueToRuntime()
-	{
-		ANT_CORE_ASSERT(m_EntityInstance->GetInstance());
-		if (Type == FieldType::ClassReference)
-		{
-			// Create Managed Object
-			void* params[] = {
-				&m_StoredValueBuffer
-			};
-			MonoObject* obj = ScriptEngine::Construct(TypeName + ":.ctor(intptr)", true, params);
-			mono_field_set_value(m_EntityInstance->GetInstance(), m_MonoClassField, obj);
-		}
-		else
-		{
-			mono_field_set_value(m_EntityInstance->GetInstance(), m_MonoClassField, m_StoredValueBuffer);
-		}
-	}
-
-	bool PublicField::IsRuntimeAvailable() const
-	{
-		return m_EntityInstance->Handle != 0;
-	}
-
-	void PublicField::SetStoredValueRaw(void* src)
-	{
-		if (Type == FieldType::ClassReference)
-		{
-			m_StoredValueBuffer = (uint8_t*)src;
-		}
-		else
-		{
-			uint32_t size = GetFieldSize(Type);
-			memcpy(m_StoredValueBuffer, src, size);
-		}
-	}
-
-	void PublicField::SetRuntimeValueRaw(void* src)
-	{
-		ANT_CORE_ASSERT(m_EntityInstance->GetInstance());
-		mono_field_set_value(m_EntityInstance->GetInstance(), m_MonoClassField, src);
-	}
-
-	void* PublicField::GetRuntimeValueRaw()
-	{
-		ANT_CORE_ASSERT(m_EntityInstance->GetInstance());
-
-		if (Type == FieldType::ClassReference)
-		{
-			MonoObject* instance;
-			mono_field_get_value(m_EntityInstance->GetInstance(), m_MonoClassField, &instance);
-
-			if (!instance)
-				return nullptr;
-
-			MonoClassField* field = mono_class_get_field_from_name(mono_object_get_class(instance), "m_UnmanagedInstance");
-			int* value;
-			mono_field_get_value(instance, field, &value);
-			return value;
-		}
-		else
-		{
-			uint8_t* outValue;
-			mono_field_get_value(m_EntityInstance->GetInstance(), m_MonoClassField, outValue);
-			return outValue;
-		}
-	}
-
-	uint8_t* PublicField::AllocateBuffer(FieldType type)
-	{
-		uint32_t size = GetFieldSize(type);
-		uint8_t* buffer = new uint8_t[size];
-		memset(buffer, 0, size);
-		return buffer;
-	}
-
-	void PublicField::SetStoredValue_Internal(void* value) const
-	{
-		if (Type == FieldType::ClassReference)
-		{
-			//m_StoredValueBuffer = (uint8_t*)value;
-		}
-		else
-		{
-			uint32_t size = GetFieldSize(Type);
-			memcpy(m_StoredValueBuffer, value, size);
-		}
-	}
-
-	void PublicField::GetStoredValue_Internal(void* outValue) const
-	{
-		uint32_t size = GetFieldSize(Type);
-		memcpy(outValue, m_StoredValueBuffer, size);
-	}
-
-	void PublicField::SetRuntimeValue_Internal(void* value) const
-	{
-		ANT_CORE_ASSERT(m_EntityInstance->GetInstance());
-		mono_field_set_value(m_EntityInstance->GetInstance(), m_MonoClassField, value);
-	}
-
-	void PublicField::GetRuntimeValue_Internal(void* outValue) const
-	{
-		ANT_CORE_ASSERT(m_EntityInstance->GetInstance());
-		mono_field_get_value(m_EntityInstance->GetInstance(), m_MonoClassField, outValue);
-	}
-
-	// Debug
-	void ScriptEngine::OnImGuiRender()
-	{
-		ImGui::Begin("Script Engine Debug");
-		for (auto& [sceneID, entityMap] : s_EntityInstanceMap)
-		{
-			bool opened = ImGui::TreeNode((void*)(uint64_t)sceneID, "Scene (%llx)", sceneID);
-			if (opened)
-			{
-				Ref<Scene> scene = Scene::GetScene(sceneID);
-				for (auto& [entityID, entityInstanceData] : entityMap)
-				{
-					Entity entity = scene->GetScene(sceneID)->GetEntityMap().at(entityID);
-					std::string entityName = "Unnamed Entity";
-					if (entity.HasComponent<TagComponent>())
-						entityName = entity.GetComponent<TagComponent>().Tag;
-					opened = ImGui::TreeNode((void*)(uint64_t)entityID, "%s (%llx)", entityName.c_str(), entityID);
-					if (opened)
-					{
-						for (auto& [moduleName, fieldMap] : entityInstanceData.ModuleFieldMap)
+						for (size_t j = 0; j < arrayStorage->GetLength(dstScriptComp.ManagedInstance); j++)
 						{
-							opened = ImGui::TreeNode(moduleName.c_str());
-							if (opened)
+							UUID entityID = arrayStorage->GetValue<UUID>(dstScriptComp.ManagedInstance, j);
+							if (entityID == children[i])
 							{
-								for (auto& [fieldName, field] : fieldMap)
-								{
-
-									opened = ImGui::TreeNodeEx((void*)&field, ImGuiTreeNodeFlags_Leaf, fieldName.c_str());
-									if (opened)
-									{
-
-										ImGui::TreePop();
-									}
-								}
-								ImGui::TreePop();
+								UUID newEntityID = targetEntity.Children()[i];
+								arrayStorage->SetValue(dstScriptComp.ManagedInstance, j, newEntityID);
 							}
 						}
-						ImGui::TreePop();
+					}
+					else
+					{
+						UUID entityID = storage.As<FieldStorage>()->GetValue<UUID>(dstScriptComp.ManagedInstance);
+						if (entityID == children[i])
+						{
+							UUID newEntityID = targetEntity.Children()[i];
+							storage.As<FieldStorage>()->SetValue(dstScriptComp.ManagedInstance, newEntityID);
+						}
 					}
 				}
-				ImGui::TreePop();
+			}
+		}*/
+
+		if (s_State->SceneContext && s_State->SceneContext->IsPlaying())
+			s_State->RuntimeDuplicatedScriptEntities.push(targetEntity);
+	}
+
+	void ScriptEngine::ShutdownScriptEntity(Entity entity, bool erase)
+	{
+		ANT_PROFILE_FUNC();
+
+		if (!entity.HasComponent<ScriptComponent>())
+			return;
+
+		auto& sc = entity.GetComponent<ScriptComponent>();
+		UUID sceneID = entity.GetSceneUUID();
+		UUID entityID = entity.GetUUID();
+
+		if (sc.IsRuntimeInitialized && sc.ManagedInstance != nullptr)
+		{
+			ShutdownRuntimeInstance(entity);
+			sc.ManagedInstance = nullptr;
+		}
+
+		if (erase && s_State->ScriptEntities.find(sceneID) != s_State->ScriptEntities.end())
+		{
+			s_State->FieldMap.erase(entityID);
+			sc.FieldIDs.clear();
+
+			auto& scriptEntities = s_State->ScriptEntities.at(sceneID);
+			scriptEntities.erase(std::remove(scriptEntities.begin(), scriptEntities.end(), entityID), scriptEntities.end());
+		}
+	}
+
+	Ref<FieldStorageBase> ScriptEngine::GetFieldStorage(Entity entity, uint32_t fieldID)
+	{
+		UUID entityID = entity.GetUUID();
+		if (s_State->FieldMap.find(entityID) == s_State->FieldMap.end())
+			return nullptr;
+
+		if (s_State->FieldMap[entityID].find(fieldID) == s_State->FieldMap[entityID].end())
+			return nullptr;
+
+		return s_State->FieldMap.at(entityID).at(fieldID);
+	}
+
+	void ScriptEngine::InitializeRuntimeDuplicatedEntities()
+	{
+		ANT_PROFILE_FUNC();
+
+		while (s_State->RuntimeDuplicatedScriptEntities.size() > 0)
+		{
+			Entity& entity = s_State->RuntimeDuplicatedScriptEntities.top();
+
+			if (!entity)
+			{
+				s_State->RuntimeDuplicatedScriptEntities.pop();
+				continue;
+			}
+
+			RuntimeInitializeScriptEntity(entity);
+			s_State->RuntimeDuplicatedScriptEntities.pop();
+		}
+	}
+
+	bool ScriptEngine::IsEntityInstantiated(Entity entity, bool checkOnCreateCalled)
+	{
+		ANT_PROFILE_FUNC();
+
+		if (!s_State->SceneContext || !s_State->SceneContext->IsPlaying())
+			return false;
+
+		if (!entity.HasComponent<ScriptComponent>())
+			return false;
+
+		const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
+
+		if (scriptComponent.ManagedInstance == nullptr)
+			return false;
+
+		if (checkOnCreateCalled && !scriptComponent.IsRuntimeInitialized)
+			return false;
+
+		return s_State->ScriptInstances.find(entity.GetUUID()) != s_State->ScriptInstances.end();
+	}
+
+	GCHandle ScriptEngine::GetEntityInstance(UUID entityID)
+	{
+		ANT_PROFILE_FUNC();
+
+		if (s_State->ScriptInstances.find(entityID) == s_State->ScriptInstances.end())
+			return nullptr;
+
+		if (s_State->ScriptInstances.find(entityID) == s_State->ScriptInstances.end())
+			return nullptr;
+
+		return s_State->ScriptInstances.at(entityID);
+	}
+
+	const std::unordered_map<UUID, GCHandle>& ScriptEngine::GetEntityInstances() { return s_State->ScriptInstances; }
+
+	uint32_t ScriptEngine::GetScriptClassIDFromComponent(const ScriptComponent& sc)
+	{
+		if (!AssetManager::IsAssetHandleValid(sc.ScriptClassHandle))
+			return 0;
+
+		if (s_State->AppAssemblyInfo == nullptr)
+			return 0;
+
+		Ref<ScriptAsset> scriptAsset = AssetManager::GetAsset<ScriptAsset>(sc.ScriptClassHandle);
+		return scriptAsset->GetClassID();
+	}
+
+	bool ScriptEngine::IsModuleValid(AssetHandle scriptAssetHandle)
+	{
+		if (!AssetManager::IsAssetHandleValid(scriptAssetHandle))
+			return false;
+
+		if (s_State->AppAssemblyInfo == nullptr)
+			return false;
+
+		Ref<ScriptAsset> scriptAsset = AssetManager::GetAsset<ScriptAsset>(scriptAssetHandle);
+		return ScriptCache::GetManagedClassByID(scriptAsset->GetClassID()) != nullptr;
+	}
+
+
+	MonoDomain* ScriptEngine::GetScriptDomain() { return s_State->ScriptsDomain; }
+
+	void ScriptEngine::InitMono()
+	{
+		if (s_State->IsMonoInitialized)
+			return;
+
+		mono_set_dirs("mono/lib", "mono/etc");
+
+		if (s_State->Config.EnableDebugging)
+		{
+			std::string portString = std::to_string(ApplicationSettings::Get().ScriptDebuggerListenPort);
+			std::string debuggerAgentArguments = "--debugger-agent=transport=dt_socket,address=127.0.0.1:" + portString + ",server=y,suspend=n,loglevel=3,logfile=logs/MonoDebugger.log";
+
+			// Enable mono soft debugger
+			const char* options[2] = {
+				debuggerAgentArguments.c_str(),
+				"--soft-breakpoints"
+			};
+
+			mono_jit_parse_options(2, (char**)options);
+			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+		}
+
+		s_State->RootDomain = mono_jit_init("AntJITRuntime");
+		ANT_CORE_ASSERT(s_State->RootDomain, "Unable to initialize Mono JIT");
+
+		if (s_State->Config.EnableDebugging)
+			mono_debug_domain_create(s_State->RootDomain);
+
+		mono_thread_set_main(mono_thread_current());
+
+		s_State->IsMonoInitialized = true;
+		ANT_CORE_INFO_TAG("ScriptEngine", "Initialized Mono");
+	}
+
+	void ScriptEngine::ShutdownMono()
+	{
+		if (!s_State->IsMonoInitialized)
+		{
+			ANT_CORE_WARN_TAG("ScriptEngine", "Trying to shutdown Mono multiple times!");
+			return;
+		}
+
+		s_State->ScriptsDomain = nullptr;
+		mono_jit_cleanup(s_State->RootDomain);
+		s_State->RootDomain = nullptr;
+
+		s_State->IsMonoInitialized = false;
+	}
+
+	Ref<AssemblyInfo> ScriptEngine::GetCoreAssemblyInfo() { return s_State->CoreAssemblyInfo; }
+	Ref<AssemblyInfo> ScriptEngine::GetAppAssemblyInfo() { return s_State->AppAssemblyInfo; }
+	const ScriptEngineConfig& ScriptEngine::GetConfig() { return s_State->Config; }
+
+	void ScriptEngine::CallMethod(MonoObject* monoObject, ManagedMethod* managedMethod, const void** parameters)
+	{
+		ANT_PROFILE_FUNC();
+
+		MonoObject* exception = NULL;
+		mono_runtime_invoke(managedMethod->Method, monoObject, const_cast<void**>(parameters), &exception);
+		ScriptUtils::HandleException(exception);
+	}
+
+	MonoObject* ScriptEngine::CreateManagedObject(ManagedClass* managedClass)
+	{
+		MonoObject* monoObject = mono_object_new(s_State->ScriptsDomain, managedClass->Class);
+		ANT_CORE_VERIFY(monoObject, "Failed to create MonoObject!");
+		return monoObject;
+	}
+
+	void ScriptEngine::InitRuntimeObject(MonoObject* monoObject)
+	{
+		// NOTE: All this does is call the default parameterless constructor (which we can do manually)
+		mono_runtime_object_init(monoObject);
+	}
+
+	MonoAssembly* ScriptEngine::LoadMonoAssembly(const std::filesystem::path& assemblyPath)
+	{
+		if (!FileSystem::Exists(assemblyPath))
+			return nullptr;
+
+		Buffer fileData = FileSystem::ReadBytes(assemblyPath);
+
+		// NOTE: We can't use this image for anything other than loading the assembly because this image doesn't have a reference to the assembly
+		MonoImageOpenStatus status;
+		MonoImage* image = mono_image_open_from_data_full(fileData.As<char>(), fileData.Size, 1, &status, 0);
+
+		if (status != MONO_IMAGE_OK)
+		{
+			const char* errorMessage = mono_image_strerror(status);
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to open C# assembly '{0}'\n\t\tMessage: {1}", assemblyPath, errorMessage);
+			return nullptr;
+		}
+
+		// Load C# debug symbols if debugging is enabled
+		if (s_State->Config.EnableDebugging)
+		{
+			// First check if we have a .dll.pdb file
+			bool loadDebugSymbols = true;
+			std::filesystem::path pdbPath = assemblyPath.string() + ".pdb";
+			if (!FileSystem::Exists(pdbPath))
+			{
+				// Otherwise try just .pdb
+				pdbPath = assemblyPath;
+				pdbPath.replace_extension("pdb");
+
+				if (!FileSystem::Exists(pdbPath))
+				{
+					ANT_CORE_WARN_TAG("ScriptEngine", "Couldn't find .pdb file for assembly {0}, no debug symbols will be loaded.", assemblyPath.string());
+					loadDebugSymbols = false;
+				}
+			}
+
+			if (loadDebugSymbols)
+			{
+				ANT_CORE_INFO_TAG("ScriptEngine", "Loading debug symbols from '{0}'", pdbPath.string());
+				Buffer buffer = FileSystem::ReadBytes(pdbPath);
+				mono_debug_open_image_from_memory(image, buffer.As<mono_byte>(), buffer.Size);
+				buffer.Release();
 			}
 		}
-		ImGui::End();
+
+		MonoAssembly* assembly = mono_assembly_load_from_full(image, assemblyPath.string().c_str(), &status, 0);
+		mono_image_close(image);
+		return assembly;
+	}
+
+	MonoAssembly* ScriptEngine::LoadMonoAssemblyRuntime(Buffer assemblyData)
+	{
+		// NOTE: We can't use this image for anything other than loading the assembly because this image doesn't have a reference to the assembly
+		MonoImageOpenStatus status;
+		MonoImage* image = mono_image_open_from_data_full(assemblyData.As<char>(), assemblyData.Size, 1, &status, 0);
+
+		if (status != MONO_IMAGE_OK)
+		{
+			const char* errorMessage = mono_image_strerror(status);
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to load C# assembly");
+			return nullptr;
+		}
+
+		MonoAssembly* assembly = mono_assembly_load_from(image, "", &status);
+		mono_image_close(image);
+		return assembly;
+	}
+
+	bool ScriptEngine::LoadCoreAssembly()
+	{
+		ANT_CORE_TRACE_TAG("ScriptEngine", "Trying to load core assembly: {}", s_State->Config.CoreAssemblyPath.string());
+		if (!FileSystem::Exists(s_State->Config.CoreAssemblyPath))
+		{
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Could not load core assembly! Path: {}", s_State->Config.CoreAssemblyPath.string());
+			return false;
+		}
+
+		if (s_State->ScriptsDomain)
+		{
+			ScriptCache::Shutdown();
+			ScriptUtils::Shutdown();
+			s_State->CoreAssemblyInfo->ReferencedAssemblies.clear();
+
+			s_State->NewScriptsDomain = mono_domain_create_appdomain("AntScriptRuntime", nullptr);
+			mono_domain_set(s_State->NewScriptsDomain, true);
+			mono_domain_set_config(s_State->NewScriptsDomain, ".", "");
+			s_State->PostLoadCleanup = true;
+		}
+		else
+		{
+			s_State->ScriptsDomain = mono_domain_create_appdomain("AntScriptRuntime", nullptr);
+			mono_domain_set(s_State->ScriptsDomain, true);
+			mono_domain_set_config(s_State->ScriptsDomain, ".", "");
+			s_State->PostLoadCleanup = false;
+		}
+
+		s_State->OldCoreAssembly = s_State->CoreAssemblyInfo->Assembly;
+		s_State->CoreAssemblyInfo->FilePath = s_State->Config.CoreAssemblyPath;
+		s_State->CoreAssemblyInfo->Assembly = LoadMonoAssembly(s_State->Config.CoreAssemblyPath);
+
+		if (s_State->CoreAssemblyInfo->Assembly == nullptr)
+		{
+			ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to load core assembly!");
+			return false;
+		}
+
+		s_State->CoreAssemblyInfo->Classes.clear();
+		s_State->CoreAssemblyInfo->AssemblyImage = mono_assembly_get_image(s_State->CoreAssemblyInfo->Assembly);
+		s_State->CoreAssemblyInfo->IsCoreAssembly = true;
+		s_State->CoreAssemblyInfo->Metadata = GetMetadataForImage(s_State->CoreAssemblyInfo->AssemblyImage);
+		s_State->CoreAssemblyInfo->ReferencedAssemblies = GetReferencedAssembliesMetadata(s_State->CoreAssemblyInfo->AssemblyImage);
+
+		LoadReferencedAssemblies(s_State->CoreAssemblyInfo);
+
+		ANT_CORE_INFO_TAG("ScriptEngine", "Successfully loaded core assembly from: {0}", s_State->Config.CoreAssemblyPath);
+
+		ScriptCache::Init();
+		ScriptUtils::Init();
+
+		return true;
+	}
+
+	void ScriptEngine::UnloadAssembly(Ref<AssemblyInfo> assemblyInfo)
+	{
+		assemblyInfo->Classes.clear();
+		assemblyInfo->Assembly = nullptr;
+		assemblyInfo->AssemblyImage = nullptr;
+
+		if (assemblyInfo->IsCoreAssembly)
+			s_State->CoreAssemblyInfo = Ref<AssemblyInfo>::Create();
+		else
+			s_State->AppAssemblyInfo = Ref<AssemblyInfo>::Create();
+	}
+
+	void ScriptEngine::LoadReferencedAssemblies(const Ref<AssemblyInfo>& assemblyInfo)
+	{
+		static std::filesystem::path s_AssembliesBasePath = std::filesystem::absolute("mono") / "lib" / "mono" / "4.5";
+
+		for (const auto& assemblyMetadata : assemblyInfo->ReferencedAssemblies)
+		{
+			// Ignore Ant-ScriptCore and mscorlib, since they're already loaded
+			if (assemblyMetadata.Name.find("Ant-ScriptCore") != std::string::npos)
+				continue;
+
+			if (assemblyMetadata.Name.find("mscorlib") != std::string::npos)
+				continue;
+
+			std::filesystem::path assemblyPath = s_AssembliesBasePath / (fmt::format("{0}.dll", assemblyMetadata.Name));
+			ANT_CORE_INFO_TAG("ScriptEngine", "Loading assembly {0} referenced by {1}", assemblyPath.filename().string(), assemblyInfo->FilePath.filename().string());
+
+			MonoAssembly* assembly = LoadMonoAssembly(assemblyPath);
+
+			if (assembly == nullptr)
+			{
+				ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to load assembly {0} referenced by {1}", assemblyMetadata.Name, assemblyInfo->FilePath);
+				continue;
+			}
+
+			s_State->ReferencedAssemblies[assemblyMetadata] = assembly;
+		}
+	}
+
+	AssemblyMetadata ScriptEngine::GetMetadataForImage(MonoImage* image)
+	{
+		AssemblyMetadata metadata;
+
+		const MonoTableInfo* t = mono_image_get_table_info(image, MONO_TABLE_ASSEMBLY);
+		uint32_t cols[MONO_ASSEMBLY_SIZE];
+		mono_metadata_decode_row(t, 0, cols, MONO_ASSEMBLY_SIZE);
+
+		metadata.Name = mono_metadata_string_heap(image, cols[MONO_ASSEMBLY_NAME]);
+		metadata.MajorVersion = cols[MONO_ASSEMBLY_MAJOR_VERSION] > 0 ? cols[MONO_ASSEMBLY_MAJOR_VERSION] : 1;
+		metadata.MinorVersion = cols[MONO_ASSEMBLY_MINOR_VERSION];
+		metadata.BuildVersion = cols[MONO_ASSEMBLY_BUILD_NUMBER];
+		metadata.RevisionVersion = cols[MONO_ASSEMBLY_REV_NUMBER];
+
+		return metadata;
+	}
+
+	std::vector<AssemblyMetadata> ScriptEngine::GetReferencedAssembliesMetadata(MonoImage* image)
+	{
+		const MonoTableInfo* t = mono_image_get_table_info(image, MONO_TABLE_ASSEMBLYREF);
+		int rows = mono_table_info_get_rows(t);
+
+		std::vector<AssemblyMetadata> metadata;
+		for (int i = 0; i < rows; i++)
+		{
+			uint32_t cols[MONO_ASSEMBLYREF_SIZE];
+			mono_metadata_decode_row(t, i, cols, MONO_ASSEMBLYREF_SIZE);
+
+			auto& assemblyMetadata = metadata.emplace_back();
+			assemblyMetadata.Name = mono_metadata_string_heap(image, cols[MONO_ASSEMBLYREF_NAME]);
+			assemblyMetadata.MajorVersion = cols[MONO_ASSEMBLYREF_MAJOR_VERSION];
+			assemblyMetadata.MinorVersion = cols[MONO_ASSEMBLYREF_MINOR_VERSION];
+			assemblyMetadata.BuildVersion = cols[MONO_ASSEMBLYREF_BUILD_NUMBER];
+			assemblyMetadata.RevisionVersion = cols[MONO_ASSEMBLYREF_REV_NUMBER];
+		}
+
+		return metadata;
+	}
+
+	void ScriptEngine::OnFileSystemChanged(const std::vector<FileSystemChangedEvent>& events)
+	{
+		if (!Project::GetActive()->GetConfig().AutomaticallyReloadAssembly)
+			return;
+
+		for (const auto& e : events)
+		{
+			const auto filepath = e.FilePath.string();
+
+			if (filepath.find("Intermediates") != std::string::npos)
+				continue;
+
+			if (filepath.find(Project::GetProjectName()) == std::string::npos)
+				continue;
+
+			// Schedule assembly reload
+			ReloadAppAssembly(true);
+		}
 	}
 }

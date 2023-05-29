@@ -34,6 +34,9 @@ include "Ant/vendor/GLFW"
 include "Ant/vendor/Glad"
 include "Ant/vendor/imgui"
 include "Ant/vendor/Box2D"
+include "Ant/vendor/Optick"
+group "Dependencies/msdf"
+include "Ant/vendor/msdf-atlas-gen"
 group ""
 
 group "Core"
@@ -57,8 +60,8 @@ project "Ant"
 		"%{prj.name}/src/**.hpp", 
 		"%{prj.name}/src/**.cpp",
 
-		"%{prj.name}/vendor/stb_image/**.h",
-        "%{prj.name}/vendor/stb_image/**.cpp",
+		--"%{prj.name}/vendor/stb_image/**.h",
+        --"%{prj.name}/vendor/stb_image/**.cpp",
 
 		"%{prj.name}/vendor/FastNoise/**.cpp",
 
@@ -68,11 +71,8 @@ project "Ant"
 		"%{prj.name}/vendor/VulkanMemoryAllocator/**.h",
 		"%{prj.name}/vendor/VulkanMemoryAllocator/**.cpp",
 
-		"%{prj.name}/vendor/ImGuizmo/ImGuizmo.h",
-        "%{prj.name}/vendor/ImGuizmo/ImGuizmo.cpp",
-
-		"%{prj.name}/vendor/imgui/examples/imgui_impl_vulkan_with_textures.h",
-        "%{prj.name}/vendor/imgui/examples/imgui_impl_vulkan_with_textures.cpp",
+		--"%{prj.name}/vendor/imgui/examples/imgui_impl_vulkan_with_textures.h",
+        --"%{prj.name}/vendor/imgui/examples/imgui_impl_vulkan_with_textures.cpp",
 	}
 
     includedirs
@@ -85,16 +85,23 @@ project "Ant"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
+		"%{IncludeDir.Vulkan}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.ImGuiNodeEditor}",
 		"%{IncludeDir.Box2D}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.mono}",
 		"%{IncludeDir.FastNoise}",
 		"%{IncludeDir.PhysX}",
 		"%{IncludeDir.PhysX}/PhysX",
+		"%{IncludeDir.msdf_atlas_gen}",
+		"%{IncludeDir.msdfgen}",
 		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.miniaudio}",
+		"%{IncludeDir.farbot}",
+		"%{IncludeDir.choc}",
+		"%{IncludeDir.magic_enum}",
 	}
 
     links
@@ -103,6 +110,8 @@ project "Ant"
 		"Glad",
 		"ImGui",
 		"Box2D",
+		"Optick",
+		"msdf-atlas-gen",
 		"opengl32.lib",
 
 		"%{Library.Vulkan}",
@@ -125,7 +134,7 @@ project "Ant"
 		"PX_PHYSX_STATIC_LIB", "GLM_FORCE_DEPTH_ZERO_TO_ONE"
 	}
 
-    filter "files:Ant/vendor/FastNoise/**.cpp or files:Ant/vendor/yaml-cpp/src/**.cpp or files:Ant/vendor/ImGuizmo/**.cpp or Ant/vendor/imgui/examples/imgui_impl_vulkan_with_textures.cpp"
+    filter "files:Ant/vendor/FastNoise/**.cpp or files:Ant/vendor/yaml-cpp/src/**.cpp"
 	flags { "NoPCH" }
 
     filter "system:windows"
@@ -150,6 +159,7 @@ project "Ant"
 
         includedirs
 		{
+			"%{IncludeDir.Optick}",
 			"%{IncludeDir.NvidiaAftermath}",
 			"%{IncludeDir.shaderc_util}",
 			"%{IncludeDir.shaderc_glslc}"
@@ -158,6 +168,7 @@ project "Ant"
         links
 		{
 			"%{Library.NvidiaAftermath}",
+			"%{Library.dxc}",
 
 			"%{Library.ShaderC_Debug}",
 			"%{Library.ShaderC_Utils_Debug}",
@@ -177,6 +188,7 @@ project "Ant"
 
         includedirs
 		{
+			"%{IncludeDir.Optick}",
 			"%{IncludeDir.NvidiaAftermath}",
 			"%{IncludeDir.shaderc_util}",
 			"%{IncludeDir.shaderc_glslc}"
@@ -192,6 +204,7 @@ project "Ant"
         links
 		{
 			"%{Library.NvidiaAftermath}",
+			"%{Library.dxc}",
 
 			"%{Library.ShaderC_Release}",
 			"%{Library.ShaderC_Utils_Release}",
@@ -218,18 +231,18 @@ project "Ant"
 			"%{prj.name}/src/Ant/Asset/AssimpMeshImporter.cpp",
 		}
 
-project "Hazel-ScriptCore"
+project "Ant-ScriptCore"
 	location "Ant-ScriptCore"
 	kind "SharedLib"
 	language "C#"
 	dotnetframework "4.7.2"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("AntPlay/Resources/Scripts")
+	objdir ("AntPlay/Resources/Scripts/Intermediates")
 
     files 
 	{
-		"%{prj.name}/src/**.cs",
+		"%{prj.name}/Source/**.cs",
 		"%{prj.name}/Properties/**.cs"
 	}
 
@@ -276,11 +289,11 @@ project "AntPlay"
 		"%{prj.name}/src/**.cpp", 
 		
 		-- Shaders
-		--"%{prj.name}/Resources/Shaders/**.glsl", 
-		--"%{prj.name}/Resources/Shaders/**.glslh", 
-		--"%{prj.name}/Resources/Shaders/**.hlsl", 
-		--"%{prj.name}/Resources/Shaders/**.hlslh", 
-		--"%{prj.name}/Resources/Shaders/**.slh", 
+		"%{prj.name}/Resources/Shaders/**.glsl", 
+		"%{prj.name}/Resources/Shaders/**.glslh", 
+		"%{prj.name}/Resources/Shaders/**.hlsl", 
+		"%{prj.name}/Resources/Shaders/**.hlslh", 
+		"%{prj.name}/Resources/Shaders/**.slh", 
 	}
 
     includedirs 
@@ -292,11 +305,15 @@ project "AntPlay"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.ImGuiNodeEditor}",
 		"%{IncludeDir.PhysX}",
 		"%{IncludeDir.PhysX}/PhysX",
 		"%{IncludeDir.Vulkan}",
-		"%{IncludeDir.Glad}"
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.miniaudio}",
+		"%{IncludeDir.farbot}",
+		"%{IncludeDir.choc}",
+		"%{IncludeDir.magic_enum}",
 	}
 
     postbuildcommands 
@@ -309,7 +326,7 @@ project "AntPlay"
 
         defines 
 		{ 
-			"Ant_PLATFORM_WINDOWS"
+			"ANT_PLATFORM_WINDOWS"
 		}
 
 		links
@@ -325,13 +342,13 @@ project "AntPlay"
 
         includedirs
 		{
-			--"%{IncludeDir.Optick}",
+			"%{IncludeDir.Optick}",
 		}
 
         defines
 		{
-			"Ant_DEBUG",
-			"Ant_TRACK_MEMORY"
+			"ANT_DEBUG",
+			"ANT_TRACK_MEMORY"
 		}
 
         links
@@ -342,6 +359,7 @@ project "AntPlay"
         postbuildcommands 
 		{
 			'{COPY} "%{Binaries.Assimp_Debug}" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
 		}
 
     filter "configurations:Release"
@@ -349,7 +367,7 @@ project "AntPlay"
 
         includedirs
 		{
-			--"%{IncludeDir.Optick}",
+			"%{IncludeDir.Optick}",
 		}
 
         defines
@@ -367,6 +385,7 @@ project "AntPlay"
         postbuildcommands 
 		{
 			'{COPY} "%{Binaries.Assimp_Release}" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
 		}
 
     filter "configurations:Dist"
@@ -386,48 +405,250 @@ project "AntPlay"
 		postbuildcommands 
 		{
 			'{COPY} "%{Binaries.Assimp_Release}" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
 		}
-group ""
 
-workspace "Sandbox"
-	architecture "x64"
-	targetdir "build"
-	
-	configurations 
-	{ 
-		"Debug", 
-		"Release",
-		"Dist"
-	}
+	filter "files:**.hlsl"
+		flags {"ExcludeFromBuild"}
 
-project "Ant-ScriptCore"
-	location "Ant-ScriptCore"
-	kind "SharedLib"
-	language "C#"
+project "AntPlayLauncher"
+	location "AntPlayLauncher"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-	files 
-	{
-		"%{prj.name}/src/**.cs", 
+	links 
+	{ 
+		"Ant"
 	}
 
-project "ExampleApp"
-	location "ExampleApp"
-	kind "SharedLib"
-	language "C#"
+	defines 
+	{
+		"GLM_FORCE_DEPTH_ZERO_TO_ONE"
+	}
 
-	targetdir ("AntPlay/assets/scripts")
+	files 
+	{ 
+		"%{prj.name}/src/**.h", 
+		"%{prj.name}/src/**.c", 
+		"%{prj.name}/src/**.hpp", 
+		"%{prj.name}/src/**.cpp" 
+	}
+
+	includedirs 
+	{
+		"%{prj.name}/src",
+		"Ant/src",
+		"Ant/vendor",
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGuiNodeEditor}",
+		"%{IncludeDir.PhysX}",
+		"%{IncludeDir.PhysX}/PhysX",
+		"%{IncludeDir.Vulkan}",
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.miniaudio}",
+		"%{IncludeDir.farbot}",
+		"%{IncludeDir.choc}",
+		"%{IncludeDir.magic_enum}",
+	}
+
+	postbuildcommands 
+	{
+		'{COPY} "../Ant/vendor/NvidiaAftermath/lib/x64/GFSDK_Aftermath_Lib.x64.dll" "%{cfg.targetdir}"'
+	}
+
+    filter "system:windows"
+		systemversion "latest"
+
+        defines 
+		{ 
+			"ANT_PLATFORM_WINDOWS"
+		}
+
+		links
+        {
+            "%{Library.WinSock}",
+			"%{Library.WinMM}",
+			"%{Library.WinVersion}",
+			"%{Library.BCrypt}",
+        }
+
+    filter "configurations:Debug"
+		symbols "on"
+
+        defines
+		{
+			"ANT_DEBUG",
+			"ANT_TRACK_MEMORY"
+		}
+
+        links
+		{
+			"%{Library.Assimp_Debug}"
+		}
+
+        postbuildcommands 
+		{
+			'{COPY} "%{Binaries.Assimp_Debug}" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
+
+    filter "configurations:Release"
+		optimize "on"
+
+        defines
+		{
+			"ANT_RELEASE",
+			"ANT_TRACK_MEMORY",
+			"NDEBUG" -- PhysX Requires This
+		}
+
+        links
+		{
+			"%{Library.Assimp_Release}"
+		}
+
+        postbuildcommands 
+		{
+			'{COPY} "%{Binaries.Assimp_Release}" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
+
+    filter "configurations:Dist"
+		defines "ANT_DIST"
+		optimize "on"
+
+        links
+		{
+			"%{Library.Assimp_Release}"
+		}
+
+		postbuildcommands 
+		{
+			'{COPY} "%{Binaries.Assimp_Release}" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
+
+group "Runtime"
+project "Ant-Runtime"
+	location "Ant-Runtime"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "off"
+
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-	files 
-	{
-		"%{prj.name}/src/**.cs", 
+	links 
+	{ 
+		"Ant"
 	}
 
-	links
+	defines 
 	{
-		"Ant-ScriptCore"
+		"GLM_FORCE_DEPTH_ZERO_TO_ONE"
 	}
+
+	files 
+	{ 
+		"%{prj.name}/src/**.h", 
+		"%{prj.name}/src/**.c", 
+		"%{prj.name}/src/**.hpp", 
+		"%{prj.name}/src/**.cpp" 
+	}
+
+	includedirs 
+	{
+		"%{prj.name}/src",
+		"Ant/src",
+		"Ant/vendor",
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.Vulkan}",
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.miniaudio}",
+		"%{IncludeDir.farbot}",
+		"%{IncludeDir.choc}",
+		"%{IncludeDir.magic_enum}",
+	}
+
+    filter "system:windows"
+		systemversion "latest"
+
+        defines 
+		{ 
+			"ANT_PLATFORM_WINDOWS"
+		}
+
+		links
+        {
+            "%{Library.WinSock}",
+			"%{Library.WinMM}",
+			"%{Library.WinVersion}",
+			"%{Library.BCrypt}",
+        }
+
+    filter "configurations:Debug"
+		symbols "on"
+
+        defines
+		{
+			"ANT_DEBUG",
+			"ANT_TRACK_MEMORY"
+		}
+
+        links
+		{
+			"%{Library.Assimp_Debug}"
+		}
+
+        postbuildcommands 
+		{
+			'{COPY} "%{Binaries.Assimp_Debug}" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/NvidiaAftermath/lib/x64/GFSDK_Aftermath_Lib.x64.dll" "%{cfg.targetdir}"'
+		}
+
+    filter "configurations:Release"
+		optimize "on"
+
+        defines
+		{
+			"ANT_RELEASE",
+			"ANT_TRACK_MEMORY",
+			"NDEBUG" -- PhysX Requires This
+		}
+
+        links
+		{
+			"%{Library.Assimp_Release}"
+		}
+
+        postbuildcommands 
+		{
+			'{COPY} "%{Binaries.Assimp_Release}" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPY} "../Ant/vendor/NvidiaAftermath/lib/x64/GFSDK_Aftermath_Lib.x64.dll" "%{cfg.targetdir}"'
+		}
+
+    filter "configurations:Dist"
+		kind "WindowedApp"
+		defines "ANT_DIST"
+		optimize "on"
+		symbols "Off"
+
+		postbuildcommands 
+		{
+			'{COPY} "../Ant/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
+
 group ""

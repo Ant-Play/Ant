@@ -8,19 +8,16 @@
 
 namespace Ant {
 
-	struct WindowProps
+	class VulkanSwapChain;
+
+	struct WindowSpecification
 	{
-		std::string Title;
-		uint32_t Width;
-		uint32_t Height;
-
-		WindowProps(const std::string& title = "Ant Engine",
-					uint32_t width = 1600,
-					uint32_t height = 900)
-			: Title(title), Width(width), Height(height)
-		{
-
-		}
+		std::string Title = "Ant";
+		uint32_t Width = 1600;
+		uint32_t Height = 900;
+		bool Decorated = true;
+		bool Fullscreen = false;
+		bool VSync = true;
 	};
 
 	// Interface representing a desktop system based Window
@@ -31,6 +28,7 @@ namespace Ant {
 
 		virtual ~Window() {}
 
+		virtual void Init() = 0;
 		virtual void ProcessEvents() = 0;
 		virtual void SwapBuffers() = 0;
 
@@ -40,12 +38,14 @@ namespace Ant {
 		virtual std::pair<float, float> GetWindowPos() const = 0;
 
 		virtual void Maximize() = 0;
+		virtual void CenterWindow() = 0;
 
 
 		// Window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;
+		virtual void SetResizable(bool resizable) const = 0;
 
 		virtual const std::string& GetTitle() const = 0;
 		virtual void SetTitle(const std::string& title) = 0;
@@ -53,7 +53,8 @@ namespace Ant {
 		virtual void* GetNativeWindow() const = 0;
 
 		virtual Ref<RendererContext> GetRenderContext() = 0;
+		virtual VulkanSwapChain& GetSwapChain() = 0;
 
-		static Window* Create(const WindowProps& props = WindowProps());
+		static Window* Create(const WindowSpecification& specification = WindowSpecification());
 	};
 }

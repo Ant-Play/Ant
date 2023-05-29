@@ -2,9 +2,7 @@
 
 #include "Ant/Renderer/Renderer.h"
 
-#include "Vulkan.h"
 #include "VulkanDevice.h"
-#include "VulkanAllocator.h"
 #include "VulkanSwapChain.h"
 
 struct GLFWwindow;
@@ -14,25 +12,18 @@ namespace Ant{
 	class VulkanContext : public RendererContext
 	{
 	public:
-		VulkanContext(GLFWwindow* windowHandle);
+		VulkanContext();
 		virtual ~VulkanContext();
 
-		virtual void Create() override;
-		virtual void SwapBuffers() override;
-
-		virtual void OnResize(uint32_t width, uint32_t height) override;
-
-		virtual void BeginFrame() override;
+		virtual void Init() override;
 
 		Ref<VulkanDevice> GetDevice() { return m_Device; }
-		VulkanSwapChain& GetSwapChain() { return m_SwapChain; }
 
 		static VkInstance GetInstance() { return s_VulkanInstance; }
 
 		static Ref<VulkanContext> Get() { return Ref<VulkanContext>(Renderer::GetContext()); }
 		static Ref<VulkanDevice> GetCurrentDevice() { return Get()->GetDevice(); }
 	private:
-		GLFWwindow* m_WindowHandle;
 
 		// Devices
 		Ref<VulkanPhysicalDevice> m_PhysicalDevice;
@@ -40,7 +31,10 @@ namespace Ant{
 
 		// Vulkan instance
 		inline static VkInstance s_VulkanInstance;
+#if 0
 		VkDebugReportCallbackEXT m_DebugReportCallback = VK_NULL_HANDLE;
+#endif
+		VkDebugUtilsMessengerEXT m_DebugUtilsMessenger = VK_NULL_HANDLE;
 		VkPipelineCache m_PipelineCache = nullptr;
 
 		VulkanSwapChain m_SwapChain;

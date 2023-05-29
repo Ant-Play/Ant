@@ -1,155 +1,221 @@
 #pragma once
 
-#include "Ant/Core/Base.h"
-#include "Ant/Core/Timestep.h"
+#include "ScriptAsset.h"
+#include "ScriptCache.h"
+#include "ScriptTypes.h"
 
-#include <string>
-
+#include "Ant/Core/Hash.h"
+#include "Ant/Debug/Profiler.h"
 #include "Ant/Scene/Components.h"
-#include "Ant/Scene/Entity.h"
+#include "Ant/Scene/Scene.h"
+#include "Ant/Utilities/FileSystem.h"
+
+#include <type_traits>
+#include <utility>
+
+#define ANT_CORE_ASSEMBLY_INDEX 0
+#define ANT_APP_ASSEMBLY_INDEX ANT_CORE_ASSEMBLY_INDEX + 1
+#define ANT_MAX_ASSEMBLIES (size_t)2
 
 extern "C" {
-	typedef struct _MonoObject MonoObject;
-	typedef struct _MonoClassField MonoClassField;
-	typedef struct _MonoClass MonoClass;
+	typedef struct _MonoDomain MonoDomain;
 }
-
 
 namespace Ant {
 
-	enum class FieldType
+	using ScriptEntityMap = std::unordered_map<UUID, std::vector<UUID>>;
+	using ScriptInstanceMap = std::unordered_map<UUID, GCHandle>;
+	using AssembliesArray = std::array<Ref<AssemblyInfo>, ANT_MAX_ASSEMBLIES>;
+
+	struct ScriptEngineConfig
 	{
-		None = 0, Float, Int, UnsignedInt, String, Vec2, Vec3, Vec4, ClassReference
+		std::filesystem::path CoreAssemblyPath;
+		bool EnableDebugging;
+		bool EnableProfiling;
 	};
-
-	const char* FieldTypeToString(FieldType type);
-
-	struct EntityScriptClass;
-	struct EntityInstance
-	{
-		EntityScriptClass* ScriptClass = nullptr;
-
-		uint32_t Handle = 0;
-		Scene* SceneInstance = nullptr;
-
-		MonoObject* GetInstance();
-	};
-
-	// TODO: This needs to somehow work for strings...
-	struct PublicField
-	{
-		std::string Name;
-		std::string TypeName;
-		FieldType Type;
-
-		PublicField(const std::string& name, const std::string& typeName, FieldType type);
-		PublicField(const PublicField&) = delete;
-		PublicField(PublicField&& other);
-		~PublicField();
-
-		void CopyStoredValueToRuntime();
-		bool IsRuntimeAvailable() const;
-
-		template<typename T>
-		T GetStoredValue() const
-		{
-			T value;
-			GetStoredValue_Internal(&value);
-			return value;
-		}
-
-		template<typename T>
-		void SetStoredValue(T value) const
-		{
-			SetStoredValue_Internal(&value);
-		}
-
-		template<typename T>
-		T GetRuntimeValue() const
-		{
-			T value;
-			GetRuntimeValue_Internal(&value);
-			return value;
-		}
-
-		template<typename T>
-		void SetRuntimeValue(T value) const
-		{
-			SetRuntimeValue_Internal(&value);
-		}
-
-		void SetStoredValueRaw(void* src);
-		void* GetStoredValueRaw() { return m_StoredValueBuffer; }
-
-		void SetRuntimeValueRaw(void* src);
-		void* GetRuntimeValueRaw();
-	private:
-		EntityInstance* m_EntityInstance;
-		MonoClassField* m_MonoClassField;
-		uint8_t* m_StoredValueBuffer = nullptr;
-
-		uint8_t* AllocateBuffer(FieldType type);
-		void SetStoredValue_Internal(void* value) const;
-		void GetStoredValue_Internal(void* outValue) const;
-		void SetRuntimeValue_Internal(void* value) const;
-		void GetRuntimeValue_Internal(void* outValue) const;
-
-		friend class ScriptEngine;
-	};
-
-	using ScriptModuleFieldMap = std::unordered_map<std::string, std::unordered_map<std::string, PublicField>>;
-
-	struct EntityInstanceData
-	{
-		EntityInstance Instance;
-		ScriptModuleFieldMap ModuleFieldMap;
-	};
-
-	using EntityInstanceMap = std::unordered_map<UUID, std::unordered_map<UUID, EntityInstanceData>>;
 
 	class ScriptEngine
 	{
 	public:
-		static void Init(const std::string& assemblyPath);
+		static void Init(const ScriptEngineConfig& config);
 		static void Shutdown();
 
-		static void OnSceneDestruct(UUID sceneID);
+		static void InitializeRuntime();
+		static void ShutdownRuntime();
+		static void ShutdownRuntimeInstance(Entity entity);
 
-		static void LoadAntRuntimeAssembly(const std::string& path);
-		static void ReloadAssembly(const std::string& path);
+		static bool LoadAppAssembly();
+		static bool LoadAppAssemblyRuntime(Buffer appAssemblyData);
+		static bool ReloadAppAssembly(const bool scheduleReload = false);
+		static bool ShouldReloadAppAssembly();
+		static void UnloadAppAssembly();
 
-		static void SetSceneContext(const Ref<Scene>& scene);
-		static const Ref<Scene>& GetCurrentSceneContext();
+		static void SetSceneContext(const Ref<Scene>& scene, const Ref<SceneRenderer>& sceneRenderer);
+		static Ref<Scene> GetSceneContext();
+		static Ref<SceneRenderer> GetSceneRenderer();
 
-		static void CopyEntityScriptData(UUID dst, UUID src);
+		static void InitializeScriptEntity(Entity entity);
+		static void RuntimeInitializeScriptEntity(Entity entity);
+		static void DuplicateScriptInstance(Entity entity, Entity targetEntity);
+		static void ShutdownScriptEntity(Entity entity, bool erase = true);
 
-		static void OnCreateEntity(Entity entity);
-		static void OnUpdateEntity(Entity entity, Timestep ts);
-		static void OnPhysicsUpdateEntity(Entity entity, float fixedTimeStep);
+		static Ref<FieldStorageBase> GetFieldStorage(Entity entity, uint32_t fieldID);
 
-		static void OnCollision2DBegin(Entity entity);
-		static void OnCollision2DEnd(Entity entity);
-		static void OnCollisionBegin(Entity entity);
-		static void OnCollisionEnd(Entity entity);
-		static void OnTriggerBegin(Entity entity);
-		static void OnTriggerEnd(Entity entity);
+		static void InitializeRuntimeDuplicatedEntities();
 
-		static MonoObject* Construct(const std::string& fullName, bool callConstructor = true, void** parameters = nullptr);
-		static MonoClass* GetCoreClass(const std::string& fullName);
+		// NOTE: Pass false as the second parameter if you don't care if OnCreate has been called yet
+		static bool IsEntityInstantiated(Entity entity, bool checkOnCreateCalled = true);
+		static GCHandle GetEntityInstance(UUID entityID);
+		static const std::unordered_map<UUID, GCHandle>& GetEntityInstances();
 
-		static bool IsEntityModuleValid(Entity entity);
+		static uint32_t GetScriptClassIDFromComponent(const ScriptComponent& sc);
+		static bool IsModuleValid(AssetHandle scriptAssetHandle);
 
-		static void OnScriptComponentDestroyed(UUID sceneID, UUID entityID);
+		static MonoDomain* GetScriptDomain();
 
-		static bool ModuleExists(const std::string& moduleName);
-		static void InitScriptEntity(Entity entity);
-		static void ShutdownScriptEntity(Entity entity, const std::string& moduleName);
-		static void InstantiateEntityClass(Entity entity);
+		template<typename... TConstructorArgs>
+		static MonoObject* CreateManagedObject(const std::string& className, TConstructorArgs&&... args)
+		{
+			return CreateManagedObject_Internal(ScriptCache::GetManagedClassByID(ANT_SCRIPT_CLASS_ID(className)), std::forward<TConstructorArgs>(args)...);
+		}
 
-		static EntityInstanceMap& GetEntityInstanceMap();
-		static EntityInstanceData& GetEntityInstanceData(UUID sceneID, UUID entityID);
+		template<typename... TConstructorArgs>
+		static MonoObject* CreateManagedObject(uint32_t classID, TConstructorArgs&&... args)
+		{
+			return CreateManagedObject_Internal(ScriptCache::GetManagedClassByID(classID), std::forward<TConstructorArgs>(args)...);
+		}
 
-		// Debug
-		static void OnImGuiRender();
+		static GCHandle CreateObjectReference(MonoObject* obj, bool weakReference)
+		{
+			return GCManager::CreateObjectReference(obj, weakReference);
+		}
+
+		static void ReleaseObjectReference(GCHandle instanceID)
+		{
+			GCManager::ReleaseObjectReference(instanceID);
+		}
+
+		static Ref<AssemblyInfo> GetCoreAssemblyInfo();
+		static Ref<AssemblyInfo> GetAppAssemblyInfo();
+
+		static const ScriptEngineConfig& GetConfig();
+
+		template<typename... TArgs>
+		static void CallMethod(MonoObject* managedObject, const std::string& methodName, TArgs&&... args)
+		{
+			ANT_PROFILE_SCOPE_DYNAMIC(methodName.c_str());
+
+			if (managedObject == nullptr)
+			{
+				ANT_CORE_WARN_TAG("ScriptEngine", "Attempting to call method {0} on an invalid instance!", methodName);
+				return;
+			}
+
+			constexpr size_t argsCount = sizeof...(args);
+
+			ManagedClass* clazz = ScriptCache::GetMonoObjectClass(managedObject);
+			if (clazz == nullptr)
+			{
+				ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to find ManagedClass!");
+				return;
+			}
+
+			ManagedMethod* method = ScriptCache::GetSpecificManagedMethod(clazz, methodName, argsCount);
+			if (method == nullptr)
+			{
+				ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to find a C# method called {0} with {1} parameters", methodName, argsCount);
+				return;
+			}
+
+			if constexpr (argsCount > 0)
+			{
+				const void* data[] = { &args... };
+				CallMethod(managedObject, method, data);
+			}
+			else
+			{
+				CallMethod(managedObject, method, nullptr);
+			}
+		}
+
+		template<typename... TArgs>
+		static void CallMethod(GCHandle instance, const std::string& methodName, TArgs&&... args)
+		{
+			if (instance == nullptr)
+			{
+				ANT_CORE_WARN_TAG("ScriptEngine", "Attempting to call method {0} on an invalid instance!", methodName);
+				return;
+			}
+
+			CallMethod(GCManager::GetReferencedObject(instance), methodName, std::forward<TArgs>(args)...);
+		}
+
+	private:
+		static void InitMono();
+		static void ShutdownMono();
+
+		static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& assemblyPath);
+		static MonoAssembly* LoadMonoAssemblyRuntime(Buffer assemblyData);
+		static bool LoadCoreAssembly();
+		static void UnloadAssembly(Ref<AssemblyInfo> assemblyInfo);
+
+		static void LoadReferencedAssemblies(const Ref<AssemblyInfo>& assemblyInfo);
+		static AssemblyMetadata GetMetadataForImage(MonoImage* image);
+		static std::vector<AssemblyMetadata> GetReferencedAssembliesMetadata(MonoImage* image);
+
+		static MonoObject* CreateManagedObject(ManagedClass* managedClass);
+		static void InitRuntimeObject(MonoObject* monoObject);
+		static void CallMethod(MonoObject* monoObject, ManagedMethod* managedMethod, const void** parameters);
+
+		static void OnFileSystemChanged(const std::vector<FileSystemChangedEvent>& events);
+
+	private:
+		template<typename... TConstructorArgs>
+		static MonoObject* CreateManagedObject_Internal(ManagedClass* managedClass, TConstructorArgs&&... args)
+		{
+			ANT_PROFILE_SCOPE_DYNAMIC(managedClass->FullName.c_str());
+
+			if (managedClass == nullptr)
+			{
+				ANT_CORE_ERROR_TAG("ScriptEngine", "Attempting to create managed object with a null class!");
+				return nullptr;
+			}
+
+			if (managedClass->IsAbstract)
+				return nullptr;
+
+			MonoObject* obj = CreateManagedObject(managedClass);
+
+			if (managedClass->IsStruct)
+				return obj;
+
+			//if (ManagedType::FromClass(managedClass).IsValueType())
+			//	return obj;
+
+			constexpr size_t argsCount = sizeof...(args);
+			ManagedMethod* ctor = ScriptCache::GetSpecificManagedMethod(managedClass, ".ctor", argsCount);
+
+			InitRuntimeObject(obj);
+
+			if constexpr (argsCount > 0)
+			{
+				if (ctor == nullptr)
+				{
+					ANT_CORE_ERROR_TAG("ScriptEngine", "Failed to call constructor with {} parameters for class '{}'.", argsCount, managedClass->FullName);
+					return obj;
+				}
+
+				const void* data[] = { &args... };
+				CallMethod(obj, ctor, data);
+			}
+
+			return obj;
+		}
+
+	private:
+		friend class ScriptCache;
+		friend class ScriptUtils;
+		friend class Application;
 	};
+
 }

@@ -1,7 +1,5 @@
 #pragma once
-#include "RendererAPI.h"
 
-#include <glm/glm.hpp>
 namespace Ant{
 
 	class RenderCommandQueue

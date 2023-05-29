@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Ant/ImGui/ImGuiLayer.h"
+#include "Ant/Renderer/RenderCommandBuffer.h"
 
 namespace Ant{
 
@@ -18,6 +19,7 @@ namespace Ant{
 		virtual void OnDetach() override;
 		virtual void OnImGuiRender() override;
 	private:
+		Ref<RenderCommandBuffer> m_RenderCommandBuffer;
 		float m_Time = 0.0f;
 	};
 }

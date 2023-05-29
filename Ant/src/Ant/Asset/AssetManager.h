@@ -1,104 +1,98 @@
 ﻿#pragma once
 
-#include "Ant/Asset/AssetImporter.h"
+#include "Ant/Project/Project.h"
 #include "Ant/Utilities/FileSystem.h"
 #include "Ant/Utilities/StringUtils.h"
+#include "Ant/Core/Hash.h"
+#include "Ant/Core/Application.h"
+#include "Ant/Core/Timer.h"
+
+#include "AssetImporter.h"
+#include "AssetRegistry.h"
+
+#include "Ant/Debug/Profiler.h"
 
 #include <map>
 #include <unordered_map>
+
 namespace Ant{
 
 	class AssetManager
 	{
 	public:
-		using AssetsChangeEventFn = std::function<void()>;
-
-		struct AssetMetadata
-		{
-			AssetHandle Handle;
-			std::string FilePath;
-			AssetType Type;
-		};
+		using AssetsChangeEventFn = std::function<void(const std::vector<FileSystemChangedEvent>&)>;
 	public:
-		static void Init();
-		static void SetAssetChangeCallback(const AssetsChangeEventFn& callback);
-		static void Shutdown();
+		static bool IsAssetHandleValid(AssetHandle assetHandle) { return Project::GetAssetManager()->IsAssetHandleValid(assetHandle); }
 
-		static std::vector<Ref<Asset>> GetAssetsInDirectory(AssetHandle directoryHandle);
-		static std::vector<Ref<Asset>> SearchAssets(const std::string& query, const std::string& searchPath, AssetType desiredTypes = AssetType::None);
+		static bool ReloadData(AssetHandle assetHandle) { return Project::GetAssetManager()->ReloadData(assetHandle); }
 
-		static bool IsDirectory(const std::string& filepath);
-
-		static AssetHandle GetAssetHandleFromFilePath(const std::string& filepath);
-		static bool IsAssetHandleValid(AssetHandle assetHandle);
-
-		static void Rename(AssetHandle assetHandle, const std::string& newName);
-		static void RemoveAsset(AssetHandle assetHandle);
-
-		static AssetType GetAssetTypeForFileType(const std::string& extension);
-
-		template<typename T, typename... Args>
-		static Ref<T> CreateNewAsset(const std::string& filename, AssetType type, AssetHandle directoryHandle, Args&&... args)
-		{
-			static_assert(std::is_base_of<Asset, T>::value, "CreateNewAsset only works for types derived from Asset");
-
-			auto& directory = GetAsset<Directory>(directoryHandle);
-
-			Ref<T> asset = Ref<T>::Create(std::forward<Args>(args)...);
-			asset->Type = type;
-			asset->FilePath = directory->FilePath + "/" + filename;
-			asset->FileName = Utils::RemoveExtension(Utils::GetFilename(asset->FilePath));
-			asset->Extension = Utils::GetFilename(filename);
-			asset->ParentDirectory = directoryHandle;
-			asset->Handle = AssetHandle();
-			asset->IsDataLoaded = true;
-			s_LoadedAssets[asset->Handle] = asset;
-			AssetImporter::Serialize(asset);
-
-			AssetMetadata metadata;
-			metadata.Handle = asset->Handle;
-			metadata.FilePath = asset->FilePath;
-			metadata.Type = asset->Type;
-			s_AssetRegistry[asset->FilePath] = metadata;
-			UpdateRegistryCache();
-
-			return asset;
-		}
+		static AssetType GetAssetType(AssetHandle assetHandle) { return Project::GetAssetManager()->GetAssetType(assetHandle); }
 
 		template<typename T>
-		static Ref<T> GetAsset(AssetHandle assetHandle, bool loadData = true)
+		static Ref<T> GetAsset(AssetHandle assetHandle)
 		{
-			ANT_CORE_ASSERT(s_LoadedAssets.find(assetHandle) != s_LoadedAssets.end());
-			Ref<Asset>& asset = s_LoadedAssets[assetHandle];
+			//static std::mutex mutex;
+			//std::scoped_lock<std::mutex> lock(mutex);
 
-			if (!asset->IsDataLoaded && loadData)
-				AssetImporter::TryLoadData(asset);
-
+			Ref<Asset> asset = Project::GetAssetManager()->GetAsset(assetHandle);
 			return asset.As<T>();
 		}
 
 		template<typename T>
-		static Ref<T> GetAsset(const std::string& filepath, bool loadData = true)
+		static std::unordered_set<AssetHandle> GetAllAssetsWithType()
 		{
-			return GetAsset<T>(GetAssetHandleFromFilePath(filepath), loadData);
+			return Project::GetAssetManager()->GetAllAssetsWithType(T::GetStaticType());
 		}
 
-	private:
-		static void LoadAssetRegistry();
-		static Ref<Asset> CreateAsset(const std::string& filepath, AssetType type, AssetHandle parentHandle);
-		static void ImportAsset(const std::string& filepath, AssetHandle parentHandle);
-		static AssetHandle ProcessDirectory(const std::string& directoryPath, AssetHandle parentHandle);
-		static void ReloadAssets();
-		static void UpdateRegistryCache();
+		static const std::unordered_map<AssetHandle, Ref<Asset>>& GetLoadedAssets() { return Project::GetAssetManager()->GetLoadedAssets(); }
+		static const std::unordered_map<AssetHandle, Ref<Asset>>& GetMemoryOnlyAssets() { return Project::GetAssetManager()->GetMemoryOnlyAssets(); }
 
-		static void OnFileSystemChanged(FileSystemChangedEvent e);
+		template<typename TAsset, typename... TArgs>
+		static AssetHandle CreateMemoryOnlyAsset(TArgs&&... args)
+		{
+			static_assert(std::is_base_of<Asset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
 
-		static AssetHandle FindParentHandleInChildren(Ref<Directory>& dir, const std::string& dirName);
-		static AssetHandle FindParentHandle(const std::string& filepath);
+			Ref<TAsset> asset = Ref<TAsset>::Create(std::forward<TArgs>(args)...);
+			asset->Handle = AssetHandle(); // NOTE(Yan): should handle generation happen here?
 
-	private:
-		static std::unordered_map<AssetHandle, Ref<Asset>> s_LoadedAssets;
-		static std::unordered_map<std::string, AssetMetadata> s_AssetRegistry;
-		static AssetsChangeEventFn s_AssetsChangeCallback;
+			Project::GetAssetManager()->AddMemoryOnlyAsset(asset);
+			return asset->Handle;
+		}
+
+		template<typename TAsset, typename... TArgs>
+		static AssetHandle CreateMemoryOnlyRendererAsset(TArgs&&... args)
+		{
+			static_assert(std::is_base_of<Asset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
+
+			Ref<TAsset> asset = TAsset::Create(std::forward<TArgs>(args)...);
+			asset->Handle = AssetHandle();
+
+			Project::GetAssetManager()->AddMemoryOnlyAsset(asset);
+			return asset->Handle;
+		}
+
+		template<typename TAsset, typename... TArgs>
+		static AssetHandle CreateMemoryOnlyAssetWithHandle(AssetHandle handle, TArgs&&... args)
+		{
+			static_assert(std::is_base_of<Asset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
+
+			Ref<TAsset> asset = Ref<TAsset>::Create(std::forward<TArgs>(args)...);
+			asset->Handle = handle;
+
+			Project::GetAssetManager()->AddMemoryOnlyAsset(asset);
+			return asset->Handle;
+		}
+
+		template<typename TAsset>
+		static AssetHandle AddMemoryOnlyAsset(Ref<TAsset> asset)
+		{
+			static_assert(std::is_base_of<Asset, TAsset>::value, "AddMemoryOnlyAsset only works for types derived from Asset");
+			asset->Handle = AssetHandle(); // NOTE(Yan): should handle generation happen here?
+
+			Project::GetAssetManager()->AddMemoryOnlyAsset(asset);
+			return asset->Handle;
+		}
+
+		static bool IsMemoryAsset(AssetHandle handle) { return Project::GetAssetManager()->IsMemoryAsset(handle); }
 	};
 }

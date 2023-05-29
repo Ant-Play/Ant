@@ -2,125 +2,160 @@
 #include "Ant/Utilities/FileSystem.h"
 #include "Ant/Asset/AssetManager.h"
 
+#include "Ant/Core/Application.h"
+
+#include <GLFW/glfw3.h>
+
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 #include <Windows.h>
+#include <Shlobj.h>
+
 #include <filesystem>
 
 namespace Ant{
 
-	FileSystem::FileSystemChangedCallbackFn FileSystem::s_Callback;
+	std::vector<FileSystem::FileSystemChangedCallbackFn> FileSystem::s_Callbacks;
 
 	static bool s_Watching = false;
 	static bool s_IgnoreNextChange = false;
 	static HANDLE s_WatcherThread;
+	static std::filesystem::path s_PersistentStoragePath;
 
-	void FileSystem::SetChangeCallback(const FileSystemChangedCallbackFn& callback)
+	void FileSystem::AddFileSystemChangedCallback(const FileSystemChangedCallbackFn& callback)
 	{
-		s_Callback = callback;
+		s_Callbacks.push_back(callback);
 	}
 
-	bool FileSystem::CreateFolder(const std::string& filepath)
+	void FileSystem::ClearFileSystemChangedCallbacks()
 	{
-		BOOL created = CreateDirectoryA(filepath.c_str(), NULL);
-		if (!created)
-		{
-			DWORD error = GetLastError();
-
-			if (error == ERROR_ALREADY_EXISTS)
-				ANT_CORE_ERROR("{0} already exists!", filepath);
-
-			if (error == ERROR_PATH_NOT_FOUND)
-				ANT_CORE_ERROR("{0}: One or more directories don't exist.", filepath);
-
-			return false;
-		}
-
-		return true;
-	}
-
-	bool FileSystem::Exists(const std::string& filepath)
-	{
-		DWORD attribs = GetFileAttributesA(filepath.c_str());
-
-		if (attribs == INVALID_FILE_ATTRIBUTES)
-			return false;
-
-		return true;
-	}
-
-	std::string FileSystem::Rename(const std::string& filepath, const std::string& newName)
-	{
-		s_IgnoreNextChange = true;
-		std::filesystem::path p = filepath;
-		std::string newFilePath = p.parent_path().string() + "/" + newName + p.extension().string();
-		MoveFileA(filepath.c_str(), newFilePath.c_str());
-		s_IgnoreNextChange = false;
-		return newFilePath;
-	}
-
-	bool FileSystem::MoveFile(const std::string& filepath, const std::string& dest)
-	{
-		s_IgnoreNextChange = true;
-		std::filesystem::path p = filepath;
-		std::string destFilePath = dest + "/" + p.filename().string();
-		BOOL result = MoveFileA(filepath.c_str(), destFilePath.c_str());
-		s_IgnoreNextChange = false;
-		return result != 0;
-	}
-
-	bool FileSystem::DeleteFile(const std::string& filepath)
-	{
-		s_IgnoreNextChange = true;
-		std::string fp = filepath;
-		fp.append(1, '\0');
-		SHFILEOPSTRUCTA file_op;
-		file_op.hwnd = NULL;
-		file_op.wFunc = FO_DELETE;
-		file_op.pFrom = fp.c_str();
-		file_op.pTo = "";
-		file_op.fFlags = FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT;
-		file_op.fAnyOperationsAborted = false;
-		file_op.hNameMappings = 0;
-		file_op.lpszProgressTitle = "";
-		int result = SHFileOperationA(&file_op);
-		s_IgnoreNextChange = false;
-		return result == 0;
+		s_Callbacks.clear();
 	}
 
 	void FileSystem::StartWatching()
 	{
+		s_Watching = true;
 		DWORD threadId;
 		s_WatcherThread = CreateThread(NULL, 0, Watch, 0, 0, &threadId);
 		ANT_CORE_ASSERT(s_WatcherThread != NULL);
+		SetThreadDescription(s_WatcherThread, L"Ant FileSystemWatcher");
 	}
 
 	void FileSystem::StopWatching()
 	{
+		if (!s_Watching)
+			return;
+
 		s_Watching = false;
-		DWORD result = WaitForSingleObject(s_WatcherThread, 5000);
-		if (result == WAIT_TIMEOUT)
-			TerminateThread(s_WatcherThread, 0);
+		//DWORD result = WaitForSingleObject(s_WatcherThread, 5000);
+		//if (result == WAIT_TIMEOUT)
+		// NOTE: this is a little annoying, but it's a quick and dirty
+		//       way to shutdown the file watching ASAP.
+		TerminateThread(s_WatcherThread, 0);
 		CloseHandle(s_WatcherThread);
 	}
 
-	static std::string wchar_to_string(wchar_t* input)
+	std::filesystem::path FileSystem::OpenFileDialog(const char* filter)
 	{
-		std::wstring string_input(input);
-		std::string converted(string_input.begin(), string_input.end());
-		return converted;
+		OPENFILENAMEA ofn;       // common dialog box structure
+		CHAR szFile[260] = { 0 };       // if using TCHAR macros
+
+		// Initialize OPENFILENAME
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = filter;
+		ofn.nFilterIndex = 1;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+		if (GetOpenFileNameA(&ofn) == TRUE)
+		{
+			std::string fp = ofn.lpstrFile;
+			std::replace(fp.begin(), fp.end(), '\\', '/');
+			return std::filesystem::path(fp);
+		}
+
+		return std::filesystem::path();
+	}
+
+	std::filesystem::path FileSystem::OpenFolderDialog(const char* initialFolder)
+	{
+		std::filesystem::path result = "";
+		IFileOpenDialog* dialog;
+		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileOpenDialog, (void**)&dialog)))
+		{
+			DWORD options;
+			dialog->GetOptions(&options);
+			dialog->SetOptions(options | FOS_PICKFOLDERS);
+			if (SUCCEEDED(dialog->Show(NULL)))
+			{
+				IShellItem* selectedItem;
+				if (SUCCEEDED(dialog->GetResult(&selectedItem)))
+				{
+					PWSTR pszFilePath;
+					if (SUCCEEDED(selectedItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszFilePath)))
+					{
+						result = std::filesystem::path(pszFilePath, std::filesystem::path::generic_format);
+						CoTaskMemFree(pszFilePath);
+					}
+
+					selectedItem->Release();
+				}
+			}
+
+			dialog->Release();
+		}
+
+		std::string fp = result.string();
+		std::replace(fp.begin(), fp.end(), '\\', '/');
+		return fp;
+	}
+
+	std::filesystem::path FileSystem::SaveFileDialog(const char* filter)
+	{
+		OPENFILENAMEA ofn;       // common dialog box structure
+		CHAR szFile[260] = { 0 };       // if using TCHAR macros
+		
+		// Initialize OPENFILENAME
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = filter;
+		ofn.nFilterIndex = 1;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+		if (GetSaveFileNameA(&ofn) == TRUE)
+		{
+			std::string fp = ofn.lpstrFile;
+			std::replace(fp.begin(), fp.end(), '\\', '/');
+			return std::filesystem::path(fp);
+		}
+
+		return std::filesystem::path();
+	}
+
+	void FileSystem::SkipNextFileSystemChange()
+	{
+		s_IgnoreNextChange = true;
 	}
 
 	unsigned long FileSystem::Watch(void* param)
 	{
-		LPCWSTR	filepath = L"assets";
-		std::vector<BYTE> buffer;
-		buffer.resize(10 * 1024);
-		OVERLAPPED overlapped = { 0 };
-		HANDLE handle = NULL;
-		DWORD bytesReturned = 0;
+		auto assetDirectory = Project::GetActive()->GetAssetDirectory();
+		std::wstring dirStr = assetDirectory.wstring();
 
-		handle = CreateFileW(
-			filepath,
-			FILE_LIST_DIRECTORY,
+		char buf[2048];
+		DWORD bytesReturned;
+		std::filesystem::path filepath;
+		BOOL result = TRUE;
+
+		HANDLE directoryHandle = CreateFile(
+			dirStr.c_str(),
+			GENERIC_READ | FILE_LIST_DIRECTORY,
 			FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
 			NULL,
 			OPEN_EXISTING,
@@ -128,101 +163,226 @@ namespace Ant{
 			NULL
 		);
 
-		ZeroMemory(&overlapped, sizeof(overlapped));
-
-		if (handle == INVALID_HANDLE_VALUE)
-			ANT_CORE_ERROR("Unable to accquire directory handle: {0}", GetLastError());
-
-		overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-
-		if (overlapped.hEvent == NULL)
+		if (directoryHandle == INVALID_HANDLE_VALUE)
 		{
-			ANT_CORE_ERROR("CreateEvent failed!");
+			ANT_CORE_VERIFY(false, "Failed to open directory!");
 			return 0;
 		}
 
-		while (s_Watching)
+		OVERLAPPED pollingOverlap;
+		pollingOverlap.OffsetHigh = 0;
+		pollingOverlap.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+		std::vector<FileSystemChangedEvent> eventBatch;
+		eventBatch.reserve(10);
+
+		while (s_Watching && result)
 		{
-			DWORD status = ReadDirectoryChangesW(
-				handle,
-				&buffer[0],
-				buffer.size(),
+			result = ReadDirectoryChangesW(
+				directoryHandle,
+				&buf,
+				sizeof(buf),
 				TRUE,
-				FILE_NOTIFY_CHANGE_CREATION | FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME,
+				FILE_NOTIFY_CHANGE_FILE_NAME |
+				FILE_NOTIFY_CHANGE_DIR_NAME |
+				FILE_NOTIFY_CHANGE_SIZE,
 				&bytesReturned,
-				&overlapped,
+				&pollingOverlap,
 				NULL
 			);
 
-			if (!status)
-				ANT_CORE_ERROR(GetLastError());
-
-			DWORD waitOperation = WaitForSingleObject(overlapped.hEvent, 5000);
-			if (waitOperation != WAIT_OBJECT_0)
-				continue;
+			WaitForSingleObject(pollingOverlap.hEvent, INFINITE);
 
 			if (s_IgnoreNextChange)
-				continue;
-
-			std::string oldName;
-			char fileName[MAX_PATH * 10] = "";
-
-			BYTE* buf = buffer.data();
-			for (;;)
 			{
-				FILE_NOTIFY_INFORMATION& fni = *(FILE_NOTIFY_INFORMATION*)buf;
-				ZeroMemory(fileName, sizeof(fileName));
-				WideCharToMultiByte(CP_ACP, 0, fni.FileName, fni.FileNameLength / sizeof(WCHAR), fileName, sizeof(fileName), NULL, NULL);
-				std::filesystem::path filepath = "assets/" + std::string(fileName);
+				s_IgnoreNextChange = false;
+				eventBatch.clear();
+				continue;
+			}
+
+			FILE_NOTIFY_INFORMATION* pNotify;
+			int offset = 0;
+			std::wstring oldName;
+
+			do
+			{
+				pNotify = (FILE_NOTIFY_INFORMATION*)((char*)buf + offset);
+				size_t filenameLength = pNotify->FileNameLength / sizeof(wchar_t);
 
 				FileSystemChangedEvent e;
-				e.FilePath = filepath.string();
-				e.NewName = filepath.filename().string();
-				e.OldName = filepath.filename().string();
-				e.IsDirectory = std::filesystem::is_directory(filepath);
+				e.FilePath = std::filesystem::path(std::wstring(pNotify->FileName, filenameLength));
+				e.IsDirectory = IsDirectory(e.FilePath);
 
-				switch (fni.Action)
+				switch (pNotify->Action)
 				{
-				case FILE_ACTION_ADDED:
-				{
-					e.Action = FileSystemAction::Added;
-					s_Callback(e);
-					break;
-				}
-				case FILE_ACTION_REMOVED:
-				{
-					e.IsDirectory = AssetManager::IsDirectory(e.FilePath);
-					e.Action = FileSystemAction::Delete;
-					s_Callback(e);
-					break;
-				}
-				case FILE_ACTION_MODIFIED:
-				{
-					e.Action = FileSystemAction::Modified;
-					s_Callback(e);
-					break;
-				}
-				case FILE_ACTION_RENAMED_OLD_NAME:
-				{
-					oldName = filepath.filename().string();
-					break;
-				}
-				case FILE_ACTION_RENAMED_NEW_NAME:
-				{
-					e.OldName = oldName;
-					e.Action = FileSystemAction::Rename;
-					s_Callback(e);
-					break;
-				}
+					case FILE_ACTION_ADDED:
+					{
+						e.Action = FileSystemAction::Added;
+						break;
+					}
+					case FILE_ACTION_REMOVED:
+					{
+						e.Action = FileSystemAction::Delete;
+						break;
+					}
+					case FILE_ACTION_MODIFIED:
+					{
+						e.Action = FileSystemAction::Modified;
+						break;
+					}
+					case FILE_ACTION_RENAMED_OLD_NAME:
+					{
+						oldName = e.FilePath.filename();
+						break;
+					}
+					case FILE_ACTION_RENAMED_NEW_NAME:
+					{
+						e.OldName = oldName;
+						e.Action = FileSystemAction::Rename;
+						break;
+					}
 				}
 
-				if (!fni.NextEntryOffset)
-					break;
+				// NOTE: Fix for https://gitlab.com/chernoprojects/Ant-dev/-/issues/143
+				bool hasAddedEvent = false;
+				if (e.Action == FileSystemAction::Modified)
+				{
+					for (const auto& event : eventBatch)
+					{
+						if (event.FilePath == e.FilePath && event.Action == FileSystemAction::Added)
+							hasAddedEvent = true;
+					}
+				}
 
-				buf += fni.NextEntryOffset;
+				if (pNotify->Action != FILE_ACTION_RENAMED_OLD_NAME && !hasAddedEvent)
+					eventBatch.push_back(e);
+
+				offset += pNotify->NextEntryOffset;
+			} while (pNotify->NextEntryOffset);
+
+			if (eventBatch.size() > 0)
+			{
+				for (auto& callback : s_Callbacks)
+					callback(eventBatch);
+				eventBatch.clear();
 			}
 		}
 
+		CloseHandle(directoryHandle);
 		return 0;
+	}
+
+	bool FileSystem::WriteBytes(const std::filesystem::path& filepath, const Buffer& buffer)
+	{
+		std::ofstream stream(filepath, std::ios::binary | std::ios::trunc);
+
+		if (!stream)
+		{
+			stream.close();
+			return false;
+		}
+
+		stream.write((char*)buffer.Data, buffer.Size);
+		stream.close();
+
+		return true;
+	}
+
+	Buffer FileSystem::ReadBytes(const std::filesystem::path& filepath)
+	{
+		Buffer buffer;
+
+		std::ifstream stream(filepath, std::ios::binary | std::ios::ate);
+		ANT_CORE_ASSERT(stream);
+
+		auto end = stream.tellg();
+		stream.seekg(0, std::ios::beg);
+		auto size = end - stream.tellg();
+		ANT_CORE_ASSERT(size != 0);
+
+		buffer.Allocate((uint32_t)size);
+		stream.read((char*)buffer.Data, buffer.Size);
+		stream.close();
+
+		return buffer;
+	}
+
+	std::filesystem::path FileSystem::GetPersistentStoragePath()
+	{
+		if (!s_PersistentStoragePath.empty())
+			return s_PersistentStoragePath;
+
+		PWSTR roamingFilePath;
+		HRESULT result = SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &roamingFilePath);
+		ANT_CORE_VERIFY(result == S_OK);
+		s_PersistentStoragePath = roamingFilePath;
+		s_PersistentStoragePath /= "AntPlay";
+
+		if (!std::filesystem::exists(s_PersistentStoragePath))
+			std::filesystem::create_directory(s_PersistentStoragePath);
+
+		return s_PersistentStoragePath;
+	}
+
+	bool FileSystem::HasEnvironmentVariable(const std::string& key)
+	{
+		HKEY hKey;
+		LPCSTR keyPath = "Environment";
+		LSTATUS lOpenStatus = RegOpenKeyExA(HKEY_CURRENT_USER, keyPath, 0, KEY_ALL_ACCESS, &hKey);
+
+		if (lOpenStatus == ERROR_SUCCESS)
+		{
+			lOpenStatus = RegQueryValueExA(hKey, key.c_str(), 0, NULL, NULL, NULL);
+			RegCloseKey(hKey);
+		}
+
+		return lOpenStatus == ERROR_SUCCESS;
+	}
+
+	bool FileSystem::SetEnvironmentVariable(const std::string& key, const std::string& value)
+	{
+		HKEY hKey;
+		LPCSTR keyPath = "Environment";
+		DWORD createdNewKey;
+		LSTATUS lOpenStatus = RegCreateKeyExA(HKEY_CURRENT_USER, keyPath, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &createdNewKey);
+		if (lOpenStatus == ERROR_SUCCESS)
+		{
+			LSTATUS lSetStatus = RegSetValueExA(hKey, key.c_str(), 0, REG_SZ, (LPBYTE)value.c_str(), (DWORD)(value.length() + 1));
+			RegCloseKey(hKey);
+
+			if (lSetStatus == ERROR_SUCCESS)
+			{
+				SendMessageTimeoutA(HWND_BROADCAST, WM_SETTINGCHANGE, 0, (LPARAM)"Environment", SMTO_BLOCK, 100, NULL);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	std::string FileSystem::GetEnvironmentVariable(const std::string& key)
+	{
+		HKEY hKey;
+		LPCSTR keyPath = "Environment";
+		DWORD createdNewKey;
+		LSTATUS lOpenStatus = RegCreateKeyExA(HKEY_CURRENT_USER, keyPath, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &createdNewKey);
+		if (lOpenStatus == ERROR_SUCCESS)
+		{
+			DWORD valueType;
+			char* data = anew char[512];
+			DWORD dataSize = 512;
+			LSTATUS status = RegGetValueA(hKey, NULL, key.c_str(), RRF_RT_ANY, &valueType, (PVOID)data, &dataSize);
+
+			RegCloseKey(hKey);
+
+			if (status == ERROR_SUCCESS)
+			{
+				std::string result(data);
+				delete[] data;
+				return result;
+			}
+		}
+
+		return std::string{};
 	}
 }

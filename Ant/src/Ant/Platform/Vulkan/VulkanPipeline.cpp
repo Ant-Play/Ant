@@ -4,10 +4,46 @@
 #include "VulkanShader.h"
 #include "VulkanContext.h"
 #include "VulkanFramebuffer.h"
+#include "VulkanUniformBuffer.h"
 
 #include "Ant/Renderer/Renderer.h"
 
 namespace Ant{
+
+	namespace Utils {
+		static VkPrimitiveTopology GetVulkanTopology(PrimitiveTopology topology)
+		{
+			switch (topology)
+			{
+				case PrimitiveTopology::Points:			return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+				case PrimitiveTopology::Lines:			return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+				case PrimitiveTopology::Triangles:		return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+				case PrimitiveTopology::LineStrip:		return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+				case PrimitiveTopology::TriangleStrip:	return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+				case PrimitiveTopology::TriangleFan:	return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+			}
+
+			ANT_CORE_ASSERT(false, "Unknown toplogy");
+			return VK_PRIMITIVE_TOPOLOGY_MAX_ENUM;
+		}
+
+		static VkCompareOp GetVulkanCompareOperator(const DepthCompareOperator compareOp)
+		{
+			switch (compareOp)
+			{
+				case DepthCompareOperator::Never:			return VK_COMPARE_OP_NEVER;
+				case DepthCompareOperator::NotEqual:		return VK_COMPARE_OP_NOT_EQUAL;
+				case DepthCompareOperator::Less:			return VK_COMPARE_OP_LESS;
+				case DepthCompareOperator::LessOrEqual:		return VK_COMPARE_OP_LESS_OR_EQUAL;
+				case DepthCompareOperator::Greater:			return VK_COMPARE_OP_GREATER;
+				case DepthCompareOperator::GreaterOrEqual:	return VK_COMPARE_OP_GREATER_OR_EQUAL;
+				case DepthCompareOperator::Equal:			return VK_COMPARE_OP_EQUAL;
+				case DepthCompareOperator::Always:			return VK_COMPARE_OP_ALWAYS;
+			}
+			ANT_CORE_ASSERT(false, "Unknown Operator");
+			return VK_COMPARE_OP_MAX_ENUM;
+		}
+	}
 
 	static VkFormat ShaderDataTypeToVulkanFormat(ShaderDataType type)
 	{
@@ -17,6 +53,10 @@ namespace Ant{
 			case ShaderDataType::Float2:    return VK_FORMAT_R32G32_SFLOAT;
 			case ShaderDataType::Float3:    return VK_FORMAT_R32G32B32_SFLOAT;
 			case ShaderDataType::Float4:    return VK_FORMAT_R32G32B32A32_SFLOAT;
+			case ShaderDataType::Int:       return VK_FORMAT_R32_SINT;
+			case ShaderDataType::Int2:      return VK_FORMAT_R32G32_SINT;
+			case ShaderDataType::Int3:      return VK_FORMAT_R32G32B32_SINT;
+			case ShaderDataType::Int4:      return VK_FORMAT_R32G32B32A32_SINT;
 		}
 		ANT_CORE_ASSERT(false);
 		return VK_FORMAT_UNDEFINED;
@@ -33,7 +73,13 @@ namespace Ant{
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		// TODO: delete pipeline
+		Renderer::SubmitResourceFree([pipeline = m_VulkanPipeline, pipelineCache = m_PipelineCache, pipelineLayout = m_PipelineLayout]()
+			{
+				const auto vulkanDevice = VulkanContext::GetCurrentDevice()->GetVulkanDevice();
+				vkDestroyPipeline(vulkanDevice, pipeline, nullptr);
+				vkDestroyPipelineCache(vulkanDevice, pipelineCache, nullptr);
+				vkDestroyPipelineLayout(vulkanDevice, pipelineLayout, nullptr);
+			});
 	}
 
 	void VulkanPipeline::Invalidate()
@@ -41,6 +87,8 @@ namespace Ant{
 		Ref<VulkanPipeline> instance = this;
 		Renderer::Submit([instance]() mutable
 			{
+				// ANT_CORE_WARN("[VulkanPipeline] Creating pipeline {0}", instance->m_Specification.DebugName);
+
 				VkDevice device = VulkanContext::GetCurrentDevice()->GetVulkanDevice();
 
 				ANT_CORE_ASSERT(instance->m_Specification.Shader);
@@ -68,9 +116,9 @@ namespace Ant{
 				VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = {};
 				pPipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 				pPipelineLayoutCreateInfo.pNext = nullptr;
-				pPipelineLayoutCreateInfo.setLayoutCount = descriptorSetLayouts.size();
+				pPipelineLayoutCreateInfo.setLayoutCount = (uint32_t)descriptorSetLayouts.size();
 				pPipelineLayoutCreateInfo.pSetLayouts = descriptorSetLayouts.data();
-				pPipelineLayoutCreateInfo.pushConstantRangeCount = vulkanPushConstantRanges.size();
+				pPipelineLayoutCreateInfo.pushConstantRangeCount = (uint32_t)vulkanPushConstantRanges.size();
 				pPipelineLayoutCreateInfo.pPushConstantRanges = vulkanPushConstantRanges.data();
 
 				VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &instance->m_PipelineLayout));
@@ -93,38 +141,82 @@ namespace Ant{
 				// This pipeline will assemble vertex data as a triangle lists (though we only use one triangle)
 				VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = {};
 				inputAssemblyState.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-				inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+				inputAssemblyState.topology = Utils::GetVulkanTopology(instance->m_Specification.Topology);
 
 				// Rasterization state
 				VkPipelineRasterizationStateCreateInfo rasterizationState = {};
 				rasterizationState.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-				rasterizationState.polygonMode = VK_POLYGON_MODE_FILL;
-				rasterizationState.cullMode = VK_CULL_MODE_NONE;
-				rasterizationState.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+				rasterizationState.polygonMode = instance->m_Specification.Wireframe ? VK_POLYGON_MODE_LINE : VK_POLYGON_MODE_FILL;
+				rasterizationState.cullMode = instance->m_Specification.BackfaceCulling ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE;
+				rasterizationState.frontFace = VK_FRONT_FACE_CLOCKWISE;
 				rasterizationState.depthClampEnable = VK_FALSE;
 				rasterizationState.rasterizerDiscardEnable = VK_FALSE;
 				rasterizationState.depthBiasEnable = VK_FALSE;
-				rasterizationState.lineWidth = 1.0f;
+				rasterizationState.lineWidth = instance->m_Specification.LineWidth; // this is dynamic
 
 				// Color blend state describes how blend factors are calculated (if used)
 				// We need one blend attachment state per color attachment (even if blending is not used)
-				size_t colorAttachmentCount = framebuffer->GetColorAttachmentCount();
+				size_t colorAttachmentCount = framebuffer->GetSpecification().SwapChainTarget ? 1 : framebuffer->GetColorAttachmentCount();
 				std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates(colorAttachmentCount);
-				for (size_t i = 0; i < colorAttachmentCount; i++)
+				if (framebuffer->GetSpecification().SwapChainTarget)
 				{
-					blendAttachmentStates[i].colorWriteMask = 0xf;
-					blendAttachmentStates[i].blendEnable = VK_TRUE;
-					blendAttachmentStates[i].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-					blendAttachmentStates[i].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-					blendAttachmentStates[i].colorBlendOp = VK_BLEND_OP_ADD;
-					blendAttachmentStates[i].alphaBlendOp = VK_BLEND_OP_ADD;
-					blendAttachmentStates[i].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-					blendAttachmentStates[i].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+					blendAttachmentStates[0].colorWriteMask = 0xf;
+					blendAttachmentStates[0].blendEnable = VK_TRUE;
+					blendAttachmentStates[0].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+					blendAttachmentStates[0].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+					blendAttachmentStates[0].colorBlendOp = VK_BLEND_OP_ADD;
+					blendAttachmentStates[0].alphaBlendOp = VK_BLEND_OP_ADD;
+					blendAttachmentStates[0].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+					blendAttachmentStates[0].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				}
+				else
+				{
+					for (size_t i = 0; i < colorAttachmentCount; i++)
+					{
+						if (!framebuffer->GetSpecification().Blend)
+							break;
+
+						blendAttachmentStates[i].colorWriteMask = 0xf;
+						if (!framebuffer->GetSpecification().Blend)
+							break;
+
+						const auto& attachmentSpec = framebuffer->GetSpecification().Attachments.Attachments[i];
+						FramebufferBlendMode blendMode = framebuffer->GetSpecification().BlendMode == FramebufferBlendMode::None
+							? attachmentSpec.BlendMode
+							: framebuffer->GetSpecification().BlendMode;
+
+						blendAttachmentStates[i].blendEnable = attachmentSpec.Blend ? VK_TRUE : VK_FALSE;
+						blendAttachmentStates[i].colorBlendOp = VK_BLEND_OP_ADD;
+						blendAttachmentStates[i].alphaBlendOp = VK_BLEND_OP_ADD;
+						blendAttachmentStates[i].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+						blendAttachmentStates[i].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+
+						switch (blendMode)
+						{
+							case FramebufferBlendMode::SrcAlphaOneMinusSrcAlpha:
+								blendAttachmentStates[i].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+								blendAttachmentStates[i].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+								blendAttachmentStates[i].srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+								blendAttachmentStates[i].dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+								break;
+							case FramebufferBlendMode::OneZero:
+								blendAttachmentStates[i].srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+								blendAttachmentStates[i].dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+								break;
+							case FramebufferBlendMode::Zero_SrcColor:
+								blendAttachmentStates[i].srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+								blendAttachmentStates[i].dstColorBlendFactor = VK_BLEND_FACTOR_SRC_COLOR;
+								break;
+
+							default:
+								ANT_CORE_VERIFY(false);
+						}
+					}
 				}
 
 				VkPipelineColorBlendStateCreateInfo colorBlendState = {};
 				colorBlendState.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-				colorBlendState.attachmentCount = blendAttachmentStates.size();
+				colorBlendState.attachmentCount = (uint32_t)blendAttachmentStates.size();
 				colorBlendState.pAttachments = blendAttachmentStates.data();
 
 				// Viewport state sets the number of viewports and scissor used in this pipeline
@@ -141,6 +233,9 @@ namespace Ant{
 				std::vector<VkDynamicState> dynamicStateEnables;
 				dynamicStateEnables.push_back(VK_DYNAMIC_STATE_VIEWPORT);
 				dynamicStateEnables.push_back(VK_DYNAMIC_STATE_SCISSOR);
+				if (instance->m_Specification.Topology == PrimitiveTopology::Lines || instance->m_Specification.Topology == PrimitiveTopology::LineStrip || instance->m_Specification.Wireframe)
+					dynamicStateEnables.push_back(VK_DYNAMIC_STATE_LINE_WIDTH);
+
 				VkPipelineDynamicStateCreateInfo dynamicState = {};
 				dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 				dynamicState.pDynamicStates = dynamicStateEnables.data();
@@ -150,9 +245,9 @@ namespace Ant{
 				// We only use depth tests and want depth tests and writes to be enabled and compare with less or equal
 				VkPipelineDepthStencilStateCreateInfo depthStencilState = {};
 				depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-				depthStencilState.depthTestEnable = VK_TRUE;
-				depthStencilState.depthWriteEnable = VK_TRUE;
-				depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+				depthStencilState.depthTestEnable = instance->m_Specification.DepthTest ? VK_TRUE : VK_FALSE;
+				depthStencilState.depthWriteEnable = instance->m_Specification.DepthWrite ? VK_TRUE : VK_FALSE;
+				depthStencilState.depthCompareOp = Utils::GetVulkanCompareOperator(instance->m_Specification.DepthOperator);
 				depthStencilState.depthBoundsTestEnable = VK_FALSE;
 				depthStencilState.back.failOp = VK_STENCIL_OP_KEEP;
 				depthStencilState.back.passOp = VK_STENCIL_OP_KEEP;
@@ -161,42 +256,63 @@ namespace Ant{
 				depthStencilState.front = depthStencilState.back;
 
 				// Multi sampling state
-				// This example does not make use fo multi sampling (for anti-aliasing), the state must still be set and passed to the pipeline
 				VkPipelineMultisampleStateCreateInfo multisampleState = {};
 				multisampleState.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 				multisampleState.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 				multisampleState.pSampleMask = nullptr;
 
 				// Vertex input descriptor
+				VertexBufferLayout& vertexLayout = instance->m_Specification.Layout;
+				VertexBufferLayout& instanceLayout = instance->m_Specification.InstanceLayout;
+				VertexBufferLayout& boneInfluenceLayout = instance->m_Specification.BoneInfluenceLayout;
+				std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 
-				VertexBufferLayout& layout = instance->m_Specification.Layout;
-
-				VkVertexInputBindingDescription vertexInputBinding = {};
+				VkVertexInputBindingDescription& vertexInputBinding = vertexInputBindingDescriptions.emplace_back();
 				vertexInputBinding.binding = 0;
-				vertexInputBinding.stride = layout.GetStride();
+				vertexInputBinding.stride = vertexLayout.GetStride();
 				vertexInputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-				// Inpute attribute bindings describe shader attribute locations and memory layouts
-				std::vector<VkVertexInputAttributeDescription> vertexInputAttributs(layout.GetElementCount());
-
-				uint32_t location = 0;
-				for (auto element : layout)
+				if (instanceLayout.GetElementCount())
 				{
-					vertexInputAttributs[location].binding = 0;
-					vertexInputAttributs[location].location = location;
-					vertexInputAttributs[location].format = ShaderDataTypeToVulkanFormat(element.Type);
-					vertexInputAttributs[location].offset = element.Offset;
+					VkVertexInputBindingDescription& instanceInputBinding = vertexInputBindingDescriptions.emplace_back();
+					instanceInputBinding.binding = 1;
+					instanceInputBinding.stride = instanceLayout.GetStride();
+					instanceInputBinding.inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+				}
 
-					location++;
+				if (boneInfluenceLayout.GetElementCount())
+				{
+					VkVertexInputBindingDescription& boneInfluenceInputBinding = vertexInputBindingDescriptions.emplace_back();
+					boneInfluenceInputBinding.binding = 2;
+					boneInfluenceInputBinding.stride = boneInfluenceLayout.GetStride();
+					boneInfluenceInputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+				}
+
+				// Input attribute bindings describe shader attribute locations and memory layouts
+				std::vector<VkVertexInputAttributeDescription> vertexInputAttributes(vertexLayout.GetElementCount() + instanceLayout.GetElementCount() + boneInfluenceLayout.GetElementCount());
+
+				uint32_t binding = 0;
+				uint32_t location = 0;
+				for (const auto& layout : { vertexLayout, instanceLayout, boneInfluenceLayout })
+				{
+					for (const auto& element : layout)
+					{
+						vertexInputAttributes[location].binding = binding;
+						vertexInputAttributes[location].location = location;
+						vertexInputAttributes[location].format = ShaderDataTypeToVulkanFormat(element.Type);
+						vertexInputAttributes[location].offset = element.Offset;
+						location++;
+					}
+					binding++;
 				}
 
 				// Vertex input state used for pipeline creation
 				VkPipelineVertexInputStateCreateInfo vertexInputState = {};
 				vertexInputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-				vertexInputState.vertexBindingDescriptionCount = 1;
-				vertexInputState.pVertexBindingDescriptions = &vertexInputBinding;
-				vertexInputState.vertexAttributeDescriptionCount = vertexInputAttributs.size();
-				vertexInputState.pVertexAttributeDescriptions = vertexInputAttributs.data();
+				vertexInputState.vertexBindingDescriptionCount = (uint32_t)vertexInputBindingDescriptions.size();
+				vertexInputState.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
+				vertexInputState.vertexAttributeDescriptionCount = (uint32_t)vertexInputAttributes.size();
+				vertexInputState.pVertexAttributeDescriptions = vertexInputAttributes.data();
 
 				const auto& shaderStages = vulkanShader->GetPipelineShaderStageCreateInfos();
 
@@ -218,16 +334,19 @@ namespace Ant{
 				// What is this pipeline cache?
 				VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
 				pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-				VkPipelineCache pipelineCache;
-				VK_CHECK_RESULT(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, nullptr, &pipelineCache));
+				VK_CHECK_RESULT(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, nullptr, &instance->m_PipelineCache));
+
 
 				// Create rendering pipeline using the specified states
-				VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &instance->m_VulkanPipeline));
+				VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, instance->m_PipelineCache, 1, &pipelineCreateInfo, nullptr, &instance->m_VulkanPipeline));
+				VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_PIPELINE, instance->m_Specification.DebugName, instance->m_VulkanPipeline);
 
 				// Shader modules are no longer needed once the graphics pipeline has been created
 				// vkDestroyShaderModule(device, shaderStages[0].module, nullptr);
 				// vkDestroyShaderModule(device, shaderStages[1].module, nullptr);
 
+				// instance->m_DescriptorSets = vulkanShader->AllocateDescriptorSets();
+#if OLD
 				const auto& shaderDescriptorSets = vulkanShader->GetShaderDescriptorSets();
 				if (!shaderDescriptorSets.empty())
 				{
@@ -253,11 +372,58 @@ namespace Ant{
 					ANT_CORE_WARN("VulkanPipeline - Updating {0} descriptor sets", writeDescriptors.size());
 					vkUpdateDescriptorSets(device, writeDescriptors.size(), writeDescriptors.data(), 0, nullptr);
 				}
+#endif
+			});
+	}
+
+	void VulkanPipeline::SetUniformBuffer(Ref<UniformBuffer> uniformBuffer, uint32_t binding, uint32_t set)
+	{
+		Ref<VulkanPipeline> instance = this;
+		Renderer::Submit([instance, uniformBuffer, binding, set]() mutable
+			{
+				instance->RT_SetUniformBuffer(uniformBuffer, binding, set);
 			});
 	}
 
 	void VulkanPipeline::Bind()
 	{
 
+	}
+
+	void VulkanPipeline::RT_SetUniformBuffer(Ref<UniformBuffer> uniformBuffer, uint32_t binding, uint32_t set)
+	{
+		Ref<VulkanShader> vulkanShader = Ref<VulkanShader>(m_Specification.Shader);
+		Ref<VulkanUniformBuffer> vulkanUniformBuffer = uniformBuffer.As<VulkanUniformBuffer>();
+
+		ANT_CORE_ASSERT(m_DescriptorSets.DescriptorSets.size() > set);
+
+		VkWriteDescriptorSet writeDescriptorSet = {};
+		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeDescriptorSet.descriptorCount = 1;
+		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		writeDescriptorSet.pBufferInfo = &vulkanUniformBuffer->GetDescriptorBufferInfo();
+		writeDescriptorSet.dstBinding = binding;
+		writeDescriptorSet.dstSet = m_DescriptorSets.DescriptorSets[set];
+
+		ANT_CORE_WARN("VulkanPipeline - Updating descriptor set (VulkanPipeline::SetUniformBuffer)");
+		VkDevice device = VulkanContext::GetCurrentDevice()->GetVulkanDevice();
+		vkUpdateDescriptorSets(device, 1, &writeDescriptorSet, 0, nullptr);
+
+#if 0
+		if (m_DescriptorSetMap.find(set) == m_DescriptorSetMap.end())
+			m_DescriptorSetMap[set] = vulkanShader->CreateDescriptorSets(set);
+
+		VkWriteDescriptorSet writeDescriptorSet = {};
+		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeDescriptorSet.descriptorCount = 1;
+		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		writeDescriptorSet.pBufferInfo = &vulkanUniformBuffer->GetDescriptorBufferInfo();
+		writeDescriptorSet.dstBinding = binding;
+		writeDescriptorSet.dstSet = m_DescriptorSetMap.at(set).DescriptorSets[0];
+
+		ANT_CORE_WARN("VulkanPipeline - Updating descriptor set (VulkanPipeline::SetUniformBuffer)");
+		VkDevice device = VulkanContext::GetCurrentDevice()->GetVulkanDevice();
+		vkUpdateDescriptorSets(device, 1, &writeDescriptorSet, 0, nullptr);
+#endif
 	}
 }

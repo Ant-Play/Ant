@@ -1,6 +1,8 @@
 ﻿#include "antpch.h"
 #include "VulkanSwapChain.h"
 
+#include "Ant/Debug/Profiler.h"
+
 #include <GLFW/glfw3.h>
 
 // Macro to get a procedure address based on a vulkan instance
@@ -137,6 +139,9 @@ namespace Ant{
 
 	void VulkanSwapChain::Create(uint32_t* width, uint32_t* height, bool vsync)
 	{
+		m_VSync = vsync;
+
+
 		VkDevice device = m_Device->GetVulkanDevice();
 		VkPhysicalDevice physicalDevice = m_Device->GetPhysicalDevice()->GetVulkanPhysicalDevice();
 
@@ -197,8 +202,6 @@ namespace Ant{
 				}
 			}
 		}
-
-		swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 
 		// Determine the number of images
 		uint32_t desiredNumberOfSwapchainImages = surfCaps.minImageCount + 1;
@@ -267,30 +270,29 @@ namespace Ant{
 
 		VK_CHECK_RESULT(fpCreateSwapchainKHR(device, &swapchainCI, nullptr, &m_SwapChain));
 
-		// If an existing swap chain is re-created, destroy the old swap chain
-		// This also cleans up all the presentable images
-		if (oldSwapchain != VK_NULL_HANDLE)
-		{
-			for (uint32_t i = 0; i < m_ImageCount; i++)
-			{
-				vkDestroyImageView(device, m_Buffers[i].view, nullptr);
-			}
+		if (oldSwapchain)
 			fpDestroySwapchainKHR(device, oldSwapchain, nullptr);
-		}
+
+		for (auto& image : m_Images)
+			vkDestroyImageView(device, image.ImageView, nullptr);
+		m_Images.clear();
+
 		VK_CHECK_RESULT(fpGetSwapchainImagesKHR(device, m_SwapChain, &m_ImageCount, NULL));
 
 		// Get the swap chain images
 		m_Images.resize(m_ImageCount);
-		VK_CHECK_RESULT(fpGetSwapchainImagesKHR(device, m_SwapChain, &m_ImageCount, m_Images.data()));
+		m_VulkanImages.resize(m_ImageCount);
+		VK_CHECK_RESULT(fpGetSwapchainImagesKHR(device, m_SwapChain, &m_ImageCount, m_VulkanImages.data()));
 
 		// Get the swap chain buffers containing the image and imageview
-		m_Buffers.resize(m_ImageCount);
+		m_Images.resize(m_ImageCount);
 		for (uint32_t i = 0; i < m_ImageCount; i++)
 		{
 			VkImageViewCreateInfo colorAttachmentView = {};
 			colorAttachmentView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			colorAttachmentView.pNext = NULL;
 			colorAttachmentView.format = m_ColorFormat;
+			colorAttachmentView.image = m_VulkanImages[i];
 			colorAttachmentView.components = {
 				VK_COMPONENT_SWIZZLE_R,
 				VK_COMPONENT_SWIZZLE_G,
@@ -305,30 +307,63 @@ namespace Ant{
 			colorAttachmentView.viewType = VK_IMAGE_VIEW_TYPE_2D;
 			colorAttachmentView.flags = 0;
 
-			m_Buffers[i].image = m_Images[i];
+			m_Images[i].Image = m_VulkanImages[i];
 
-			colorAttachmentView.image = m_Buffers[i].image;
-
-			VK_CHECK_RESULT(vkCreateImageView(device, &colorAttachmentView, nullptr, &m_Buffers[i].view));
+			VK_CHECK_RESULT(vkCreateImageView(device, &colorAttachmentView, nullptr, &m_Images[i].ImageView));
+			VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_IMAGE_VIEW, fmt::format("Swapchain ImageView: {}", i), m_Images[i].ImageView);
 		}
 
-		CreateDrawBuffers();
+		// Create command buffers
+		{
+			for (auto& commandBuffer : m_CommandBuffers)
+				vkDestroyCommandPool(device, commandBuffer.CommandPool, nullptr);
+
+			VkCommandPoolCreateInfo cmdPoolInfo = {};
+			cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			cmdPoolInfo.queueFamilyIndex = m_QueueNodeIndex;
+			cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+
+			VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
+			commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			commandBufferAllocateInfo.commandBufferCount = 1;
+
+			m_CommandBuffers.resize(m_ImageCount);
+			for (auto& commandBuffer : m_CommandBuffers)
+			{
+				VK_CHECK_RESULT(vkCreateCommandPool(device, &cmdPoolInfo, nullptr, &commandBuffer.CommandPool));
+
+				commandBufferAllocateInfo.commandPool = commandBuffer.CommandPool;
+				VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer.CommandBuffer));
+			}
+		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Synchronization Objects
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		VkSemaphoreCreateInfo semaphoreCreateInfo{};
-		semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-		// Create a semaphore used to synchronize image presentation
-		// Ensures that the image is displayed before we start submitting new commands to the queu
-		VK_CHECK_RESULT(vkCreateSemaphore(m_Device->GetVulkanDevice(), &semaphoreCreateInfo, nullptr, &m_Semaphores.PresentComplete));
-		// Create a semaphore used to synchronize command submission
-		// Ensures that the image is not presented until all commands have been sumbitted and executed
-		VK_CHECK_RESULT(vkCreateSemaphore(m_Device->GetVulkanDevice(), &semaphoreCreateInfo, nullptr, &m_Semaphores.RenderComplete));
+		if (!m_Semaphores.RenderComplete || !m_Semaphores.PresentComplete)
+		{
+			VkSemaphoreCreateInfo semaphoreCreateInfo{};
+			semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+			VK_CHECK_RESULT(vkCreateSemaphore(m_Device->GetVulkanDevice(), &semaphoreCreateInfo, nullptr, &m_Semaphores.RenderComplete));
+			VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_SEMAPHORE, "Swapchain Semaphore RenderComplete", m_Semaphores.RenderComplete);
+			VK_CHECK_RESULT(vkCreateSemaphore(m_Device->GetVulkanDevice(), &semaphoreCreateInfo, nullptr, &m_Semaphores.PresentComplete));
+			VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_SEMAPHORE, "Swapchain Semaphore PresentComplete", m_Semaphores.PresentComplete);
+		}
 
-		// Set up submit info structure
-		// Semaphores will stay the same during application lifetime
-		// Command buffer submission info is set by each example
+		if (m_WaitFences.size() != m_ImageCount)
+		{
+			VkFenceCreateInfo fenceCreateInfo{};
+			fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+			m_WaitFences.resize(m_ImageCount);
+			for (auto& fence : m_WaitFences)
+			{
+				VK_CHECK_RESULT(vkCreateFence(m_Device->GetVulkanDevice(), &fenceCreateInfo, nullptr, &fence));
+				VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_FENCE, "Swapchain Fence", fence);
+			}
+		}
 		VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 		m_SubmitInfo = {};
@@ -339,40 +374,19 @@ namespace Ant{
 		m_SubmitInfo.signalSemaphoreCount = 1;
 		m_SubmitInfo.pSignalSemaphores = &m_Semaphores.RenderComplete;
 
-		// Wait fences to sync command buffer access
-		VkFenceCreateInfo fenceCreateInfo{};
-		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-		m_WaitFences.resize(m_DrawCommandBuffers.size());
-		for (auto& fence : m_WaitFences)
-		{
-			VK_CHECK_RESULT(vkCreateFence(m_Device->GetVulkanDevice(), &fenceCreateInfo, nullptr, &fence));
-		}
-
-		CreateDepthStencil();
-
 		VkFormat depthFormat = m_Device->GetPhysicalDevice()->GetDepthFormat();
 
 		// Render Pass
-		std::array<VkAttachmentDescription, 2> attachments = {};
+		VkAttachmentDescription colorAttachmentDesc = {};
 		// Color attachment
-		attachments[0].format = m_ColorFormat;
-		attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
-		attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		// Depth attachment
-		attachments[1].format = depthFormat;
-		attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
-		attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		colorAttachmentDesc.format = m_ColorFormat;
+		colorAttachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
+		colorAttachmentDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		colorAttachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		colorAttachmentDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachmentDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachmentDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		colorAttachmentDesc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		VkAttachmentReference colorReference = {};
 		colorReference.attachment = 0;
@@ -386,7 +400,6 @@ namespace Ant{
 		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpassDescription.colorAttachmentCount = 1;
 		subpassDescription.pColorAttachments = &colorReference;
-		//subpassDescription.pDepthStencilAttachment = &depthReference;
 		subpassDescription.inputAttachmentCount = 0;
 		subpassDescription.pInputAttachments = nullptr;
 		subpassDescription.preserveAttachmentCount = 0;
@@ -403,144 +416,105 @@ namespace Ant{
 
 		VkRenderPassCreateInfo renderPassInfo = {};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = 1;// static_cast<uint32_t>(attachments.size());
-		renderPassInfo.pAttachments = attachments.data();
+		renderPassInfo.attachmentCount = 1;
+		renderPassInfo.pAttachments = &colorAttachmentDesc;
 		renderPassInfo.subpassCount = 1;
 		renderPassInfo.pSubpasses = &subpassDescription;
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
 		VK_CHECK_RESULT(vkCreateRenderPass(m_Device->GetVulkanDevice(), &renderPassInfo, nullptr, &m_RenderPass));
+		VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_RENDER_PASS, "Swapchain render pass", m_RenderPass);
 
-		CreateFramebuffer();
-	}
-
-	void VulkanSwapChain::CreateDepthStencil()
-	{
-		VkDevice device = m_Device->GetVulkanDevice();
-		VkFormat depthFormat = m_Device->GetPhysicalDevice()->GetDepthFormat();
-
-		VkImageCreateInfo imageCI{};
-		imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageCI.imageType = VK_IMAGE_TYPE_2D;
-		imageCI.format = depthFormat;
-		imageCI.extent = { m_Width, m_Height, 1 };
-		imageCI.mipLevels = 1;
-		imageCI.arrayLayers = 1;
-		imageCI.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCI.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-
-		VulkanAllocator allocator("SwapChain");
-		m_DepthStencil.MemoryAlloc = allocator.AllocateImage(imageCI, VMA_MEMORY_USAGE_GPU_ONLY, m_DepthStencil.Image);
-
-		VkImageViewCreateInfo imageViewCI{};
-		imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		imageViewCI.image = m_DepthStencil.Image;
-		imageViewCI.format = depthFormat;
-		imageViewCI.subresourceRange.baseMipLevel = 0;
-		imageViewCI.subresourceRange.levelCount = 1;
-		imageViewCI.subresourceRange.baseArrayLayer = 0;
-		imageViewCI.subresourceRange.layerCount = 1;
-		imageViewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-		// Stencil aspect should only be set on depth + stencil formats (VK_FORMAT_D16_UNORM_S8_UINT..VK_FORMAT_D32_SFLOAT_S8_UINT
-		if (depthFormat >= VK_FORMAT_D16_UNORM_S8_UINT)
-			imageViewCI.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-
-		VK_CHECK_RESULT(vkCreateImageView(device, &imageViewCI, nullptr, &m_DepthStencil.ImageView));
-	}
-
-	void VulkanSwapChain::CreateFramebuffer()
-	{
-		// Setup Framebuffer
-		VkImageView ivAttachments[2];
-
-		// Depth/Stencil attachment is the same for all frame buffers
-		ivAttachments[1] = m_DepthStencil.ImageView;
-
-		VkFramebufferCreateInfo frameBufferCreateInfo = {};
-		frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		frameBufferCreateInfo.pNext = NULL;
-		frameBufferCreateInfo.renderPass = m_RenderPass;
-		frameBufferCreateInfo.attachmentCount = 1;
-		frameBufferCreateInfo.pAttachments = ivAttachments;
-		frameBufferCreateInfo.width = m_Width;
-		frameBufferCreateInfo.height = m_Height;
-		frameBufferCreateInfo.layers = 1;
-
-		// Create frame buffers for every swap chain image
-		m_Framebuffers.resize(m_ImageCount);
-		for (uint32_t i = 0; i < m_Framebuffers.size(); i++)
+		// Create framebuffers for every swapchain image
 		{
-			ivAttachments[0] = m_Buffers[i].view;
-			VK_CHECK_RESULT(vkCreateFramebuffer(m_Device->GetVulkanDevice(), &frameBufferCreateInfo, nullptr, &m_Framebuffers[i]));
+			for (auto& framebuffer : m_Framebuffers)
+				vkDestroyFramebuffer(device, framebuffer, nullptr);
+
+			VkFramebufferCreateInfo frameBufferCreateInfo = {};
+			frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			frameBufferCreateInfo.renderPass = m_RenderPass;
+			frameBufferCreateInfo.attachmentCount = 1;
+			frameBufferCreateInfo.width = m_Width;
+			frameBufferCreateInfo.height = m_Height;
+			frameBufferCreateInfo.layers = 1;
+
+			m_Framebuffers.resize(m_ImageCount);
+			for (uint32_t i = 0; i < m_Framebuffers.size(); i++)
+			{
+				frameBufferCreateInfo.pAttachments = &m_Images[i].ImageView;
+				VK_CHECK_RESULT(vkCreateFramebuffer(m_Device->GetVulkanDevice(), &frameBufferCreateInfo, nullptr, &m_Framebuffers[i]));
+				VKUtils::SetDebugUtilsObjectName(m_Device->GetVulkanDevice(), VK_OBJECT_TYPE_FRAMEBUFFER, fmt::format("Swapchain framebuffer (Frame in flight: {})", i), m_Framebuffers[i]);
+			}
 		}
 	}
 
-	void VulkanSwapChain::CreateDrawBuffers()
+	void VulkanSwapChain::Destroy()
 	{
-		// Create one command buffer for each swap chain image and reuse for rendering
-		m_DrawCommandBuffers.resize(m_ImageCount);
+		ANT_CORE_WARN_TAG("Renderer", "VulkanSwapChain::OnDestroy");
 
-		// TODO: Move this somewhere maybe?
-		VkCommandPoolCreateInfo cmdPoolInfo = {};
-		cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		cmdPoolInfo.queueFamilyIndex = m_QueueNodeIndex;
-		cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		VK_CHECK_RESULT(vkCreateCommandPool(m_Device->GetVulkanDevice(), &cmdPoolInfo, nullptr, &m_CommandPool));
+		auto device = m_Device->GetVulkanDevice();
+		vkDeviceWaitIdle(device);
 
-		VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
-		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		commandBufferAllocateInfo.commandPool = m_CommandPool;
-		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		commandBufferAllocateInfo.commandBufferCount = static_cast<uint32_t>(m_DrawCommandBuffers.size());
-		VK_CHECK_RESULT(vkAllocateCommandBuffers(m_Device->GetVulkanDevice(), &commandBufferAllocateInfo, m_DrawCommandBuffers.data()));
+		if (m_SwapChain)
+			fpDestroySwapchainKHR(device, m_SwapChain, nullptr);
+
+		for (auto& image : m_Images)
+			vkDestroyImageView(device, image.ImageView, nullptr);
+
+		for (auto& commandBuffer : m_CommandBuffers)
+			vkDestroyCommandPool(device, commandBuffer.CommandPool, nullptr);
+
+		if (m_RenderPass)
+			vkDestroyRenderPass(device, m_RenderPass, nullptr);
+
+		for (auto framebuffer : m_Framebuffers)
+			vkDestroyFramebuffer(device, framebuffer, nullptr);
+
+		if (m_Semaphores.RenderComplete)
+			vkDestroySemaphore(device, m_Semaphores.RenderComplete, nullptr);
+
+		if (m_Semaphores.PresentComplete)
+			vkDestroySemaphore(device, m_Semaphores.PresentComplete, nullptr);
+
+		for (auto& fence : m_WaitFences)
+			vkDestroyFence(device, fence, nullptr);
+
+		vkDeviceWaitIdle(device);
 	}
 
 	void VulkanSwapChain::OnResize(uint32_t width, uint32_t height)
 	{
-		ANT_CORE_WARN("VulkanContext::OnResize");
+		ANT_CORE_WARN_TAG("Renderer", "VulkanSwapChain::OnResize");
+
 		auto device = m_Device->GetVulkanDevice();
-
 		vkDeviceWaitIdle(device);
-
-		Create(&width, &height);
-		// Recreate the frame buffers
-		vkDestroyImageView(device, m_DepthStencil.ImageView, nullptr);
-		VulkanAllocator allocator("SwapChain");
-		allocator.DestroyImage(m_DepthStencil.Image, m_DepthStencil.MemoryAlloc);
-		CreateDepthStencil();
-
-		for (auto& framebuffer : m_Framebuffers)
-			vkDestroyFramebuffer(device, framebuffer, nullptr);
-
-		CreateFramebuffer();
-
-		// Command buffers need to be recreated as they may store
-		// references to the recreated frame buffer
-		vkFreeCommandBuffers(device, m_CommandPool, static_cast<uint32_t>(m_DrawCommandBuffers.size()), m_DrawCommandBuffers.data());
-		CreateDrawBuffers();
-
+		Create(&width, &height, m_VSync);
 		vkDeviceWaitIdle(device);
 	}
 
 	void VulkanSwapChain::BeginFrame()
 	{
-		VK_CHECK_RESULT(vkWaitForFences(m_Device->GetVulkanDevice(), 1, &m_WaitFences[m_CurrentBufferIndex], VK_TRUE, UINT64_MAX));
-		VK_CHECK_RESULT(AcquireNextImage(m_Semaphores.PresentComplete, &m_CurrentBufferIndex));
+		ANT_SCOPE_PERF("VulkanSwapChain::BeginFrame");
+
+		// Resource release queue
+		auto& queue = Renderer::GetRenderResourceReleaseQueue(m_CurrentBufferIndex);
+		queue.Execute();
+
+		m_CurrentImageIndex = AcquireNextImage();
+
+		VK_CHECK_RESULT(vkResetCommandPool(m_Device->GetVulkanDevice(), m_CommandBuffers[m_CurrentBufferIndex].CommandPool, 0));
 	}
 
 	void VulkanSwapChain::Present()
 	{
+		ANT_PROFILE_FUNC();
+		ANT_SCOPE_PERF("VulkanSwapChain::Present");
+
 		const uint64_t DEFAULT_FENCE_TIMEOUT = 100000000000;
 
-		// Use a fence to wait until the command buffer has finished execution before using it again
-		VK_CHECK_RESULT(vkResetFences(m_Device->GetVulkanDevice(), 1, &m_WaitFences[m_CurrentBufferIndex]));
-
-		// Pipeline stage at which the queue submission will wait (via pWaitSemaphores)
 		VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		// The submit info structure specifices a command buffer queue submission batch
+
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pWaitDstStageMask = &waitStageMask;
@@ -548,24 +522,37 @@ namespace Ant{
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &m_Semaphores.RenderComplete;
 		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pCommandBuffers = &m_DrawCommandBuffers[m_CurrentBufferIndex];
+		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentBufferIndex].CommandBuffer;
 		submitInfo.commandBufferCount = 1;
 
-		// Submit to the graphics queue passing a wait fence
-		VK_CHECK_RESULT(vkQueueSubmit(m_Device->GetQueue(), 1, &submitInfo, m_WaitFences[m_CurrentBufferIndex]));
+		VK_CHECK_RESULT(vkResetFences(m_Device->GetVulkanDevice(), 1, &m_WaitFences[m_CurrentBufferIndex]));
+		VK_CHECK_RESULT(vkQueueSubmit(m_Device->GetGraphicsQueue(), 1, &submitInfo, m_WaitFences[m_CurrentBufferIndex]));
 
 		// Present the current buffer to the swap chain
 		// Pass the semaphore signaled by the command buffer submission from the submit info as the wait semaphore for swap chain presentation
 		// This ensures that the image is not presented to the windowing system until all commands have been submitted
-		VkResult result = QueuePresent(m_Device->GetQueue(), m_CurrentBufferIndex, m_Semaphores.RenderComplete);
+		VkResult result;
 
-		if (result != VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 		{
-			if (result == VK_ERROR_OUT_OF_DATE_KHR)
+			ANT_SCOPE_PERF("VulkanSwapChain::Present - QueuePresent");
+
+			VkPresentInfoKHR presentInfo = {};
+			presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+			presentInfo.pNext = NULL;
+			presentInfo.swapchainCount = 1;
+			presentInfo.pSwapchains = &m_SwapChain;
+			presentInfo.pImageIndices = &m_CurrentImageIndex;
+
+			presentInfo.pWaitSemaphores = &m_Semaphores.RenderComplete;
+			presentInfo.waitSemaphoreCount = 1;
+			result = fpQueuePresentKHR(m_Device->GetGraphicsQueue(), &presentInfo);
+		}
+
+		if (result != VK_SUCCESS)
+		{
+			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{
-				// Swap chain is no longer compatible with the surface and needs to be recreated
 				OnResize(m_Width, m_Height);
-				return;
 			}
 			else
 			{
@@ -573,58 +560,21 @@ namespace Ant{
 			}
 		}
 
-		//VK_CHECK_RESULT(vkWaitForFences(m_Device->GetVulkanDevice(), 1, &m_WaitFences[m_CurrentBufferIndex], VK_TRUE, DEFAULT_FENCE_TIMEOUT));
-
-		// vkQueueWaitIdle(m_Queue);
-
-		// TODO: Do we need this anywhere?
-		//vkResetCommandPool(m_Device->GetVulkanDevice(), m_CommandPool, 0);
+		{
+			ANT_PROFILE_FUNC("VulkanSwapChain::Present - WaitForFences");
+			const auto& config = Renderer::GetConfig();
+			m_CurrentBufferIndex = (m_CurrentBufferIndex + 1) % config.FramesInFlight;
+			// Make sure the frame we're requesting has finished rendering
+			VK_CHECK_RESULT(vkWaitForFences(m_Device->GetVulkanDevice(), 1, &m_WaitFences[m_CurrentBufferIndex], VK_TRUE, UINT64_MAX));
+		}
+		
 	}
 
-	VkResult VulkanSwapChain::AcquireNextImage(VkSemaphore presentCompleteSemaphore, uint32_t* imageIndex)
+	uint32_t VulkanSwapChain::AcquireNextImage()
 	{
-		// By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
-		// With that we don't have to handle VK_NOT_READY
-		return fpAcquireNextImageKHR(m_Device->GetVulkanDevice(), m_SwapChain, UINT64_MAX, presentCompleteSemaphore, (VkFence)nullptr, imageIndex);
-	}
-
-	VkResult VulkanSwapChain::QueuePresent(VkQueue queue, uint32_t imageIndex, VkSemaphore waitSemaphore)
-	{
-		VkPresentInfoKHR presentInfo = {};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.pNext = NULL;
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = &m_SwapChain;
-		presentInfo.pImageIndices = &imageIndex;
-		// Check if a wait semaphore has been specified to wait for before presenting the image
-		if (waitSemaphore != VK_NULL_HANDLE)
-		{
-			presentInfo.pWaitSemaphores = &waitSemaphore;
-			presentInfo.waitSemaphoreCount = 1;
-		}
-		return fpQueuePresentKHR(queue, &presentInfo);
-	}
-
-	void VulkanSwapChain::Cleanup()
-	{
-		VkDevice device = m_Device->GetVulkanDevice();
-
-		if (m_SwapChain)
-		{
-			for (uint32_t i = 0; i < m_ImageCount; i++)
-				vkDestroyImageView(device, m_Buffers[i].view, nullptr);
-		}
-
-		if (m_Surface)
-		{
-			fpDestroySwapchainKHR(device, m_SwapChain, nullptr);
-			vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
-		}
-
-		vkDestroyCommandPool(device, m_CommandPool, nullptr);
-
-		m_Surface = VK_NULL_HANDLE;
-		m_SwapChain = VK_NULL_HANDLE;
+		uint32_t imageIndex;
+		VK_CHECK_RESULT(fpAcquireNextImageKHR(m_Device->GetVulkanDevice(), m_SwapChain, UINT64_MAX, m_Semaphores.PresentComplete, (VkFence)nullptr, &imageIndex));
+		return imageIndex;
 	}
 
 	void VulkanSwapChain::FindImageFormatAndColorSpace()

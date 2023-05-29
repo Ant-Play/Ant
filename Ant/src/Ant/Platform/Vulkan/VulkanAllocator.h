@@ -7,10 +7,6 @@
 
 namespace Ant{
 
-	namespace Utils{
-		std::string BytesToString(uint64_t bytes);
-	}
-
 	struct GPUMemoryStats
 	{
 		uint64_t Used = 0;
@@ -27,7 +23,7 @@ namespace Ant{
 		//void Allocate(VkMemoryRequirements requirements, VkDeviceMemory* dest, VkMemoryPropertyFlags flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 		VmaAllocation AllocateBuffer(VkBufferCreateInfo bufferCreateInfo, VmaMemoryUsage usage, VkBuffer& outBuffer);
-		VmaAllocation AllocateImage(VkImageCreateInfo imageCreateInfo, VmaMemoryUsage usage, VkImage& outImage);
+		VmaAllocation AllocateImage(VkImageCreateInfo imageCreateInfo, VmaMemoryUsage usage, VkImage& outImage, VkDeviceSize* allocatedSize = nullptr);
 		void Free(VmaAllocation allocation);
 		void DestroyImage(VkImage image, VmaAllocation allocation);
 		void DestroyBuffer(VkBuffer buffer, VmaAllocation allocation);

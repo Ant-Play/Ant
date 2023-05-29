@@ -14,7 +14,18 @@ namespace Ant{
 		{
 			case RendererAPIType::None: return nullptr;
 			case RendererAPIType::Vulkan: return Ref<VulkanMaterial>::Create(shader, name);
-			case RendererAPIType::OpenGL: return Ref<OpenGLMaterial>::Create(shader, name);
+			//case RendererAPIType::OpenGL: return Ref<OpenGLMaterial>::Create(shader, name);
+		}
+		ANT_CORE_ASSERT(false, "Unknown RendererAPI");
+		return nullptr;
+	}
+
+	Ref<Material> Material::Copy(const Ref<Material>& other, const std::string& name)
+	{
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::None: return nullptr;
+			case RendererAPIType::Vulkan: return Ref<VulkanMaterial>::Create(other, name);
 		}
 		ANT_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;

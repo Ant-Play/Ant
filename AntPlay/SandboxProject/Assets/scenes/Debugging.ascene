@@ -1,0 +1,105 @@
+Scene: Debugging
+Entities:
+  - Entity: 4449987008310684353
+    TagComponent:
+      Tag: Spawner
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassHandle: 2289991957
+      StoredFields:
+        - ID: 1279767846
+          Name: Sandbox.ScriptSpawner:ScriptPrefab
+          Type: 18
+          Data: 9311673446641902031
+        - ID: 1184180582
+          Name: Sandbox.ScriptSpawner:Rows
+          Type: 8
+          Data: 1
+        - ID: 2306161894
+          Name: Sandbox.ScriptSpawner:Columns
+          Type: 8
+          Data: 1
+  - Entity: 4552253363582886319
+    TagComponent:
+      Tag: Camera
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [-5.06146669, 1.81161118, 7.5456605]
+      Rotation: [0.442699462, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 70
+        PerspectiveNear: 0.100000001
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+  - Entity: 5743058420277068335
+    TagComponent:
+      Tag: Cube
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [200, 0.104631662, 200]
+    StaticMeshComponent:
+      AssetID: 16704718035390383336
+      MaterialTable:
+        0: 3067266531766851022
+    BoxColliderComponent:
+      Offset: [0, 0, 0]
+      HalfSize: [0.5, 0.5, 0.5]
+      IsTrigger: false
+      Material: 0
+  - Entity: 9164801221146354090
+    TagComponent:
+      Tag: Sky Light
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SkyLightComponent:
+      EnvironmentMap: 0
+      Intensity: 1
+      Lod: 1
+      DynamicSky: true
+      TurbidityAzimuthInclination: [2, 0, 0]
+  - Entity: 17370235393756367421
+    TagComponent:
+      Tag: Directional Light
+    Parent: 0
+    Children:
+      []
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [1.39626336, 0.17453292, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Intensity: 1
+      Radiance: [1, 1, 1]
+      CastShadows: true
+      SoftShadows: true
+      LightSize: 0.5
+      ShadowAmount: 1
+SceneAudio:
+  MasterReverb:
+    Pre-delay: 50
+    Room size: 0.49999994
+    Damping: 0.5
+    Width: 1
