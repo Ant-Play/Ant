@@ -35,6 +35,6 @@ else:
     print(f"{Style.BRIGHT}{Back.YELLOW}Re-run as admin to create symlinks required for Dist builds.{Style.RESET_ALL}")
 
 print(f"{Style.BRIGHT}{Back.GREEN}Generating Visual Studio 2022 solution.{Style.RESET_ALL}")
-subprocess.call(["vendor/bin/premake5.exe", "vs2022"])
+subprocess.call(["vendor/premake/bin/premake5.exe", "vs2022"])
 os.chdir('AntPlay/SandboxProject')
-subprocess.call(["../../vendor/bin/premake5.exe", "vs2022"])
+subprocess.call(["../../vendor/premake/bin/premake5.exe", "vs2022"])
